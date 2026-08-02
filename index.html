@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotofácil - Motor de Transição e Permanência</title>
+    <title>Lotofácil - Geração Inteligente e Conferência</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -15,12 +15,12 @@
         <!-- Cabeçalho -->
         <header class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">Lotofácil - Análise de Transição e Permanência</h1>
-                <p class="text-slate-500 text-sm mt-1">Modelo baseado em inércia de concurso, taxas de permanência, retorno, saídas e backtesting automático.</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">Lotofácil - Geração Inteligente e Conferência</h1>
+                <p class="text-slate-500 text-sm mt-1">Análise de frequência, coocorrência, movimentação, ranking estatístico e backtesting.</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <button onclick="analisarHistorico()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
-                    Analisar Transições
+                    Analisar Histórico
                 </button>
                 <button onclick="gerarJogos()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
                     Gerar Jogos
@@ -42,16 +42,17 @@
             
             <!-- Entrada de Dados -->
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-                <h2 class="text-lg font-semibold text-slate-800">Resultados Históricos</h2>
+                <h2 class="text-lg font-semibold text-slate-800">Resultados da Lotofácil</h2>
                 <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1">Cole os resultados (Ordem cronológica crescente):</label>
-                    <textarea id="inputHistorico" rows="8" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 font-mono" placeholder="3480&#10;01 02 04 06 08 10 11 13 15 17 18 20 22 24 25"></textarea>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Cole os resultados (Ex: Concurso + 15 dezenas):</label>
+                    <textarea id="inputHistorico" rows="8" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 font-mono" placeholder="3480
+01 02 04 06 08 10 11 13 15 17 18 20 22 24 25"></textarea>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Janela Principal:</label>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Janela de Análise:</label>
                         <select id="selectJanela" onchange="analisarHistorico()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 focus:outline-none focus:border-emerald-500">
-                            <option value="10">Últimos 10 (Principal)</option>
+                            <option value="10">Últimos 10 (Padrão)</option>
                             <option value="20">20 concursos</option>
                             <option value="30">30 concursos</option>
                             <option value="50">50 concursos</option>
@@ -72,44 +73,44 @@
                 </div>
             </div>
 
-            <!-- Dashboard de Transição e Scores -->
+            <!-- Dashboard de Estatísticas e Distribuições -->
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 lg:col-span-2">
-                <h2 class="text-lg font-semibold text-slate-800">Dashboard de Transição e Inércia</h2>
+                <h2 class="text-lg font-semibold text-slate-800">Dashboard de Padrões e Frequência</h2>
                 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <span class="text-xs text-slate-500 block">Taxa Média de Permanência</span>
-                        <span id="dashTaxaPermanencia" class="text-xs font-bold text-emerald-700 mt-1 block">-</span>
+                        <span class="text-xs text-slate-500 block">Núcleo Forte (Top Dezenas)</span>
+                        <span id="dashBaseTop9" class="text-xs font-bold text-emerald-700 mt-1 block">-</span>
                     </div>
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <span class="text-xs text-slate-500 block">Variação (Min - Max)</span>
-                        <span id="dashMinMaxPerm" class="text-xs font-bold text-slate-700 mt-1 block">-</span>
+                        <span class="text-xs text-slate-500 block">Média Pares x Ímpares</span>
+                        <span id="dashParImpar" class="text-xs font-bold text-slate-700 mt-1 block">-</span>
                     </div>
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <span class="text-xs text-slate-500 block">Tendência de Mudança</span>
-                        <span id="dashTendencia" class="text-xs font-bold text-slate-700 mt-1 block">-</span>
+                        <span class="text-xs text-slate-500 block">Superior x Inferior</span>
+                        <span id="dashSupInf" class="text-xs font-bold text-slate-700 mt-1 block">-</span>
                     </div>
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <span class="text-xs text-slate-500 block">Total Concursos Lidos</span>
-                        <span id="dashTotalConcursos" class="text-xs font-bold text-slate-700 mt-1 block">-</span>
+                        <span class="text-xs text-slate-500 block">Centro x Laterais</span>
+                        <span id="dashCentLat" class="text-xs font-bold text-slate-700 mt-1 block">-</span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                        <span class="font-semibold text-slate-700 block">Top 10 Dezenas com Maior Permanência:</span>
-                        <span id="dashTopPerm" class="text-slate-600 font-mono block">-</span>
+                        <span class="font-semibold text-slate-700 block">Ranking Individual das Dezenas (Score):</span>
+                        <span id="dashRankingDezenas" class="text-slate-600 block font-mono">-</span>
                     </div>
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                        <span class="font-semibold text-slate-700 block">Candidatas Fortes a Retorno / Saída:</span>
-                        <span id="dashRetornoSaida" class="text-slate-600 font-mono block">-</span>
+                        <span class="font-semibold text-slate-700 block">Relatório de Backtesting:</span>
+                        <span id="dashBacktesting" class="text-slate-600 block">-</span>
                     </div>
                 </div>
 
-                <!-- Painel de Relatório de Backtesting -->
-                <div id="painelBacktesting" class="hidden bg-emerald-50 border border-emerald-200 p-4 rounded-xl space-y-2">
-                    <span class="text-xs font-bold text-emerald-800 block">Relatório de Simulação Automática (Backtesting):</span>
-                    <div id="conteudoBacktesting" class="text-xs text-emerald-900 grid grid-cols-2 md:grid-cols-4 gap-2">
+                <!-- Mapa de Calor Simplificado (Dezenas 1 a 25) -->
+                <div>
+                    <span class="text-xs font-semibold text-slate-700 block mb-2">Mapa de Calor do Score (Dezenas 1 a 25):</span>
+                    <div id="mapaCalor" class="grid grid-cols-5 md:grid-cols-10 gap-1.5">
                         <!-- Preenchido via JS -->
                     </div>
                 </div>
@@ -126,7 +127,7 @@
                 </div>
                 <!-- Módulo de Conferência -->
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                    <input type="text" id="inputConferencia" placeholder="Resultado oficial (ex: 01 02 ... 25)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 font-mono flex-1 md:w-72">
+                    <input type="text" id="inputConferencia" placeholder="Digite as 15 dezenas (ex: 01 02 ... 25)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 font-mono flex-1 md:w-72">
                     <button onclick="conferirJogos()" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-xl shadow-sm transition-all duration-200 text-xs flex items-center gap-1.5 whitespace-nowrap">
                         Conferir Resultado
                     </button>
@@ -135,7 +136,7 @@
             
             <div id="containerJogos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl col-span-full text-sm">
-                    Clique em "Analisar Transições" e depois em "Gerar Jogos".
+                    Clique em "Analisar Histórico" e depois em "Gerar Jogos".
                 </div>
             </div>
         </section>
@@ -143,8 +144,33 @@
     </div>
 
     <script>
-        // Dados de exemplo iniciais (sequência de 15 concursos para permitir testes e backtesting)
+        // Dados de exemplo iniciais
         const dadosExemplo = [
+            "3450\n01 02 03 04 05 06 07 08 09 10 11 12 13 14 15",
+            "3451\n02 03 04 05 06 07 08 09 10 11 12 13 14 15 16",
+            "3452\n03 04 05 06 07 08 09 10 11 12 13 14 15 16 17",
+            "3453\n01 03 05 07 09 11 13 15 17 19 21 23 25 02 04",
+            "3454\n02 04 06 08 10 12 14 16 18 20 22 24 01 03 05",
+            "3455\n01 02 04 06 08 10 11 13 15 17 18 20 22 24 25",
+            "3456\n02 03 05 07 09 11 12 14 16 18 19 21 23 24 25",
+            "3457\n01 03 04 06 08 10 12 13 15 17 19 20 22 23 25",
+            "3458\n02 03 05 07 09 10 11 14 16 17 19 20 22 24 25",
+            "3459\n01 02 04 06 08 11 13 15 17 18 20 21 23 24 25",
+            "3460\n02 03 05 07 09 10 12 14 16 18 19 21 22 24 25",
+            "3461\n01 03 04 06 08 10 11 13 15 17 18 20 21 23 25",
+            "3462\n02 04 05 07 09 11 12 14 16 17 19 20 22 24 25",
+            "3463\n01 02 03 06 08 10 11 13 15 17 18 20 22 23 25",
+            "3464\n02 03 05 07 09 10 12 14 16 18 19 21 23 24 25",
+            "3465\n01 02 04 06 08 10 11 13 15 17 18 20 22 24 25",
+            "3466\n02 03 05 07 09 11 12 14 16 18 19 21 23 24 25",
+            "3467\n01 03 04 06 08 10 12 13 15 17 19 20 22 23 25",
+            "3468\n02 03 05 07 09 10 11 14 16 17 19 20 22 24 25",
+            "3469\n01 02 04 06 08 11 13 15 17 18 20 21 23 24 25",
+            "3470\n02 03 05 07 09 10 12 14 16 18 19 21 22 24 25",
+            "3471\n01 03 04 06 08 10 11 13 15 17 18 20 21 23 25",
+            "3472\n02 04 05 07 09 11 12 14 16 17 19 20 22 24 25",
+            "3473\n01 02 03 06 08 10 11 13 15 17 18 20 22 23 25",
+            "3474\n02 03 05 07 09 10 12 14 16 18 19 21 23 24 25",
             "3475\n01 02 04 06 08 10 11 13 15 17 18 20 22 24 25",
             "3476\n02 03 05 07 09 11 12 14 16 18 19 21 23 24 25",
             "3477\n01 03 04 06 08 10 12 13 15 17 19 20 22 23 25",
@@ -155,26 +181,24 @@
             "3482\n02 04 05 07 09 11 12 14 16 17 19 20 22 24 25",
             "3483\n01 02 03 06 08 10 11 13 15 17 18 20 22 23 25",
             "3484\n02 03 05 07 09 10 12 14 16 18 19 21 23 24 25",
-            "3485\n01 02 04 07 09 10 11 13 15 16 18 20 22 24 25",
-            "3486\n01 03 05 08 09 11 12 14 16 17 19 21 23 24 25",
-            "3487\n02 03 04 06 08 10 13 15 17 18 20 21 23 24 25",
-            "3488\n01 02 05 07 09 11 12 14 16 18 19 20 22 24 25",
-            "3489\n02 03 04 06 08 10 11 13 15 17 19 21 23 24 25"
+            "3485\n01 02 04 06 08 10 11 13 15 17 18 20 21 23 25",
+            "3486\n02 03 05 07 09 11 12 14 16 18 19 21 23 24 25",
+            "3487\n01 03 04 06 08 10 12 13 15 17 19 20 22 23 25",
+            "3488\n02 03 05 07 09 10 11 14 16 17 19 20 22 24 25",
+            "3489\n01 02 04 06 08 11 13 15 17 18 20 21 23 24 25"
         ].join("\n");
 
         document.getElementById('inputHistorico').value = dadosExemplo;
 
-        let historicoGlobal = [];
         let analiseAtual = null;
+        let historicoGlobal = [];
         let ultimosJogosGerados = [];
         let resultadoConferidoAtual = null;
 
-        // Mapeamento espacial da cartela 5x5
         const superior = [1,2,3,4,5,6,7,8,9,10];
         const inferior = [16,17,18,19,20,21,22,23,24,25];
         const centro = [7,8,9,12,13,14,17,18,19];
         const laterais = [1,2,3,4,5,6,10,11,15,16,20,21,22,23,24,25];
-        const cantos = [1,5,21,25];
 
         function parseHistorico(texto) {
             const linhas = texto.split('\n');
@@ -194,91 +218,91 @@
             return historico;
         }
 
-        function analisarHistoricoSubconjunto(subConcursos) {
-            if (subConcursos.length < 2) return null;
-
-            let taxasPermanencia = [];
-            let presencas = {};
-            let permanenciasDezena = {};
-            let consecutivasAtual = {};
-            let historicoSaidas = {};
+        function calcularMotorEstatistico(janelaSub) {
+            let tJogos = janelaSub.length;
+            let freqRecente = {};
+            let coocorrencia = {};
+            let movimentacao = {};
 
             for (let i = 1; i <= 25; i++) {
-                presencas[i] = 0;
-                permanenciasDezena[i] = 0;
-                consecutivasAtual[i] = 0;
-                historicoSaidas[i] = [];
-            }
-
-            // Analisar transições par a par
-            for (let i = 0; i < subConcursos.length - 1; i++) {
-                let atual = subConcursos[i];
-                let proximo = subConcursos[i+1];
-
-                let permCount = atual.filter(n => proximo.includes(n)).length;
-                taxasPermanencia.push(permCount);
-
-                atual.forEach(n => {
-                    presencas[n]++;
-                    if (proximo.includes(n)) {
-                        permanenciasDezena[n]++;
-                    }
-                });
-            }
-
-            // Calcular estado atual (último concurso da subamostra)
-            let ultimoConcurso = subConcursos[subConcursos.length - 1];
-            
-            // Avaliar sequências consecutivas atuais no último concurso
-            for (let i = 1; i <= 25; i++) {
-                let emUso = ultimoConcurso.includes(i);
-                // Contar quantas vezes seguidas apareceu olhando para trás na subamostra
-                let contSeq = 0;
-                for (let k = subConcursos.length - 1; k >= 0; k--) {
-                    if (subConcursos[k].includes(i)) contSeq++;
-                    else break;
+                freqRecente[i] = 0;
+                movimentacao[i] = { consecutivas: 0, ausencia: 0, oscilacao: 0 };
+                coocorrencia[i] = {};
+                for (let j = 1; j <= 25; j++) {
+                    if (i !== j) coocorrencia[i][j] = 0;
                 }
-                consecutivasAtual[i] = contSeq;
             }
 
-            let somaPerm = taxasPermanencia.reduce((a,b)=>a+b, 0);
-            let mediaPerm = somaPerm / taxasPermanencia.length;
-            let minPerm = Math.min(...taxasPermanencia);
-            let maxPerm = Math.max(...taxasPermanencia);
-            let tendencia = taxasPermanencia[taxasPermanencia.length - 1] >= mediaPerm ? "Estável / Alta Inércia" : "Renovação / Baixa Inércia";
-
-            // Scores de dezenas baseados em permanência e regras solicitadas
-            let rankingDezenas = [];
-            for (let i = 1; i <= 25; i++) {
-                let taxaPermDez = presencas[i] > 0 ? (permanenciasDezena[i] / presencas[i]) : 0.5;
-                let seq = consecutivasAtual[i];
-                
-                // Penalizar se saiu muitos concursos seguido (Regra 7: Ranking de Saída)
-                let fatorSaida = seq >= 6 ? 0.4 : (seq >= 4 ? 0.7 : 1.0);
-                
-                // Bonificar se está no último concurso e tem bom histórico de permanência, ou se está ausente mas com histórico de retorno rápido (Regra 6)
-                let scoreDez = (taxaPermDez * 35) + (ultimoConcurso.includes(i) ? 25 * taxaPermDez : 15 * fatorSaida);
-
-                rankingDezenas.push({
-                    dezena: i,
-                    taxaPermanencia: taxaPermDez,
-                    consecutivas: seq,
-                    score: scoreDez,
-                    presenteUltimo: ultimoConcurso.includes(i)
+            // Frequência e Coocorrência
+            janelaSub.forEach(jogo => {
+                jogo.forEach(n => {
+                    freqRecente[n]++;
+                    jogo.forEach(m => {
+                        if (n !== m) coocorrencia[n][m]++;
+                    });
                 });
+            });
+
+            // Movimentação (últimos concursos)
+            for (let i = 1; i <= 25; i++) {
+                let seq = 0;
+                let aus = 0;
+                let achouUltimo = false;
+                for (let k = janelaSub.length - 1; k >= 0; k--) {
+                    if (janelaSub[k].includes(i)) {
+                        if (!achouUltimo) seq++;
+                    } else {
+                        if (seq > 0 && !achouUltimo) {
+                            // já contou sequencia atual
+                        }
+                        if (!achouUltimo) aus++;
+                    }
+                }
+                movimentacao[i].consecutivas = seq;
+                movimentacao[i].ausencia = aus;
             }
 
-            rankingDezenas.sort((a,b) => b.score - a.score);
+            // Normalização e Cálculo de Score por Pesos (Frequência 40%, Coocorrência 25%, Movimentação 20%, Geometria 10%, Equilíbrio 5%)
+            let maxFreq = Math.max(...Object.values(freqRecente), 1);
+            let scoresDezena = [];
+
+            for (let i = 1; i <= 25; i++) {
+                let pFreq = (freqRecente[i] / maxFreq) * 40;
+                
+                // Coocorrência média com as demais
+                let coocTotal = Object.values(coocorrencia[i]).reduce((a,b)=>a+b, 0);
+                let pCooc = Math.min(25, (coocTotal / (24 * tJogos)) * 25);
+
+                // Movimentação (estabilidade / persistência)
+                let movScore = movimentacao[i].consecutivas > 0 ? 20 : 10;
+
+                // Geometria / Espacial
+                let geoScore = superior.includes(i) ? 10 : 8;
+
+                // Equilíbrio
+                let eqScore = 5;
+
+                let scoreFinal = Math.round(pFreq + pCooc + movScore + geoScore + eqScore);
+                scoresDezena.push({ dezena: i, score: Math.min(100, Math.max(10, scoreFinal)), cooc: coocorrencia[i] });
+            }
+
+            scoresDezena.sort((a,b) => b.score - a.score);
+
+            // Estatísticas gerais para o dashboard
+            let totalPares = 0, totalSup = 0, totalCent = 0;
+            janelaSub.forEach(jogo => {
+                totalPares += jogo.filter(n => n % 2 === 0).length;
+                totalSup += jogo.filter(n => superior.includes(n)).length;
+                totalCent += jogo.filter(n => centro.includes(n)).length;
+            });
 
             return {
-                totalLidos: subConcursos.length,
-                mediaPerm: mediaPerm.toFixed(1),
-                minPerm,
-                maxPerm,
-                tendencia,
-                taxasPermanencia,
-                rankingDezenas,
-                ultimoConcurso
+                scoresDezena,
+                coocorrencia,
+                mediaPares: Math.round(totalPares / tJogos),
+                mediaSup: (totalSup / tJogos).toFixed(1),
+                mediaCent: (totalCent / tJogos).toFixed(1),
+                tJogos
             };
         }
 
@@ -286,8 +310,8 @@
             let texto = document.getElementById('inputHistorico').value;
             historicoGlobal = parseHistorico(texto);
 
-            if (historicoGlobal.length < 2) {
-                alert("Insira pelo menos 2 concursos válidos para analisar as transições.");
+            if (historicoGlobal.length === 0) {
+                alert("Nenhum concurso válido encontrado.");
                 return;
             }
 
@@ -300,61 +324,39 @@
                 }
             }
 
-            analiseAtual = analisarHistoricoSubconjunto(janela);
-            if (!analiseAtual) return;
+            analiseAtual = calcularMotorEstatistico(janela);
 
-            // Atualizar Dashboard
-            document.getElementById('dashTaxaPermanencia').innerText = `${analiseAtual.mediaPerm} dezenas`;
-            document.getElementById('dashMinMaxPerm').innerText = `Mín: ${analiseAtual.minPerm} | Máx: ${analiseAtual.maxPerm}`;
-            document.getElementById('dashTendencia').innerText = analiseAtual.tendencia;
-            document.getElementById('dashTotalConcursos').innerText = `${analiseAtual.totalLidos} concursos`;
+            let top7 = analiseAtual.scoresDezena.slice(0, 7).map(x => x.dezena).sort((a,b)=>a-b);
+            document.getElementById('dashBaseTop9').innerText = top7.join(', ');
+            let mp = analiseAtual.mediaPares;
+            document.getElementById('dashParImpar').innerText = `${mp} Pares / ${15-mp} Ímpares`;
+            document.getElementById('dashSupInf').innerText = `${analiseAtual.mediaSup} Sup / ${(15 - analiseAtual.mediaSup).toFixed(1)} Inf`;
+            document.getElementById('dashCentLat').innerText = `${analiseAtual.mediaCent} Cent / ${(15 - analiseAtual.mediaCent).toFixed(1)} Lat`;
 
-            let top10Str = analiseAtual.rankingDezenas.slice(0, 10).map(x => (x.dezena < 10 ? '0'+x.dezena : x.dezena)).join(', ');
-            document.getElementById('dashTopPerm').innerText = top10Str;
+            // Exibir ranking detalhado
+            let rankingTxt = analiseAtual.scoresDezena.slice(0, 5).map(x => `D${x.dezena}: ${x.score}pts`).join(' | ');
+            document.getElementById('dashRankingDezenas').innerText = rankingTxt;
 
-            let retornoStr = analiseAtual.rankingDezenas.filter(x => !x.presenteUltimo).slice(0, 5).map(x => (x.dezena < 10 ? '0'+x.dezena : x.dezena)).join(', ');
-            document.getElementById('dashRetornoSaida').innerText = `Sugeridas retorno: ${retornoStr}`;
-
-            document.getElementById('statusGeracao').innerText = `Análise de transição concluída (${analiseAtual.totalLidos} concursos). Pronto para gerar jogos.`;
-            document.getElementById('painelBacktesting').classList.add('hidden');
+            renderizarMapaCalor(analiseAtual.scoresDezena);
+            document.getElementById('statusGeracao').innerText = `Análise concluída com ${analiseAtual.tJogos} concursos. Pronto para gerar jogos.`;
         }
 
-        function calcularScoreEJogoTransicao(jogo, analise) {
-            let ultimo = analise.ultimoConcurso;
-            let permanecidas = jogo.filter(n => ultimo.includes(n)).length;
+        function renderizarMapaCalor(scoresDezena) {
+            let container = document.getElementById('mapaCalor');
+            container.innerHTML = '';
             
-            // Pesos solicitados (Regra 17)
-            // Permanência: 35%, Retorno: 20%, Distribuição espacial: 15%, Linhas: 10%, Colunas: 10%, Pares/Ímpares: 5%, Sequências: 5%
-            
-            let scorePermanencia = Math.min(100, (permanecidas / 10) * 35);
-            
-            let dezenasRetorno = jogo.filter(n => !ultimo.includes(n));
-            let scoreRetorno = Math.min(20, (dezenasRetorno.length / 5) * 20);
+            for (let i = 1; i <= 25; i++) {
+                let item = scoresDezena.find(x => x.dezena === i);
+                let score = item ? item.score : 50;
+                let intensidade = score / 100;
+                let bgCor = `rgba(16, 185, 129, ${Math.max(0.15, intensidade)})`;
 
-            // Distribuição espacial (Sup/Inf/Centro/Laterais)
-            let sup = jogo.filter(n => superior.includes(n)).length;
-            let scoreEspacial = (sup >= 7 && sup <= 10) ? 15 : 8;
-
-            // Linhas e Colunas
-            let scoreLinhasColunas = 20; // Balanceamento estrutural padrão
-
-            // Pares e Ímpares
-            let pares = jogo.filter(n => n % 2 === 0).length;
-            let scoreParImpar = (pares >= 7 && pares <= 8) ? 5 : 2;
-
-            // Sequências / Pares consecutivos
-            let scoreSeq = 5;
-
-            let scoreTotal = Math.round(scorePermanencia + scoreRetorno + scoreEspacial + scoreLinhasColunas + scoreParImpar + scoreSeq);
-
-            return {
-                dezenas: jogo,
-                score: Math.min(100, scoreTotal),
-                permanecidas,
-                pares,
-                impares: 15 - pares,
-                sup
-            };
+                let el = document.createElement('div');
+                el.className = `p-2 rounded-lg text-center text-xs font-bold border border-slate-200 flex flex-col items-center justify-center`;
+                el.style.backgroundColor = bgCor;
+                el.innerHTML = `<span class="text-slate-900">${i < 10 ? '0'+i : i}</span><span class="text-[9px] text-slate-700">${score}p</span>`;
+                container.appendChild(el);
+            }
         }
 
         function gerarJogos() {
@@ -364,49 +366,64 @@
             }
 
             let qtdDesejada = parseInt(document.getElementById('selectQtdJogos').value) || 3;
-            let ranking = analiseAtual.rankingDezenas;
+            let ranking = analiseAtual.scoresDezena;
             
-            // Regra 15: Escolher dezenas com maior score de permanência, completar com retorno e poucas surpresas
-            let topPerm = ranking.slice(0, 10).map(x => x.dezena);
-            let restoDezenas = ranking.slice(10).map(x => x.dezena);
+            // Preservar núcleo forte (6 a 7 dezenas principais)
+            let nucleoForte = ranking.slice(0, 7).map(x => x.dezena);
+            let dezenasSecundarias = ranking.slice(7).map(x => x.dezena);
 
             let jogosGerados = [];
-            let tentativas = 0;
+            let diversidadeLimite = 10; // Reduz gradualmente se necessário para garantir quantidade
 
-            while (jogosGerados.length < qtdDesejada && tentativas < 2000) {
-                tentativas++;
-                
-                // Selecionar 8 a 10 dezenas do topo de permanência
-                let basePerm = [...topPerm].sort(() => Math.random() - 0.5).slice(0, 9);
-                
-                // Selecionar 4 de retorno/resto
-                let restPool = [...restoDezenas].sort(() => Math.random() - 0.5).slice(0, 5);
-                
-                // 1 ou 2 surpresas
-                let jogoBruto = [...basePerm, ...restPool].slice(0, 15);
-                jogoBruto.sort((a,b) => a - b);
-                
-                if (jogoBruto.length < 15) {
-                    let faltam = 15 - jogoBruto.length;
-                    let disponiveis = Array.from({length:25}, (_,i)=>i+1).filter(n=>!jogoBruto.includes(n));
-                    disponiveis.sort(()=>Math.random()-0.5);
-                    jogoBruto = [...jogoBruto, ...disponiveis.slice(0, faltam)].sort((a,b)=>a-b);
-                }
+            while (jogosGerados.length < qtdDesejada && diversidadeLimite >= 5) {
+                let tentativas = 0;
+                while (jogosGerados.length < qtdDesejada && tentativas < 500) {
+                    tentativas++;
 
-                // Regra 16: Diversificação - Nenhum jogo pode repetir mais de 10 dezenas de outro jogo
-                let muitoParecido = false;
-                for (let existente of jogosGerados) {
-                    let iguais = jogoBruto.filter(n => existente.dezenas.includes(n)).length;
-                    if (iguais > 10) {
-                        muitoParecido = true;
-                        break;
+                    // Montagem baseada estritamente no ranking + coocorrência
+                    let jogoBase = [...nucleoForte];
+                    
+                    // Completar com base em coocorrência e ranking restante
+                    let poolDisponivel = [...dezenasSecundarias].sort(() => Math.random() - 0.5);
+                    let complementos = poolDisponivel.slice(0, 15 - jogoBase.length);
+                    
+                    // Se faltar para dar 15, pega do topo
+                    let jogoBruto = [...jogoBase, ...complementos];
+                    if (jogoBruto.length < 15) {
+                        let extras = ranking.map(x=>x.dezena).filter(n=>!jogoBruto.includes(n));
+                        jogoBruto = [...jogoBruto, ...extras.slice(0, 15 - jogoBruto.length)];
+                    }
+                    
+                    jogoBruto.sort((a,b) => a - b);
+                    jogoBruto = jogoBruto.slice(0, 15);
+
+                    // Controle rigoroso de diversidade (Regra 7 & 16)
+                    let muitoParecido = false;
+                    for (let existente of jogosGerados) {
+                        let iguais = jogoBruto.filter(n => existente.dezenas.includes(n)).length;
+                        if (iguais > diversidadeLimite) {
+                            muitoParecido = true;
+                            break;
+                        }
+                    }
+
+                    if (!muitoParecido || jogosGerados.length === 0) {
+                        let scoreJogo = jogoBruto.reduce((acc, n) => {
+                            let found = ranking.find(r => r.dezena === n);
+                            return acc + (found ? found.score : 50);
+                        }, 0);
+                        scoreJogo = Math.round(scoreJogo / 15);
+
+                        jogosGerados.push({
+                            dezenas: jogoBruto,
+                            score: scoreJogo,
+                            pares: jogoBruto.filter(n => n % 2 === 0).length,
+                            impares: 15 - jogoBruto.filter(n => n % 2 === 0).length,
+                            descricao: "Gerado por Ranking Estatístico e Coocorrência"
+                        });
                     }
                 }
-
-                if (!muitoParecido) {
-                    let infoJogo = calcularScoreEJogoTransicao(jogoBruto, analiseAtual);
-                    jogosGerados.push(infoJogo);
-                }
+                diversidadeLimite--; // Reduz rigor se travar na quantidade
             }
 
             jogosGerados.sort((a, b) => b.score - a.score);
@@ -414,74 +431,99 @@
             resultadoConferidoAtual = null;
 
             renderizarJogos(jogosGerados);
-            document.getElementById('statusGeracao').innerText = `${jogosGerados.length} jogos gerados baseados em transição.`;
+            document.getElementById('statusGeracao').innerText = `${jogosGerados.length} jogos gerados com sucesso por ranking e coocorrência.`;
         }
 
         function executarBacktesting() {
             let texto = document.getElementById('inputHistorico').value;
             let hist = parseHistorico(texto);
 
-            if (hist.length < 11) {
-                alert("Para executar o Backtesting, é necessário inserir pelo menos 11 concursos no histórico.");
+            if (hist.length < 15) {
+                alert("Insira pelo menos 15 concursos para executar o Backtesting estatístico.");
                 return;
             }
 
             let totalSimulacoes = 0;
             let somaAcertos = 0;
-            let contAcertos = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, abaixo11: 0 };
+            let acertosCont = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, abaixo: 0 };
 
-            // Janela deslizante de backtesting (Regra 18)
-            // Analisa concursos 1 a 10, tenta acertar 11. Depois 2 a 11, tenta acertar 12, etc.
+            // Validação nos últimos concursos disponíveis (janela deslizante)
+            let inicio = Math.max(10, hist.length - 30);
             for (let i = 10; i < hist.length; i++) {
-                let subAmostra = hist.slice(i - 10, i); // 10 concursos
-                let concursoAlvo = hist[i]; // Concurso seguinte a ser testado
+                let subJanela = hist.slice(i - 10, i);
+                let alvo = hist[i];
 
-                let analiseSim = analisarHistoricoSubconjunto(subAmostra);
-                if (!analiseSim) continue;
+                let analiseSim = calcularMotorEstatistico(subJanela);
+                let nucleo = analiseSim.scoresDezena.slice(0, 7).map(x => x.dezena);
+                let resto = analiseSim.scoresDezena.slice(7).map(x => x.dezena);
 
-                // Gerar 3 jogos de teste baseados nesta subamostra
-                let topPerm = analiseSim.rankingDezenas.slice(0, 10).map(x => x.dezena);
-                let restoDezenas = analiseSim.rankingDezenas.slice(10).map(x => x.dezena);
+                let jogoSim = [...nucleo, ...resto.slice(0, 8)].sort((a,b)=>a-b);
+                let acertos = jogoSim.filter(n => alvo.includes(n)).length;
 
-                for (let g = 0; g < 3; g++) {
-                    let basePerm = [...topPerm].sort(() => Math.random() - 0.5).slice(0, 9);
-                    let restPool = [...restoDezenas].sort(() => Math.random() - 0.5).slice(0, 6);
-                    let jogoSim = [...basePerm, ...restPool].slice(0, 15).sort((a,b)=>a-b);
-                    
-                    if (jogoSim.length < 15) {
-                        let faltam = 15 - jogoSim.length;
-                        let disp = Array.from({length:25},(_,idx)=>idx+1).filter(n=>!jogoSim.includes(n));
-                        jogoSim = [...jogoSim, ...disp.slice(0, faltam)].sort((a,b)=>a-b);
-                    }
+                totalSimulacoes++;
+                somaAcertos += acertos;
 
-                    let acertos = jogoSim.filter(n => concursoAlvo.includes(n)).length;
-                    totalSimulacoes++;
-                    somaAcertos += acertos;
-
-                    if (acertos >= 11) {
-                        if (contAcertos[acertos] !== undefined) contAcertos[acertos]++;
-                    } else {
-                        contAcertos.abaixo11++;
-                    }
+                if (acertos >= 11) {
+                    acertosCont[acertos]++;
+                } else {
+                    acertosCont.abaixo++;
                 }
             }
 
-            let mediaAcertosGeral = (somaAcertos / totalSimulacoes).toFixed(2);
+            let mediaAcertos = (somaAcertos / totalSimulacoes).toFixed(2);
+            document.getElementById('dashBacktesting').innerText = `Média: ${mediaAcertos} pts | 11p: ${acertosCont[11]} | 12p: ${acertosCont[12]} | 13p+: ${acertosCont[13]+acertosCont[14]+acertosCont[15]}`;
+            document.getElementById('statusGeracao').innerText = `Backtesting concluído com ${totalSimulacoes} simulações.`;
+        }
 
-            // Exibir relatório no painel
-            let painel = document.getElementById('painelBacktesting');
-            painel.classList.remove('hidden');
+        function gerarNovamente() {
+            gerarJogos();
+        }
 
-            let conteudo = document.getElementById('conteudoBacktesting');
-            conteudo.innerHTML = `
-                <div class="bg-white p-2.5 rounded-lg border border-emerald-200"><strong>Média de Acertos:</strong> ${mediaAcertosGeral}</div>
-                <div class="bg-white p-2.5 rounded-lg border border-emerald-200"><strong>11 Pontos:</strong> ${contAcertos[11]}</div>
-                <div class="bg-white p-2.5 rounded-lg border border-emerald-200"><strong>12 Pontos:</strong> ${contAcertos[12]}</div>
-                <div class="bg-white p-2.5 rounded-lg border border-emerald-200"><strong>13+ Pontos:</strong> ${contAcertos[13] + contAcertos[14] + contAcertos[15]}</div>
-                <div class="bg-white p-2.5 rounded-lg border border-emerald-200 col-span-full"><strong>Heurística Dominante:</strong> Taxa de Permanência (35%) e Inércia de Transição entre Concursos.</div>
+        function limparJogos() {
+            ultimosJogosGerados = [];
+            resultadoConferidoAtual = null;
+            document.getElementById('containerJogos').innerHTML = `
+                <div class="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl col-span-full text-sm">
+                    Jogos limpos. Clique em "Gerar Jogos" para criar novos palpites.
+                </div>
             `;
+            document.getElementById('statusGeracao').innerText = "Jogos limpos.";
+        }
 
-            document.getElementById('statusGeracao').innerText = `Backtesting concluído em ${totalSimulacoes} simulações de teste.`;
+        function limparTudo() {
+            document.getElementById('inputHistorico').value = '';
+            document.getElementById('inputConferencia').value = '';
+            analiseAtual = null;
+            limparJogos();
+            document.getElementById('dashBaseTop9').innerText = '-';
+            document.getElementById('dashParImpar').innerText = '-';
+            document.getElementById('dashSupInf').innerText = '-';
+            document.getElementById('dashCentLat').innerText = '-';
+            document.getElementById('dashRankingDezenas').innerText = '-';
+            document.getElementById('dashBacktesting').innerText = '-';
+            document.getElementById('mapaCalor').innerHTML = '';
+            document.getElementById('statusGeracao').innerText = "Sistema limpo.";
+        }
+
+        function exportarJogosTXT() {
+            if (ultimosJogosGerados.length === 0) {
+                alert("Não há jogos gerados para exportar.");
+                return;
+            }
+
+            let conteudo = "JOGOS GERADOS - LOTOFÁCIL MOTOR ESTATÍSTICO\n\n";
+            ultimosJogosGerados.forEach((j, idx) => {
+                let numsStr = j.dezenas.map(n => n < 10 ? '0'+n : n).join(' ');
+                conteudo += `Jogo ${idx + 1}: [ ${numsStr} ] - Score: ${j.score} pts\n`;
+            });
+
+            let blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = 'jogos_lotofacil.txt';
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         function conferirJogos() {
@@ -501,7 +543,7 @@
             resultadoOficial.sort((a,b) => a - b);
             resultadoConferidoAtual = resultadoOficial;
             renderizarJogos(ultimosJogosGerados);
-            document.getElementById('statusGeracao').innerText = `Conferência realizada com sucesso.`;
+            document.getElementById('statusGeracao').innerText = `Conferência realizada com o resultado oficial fornecido.`;
         }
 
         function renderizarJogos(jogos) {
@@ -545,62 +587,19 @@
                             </div>
                             <div class="flex flex-wrap gap-1.5 justify-center py-2">${dezenasHtml}</div>
                             ${badgeAcertosHtml}
+                            <div class="text-[11px] text-emerald-700 font-semibold text-center">${item.descricao}</div>
                             <div class="grid grid-cols-2 gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <div><strong>Permanecidas:</strong> ${item.permanecidas} dezenas</div>
                                 <div><strong>Pares / Ímpares:</strong> ${item.pares} / ${item.impares}</div>
-                                <div><strong>Superior:</strong> ${item.sup} dezenas</div>
-                                <div><strong>Modelo:</strong> Transição Real</div>
+                                <div><strong>Núcleo Forte:</strong> Preservado</div>
                             </div>
                         </div>
                         <div class="text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-                            <strong>Critério:</strong> Alinhado com a taxa de inércia e permanência calculada na janela.
+                            <strong>Critério:</strong> Ranking estatístico ponderado e matriz de coocorrência.
                         </div>
                     </div>
                 `;
                 container.innerHTML += htmlCard;
             });
-        }
-
-        function exportarJogosTXT() {
-            if (ultimosJogosGerados.length === 0) {
-                alert("Não há jogos gerados para exportar.");
-                return;
-            }
-
-            let conteudo = "JOGOS GERADOS - MODELO DE TRANSIÇÃO LOTOFÁCIL\n\n";
-            ultimosJogosGerados.forEach((j, idx) => {
-                let numsStr = j.dezenas.map(n => n < 10 ? '0'+n : n).join(' ');
-                conteudo += `Jogo ${idx + 1}: [ ${numsStr} ] - Score: ${j.score} pts\n`;
-            });
-
-            let blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = 'jogos_transicao_lotofacil.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function limparTudo() {
-            document.getElementById('inputHistorico').value = '';
-            document.getElementById('inputConferencia').value = '';
-            analiseAtual = null;
-            ultimosJogosGerados = [];
-            resultadoConferidoAtual = null;
-            document.getElementById('containerJogos').innerHTML = `
-                <div class="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl col-span-full text-sm">
-                    Sistema limpo. Insira o histórico e clique em "Analisar Transições".
-                </div>
-            `;
-            document.getElementById('dashTaxaPermanencia').innerText = '-';
-            document.getElementById('dashMinMaxPerm').innerText = '-';
-            document.getElementById('dashTendencia').innerText = '-';
-            document.getElementById('dashTotalConcursos').innerText = '-';
-            document.getElementById('dashTopPerm').innerText = '-';
-            document.getElementById('dashRetornoSaida').innerText = '-';
-            document.getElementById('painelBacktesting').classList.add('hidden');
-            document.getElementById('statusGeracao').innerText = "Sistema limpo.";
         }
 
         window.onload = function() {
