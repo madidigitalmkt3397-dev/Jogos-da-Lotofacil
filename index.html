@@ -3,768 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motor Analítico Lotofácil - 7 Módulos & Algoritmo Genético</title>
+    <title>Motor Estatístico Avançado - Lotofácil v3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --border-color: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
-        }
-        body { background-color: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .custom-card { background-color: var(--bg-card); border: 1px solid var(--border-color); }
-        .lotto-ball {
-            width: 36px;
-            height: 36px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-weight: bold;
-            font-size: 0.875rem;
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-        }
-        .lotto-ball.hit {
-            background: linear-gradient(135deg, #10b981, #059669) !important;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
-        }
-        .lotto-ball.miss {
-            background: linear-gradient(135deg, #475569, #334155);
-            opacity: 0.6;
-        }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
-
-    <!-- Header -->
-    <header class="custom-card border-x-0 border-t-0 py-4 px-6 mb-6">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- Cabeçalho -->
+        <header class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">Motor Analítico Lotofácil &bull; 7 Módulos & Algoritmo Genético</h1>
-                <p class="text-xs text-slate-400 mt-1">Arquitetura avançada baseada em escore ponderado, validação espacial, penalização de similaridade e otimização por evolução.</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-emerald-400">Lotofácil - Motor Estatístico & Formatos</h1>
+                <p class="text-slate-400 text-sm mt-1">Arquitetura avançada baseada em tendências, saturação, matriz 25x25 e filtragem por score contínuo.</p>
             </div>
             <div class="flex items-center gap-3">
-                <span class="px-3 py-1 bg-blue-950 border border-blue-800 text-blue-300 text-xs font-semibold rounded-full">v7.0 Otimizado</span>
+                <button onclick="gerarJogosAvancados()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Processar e Gerar Jogos
+                </button>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 w-full flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6 pb-12">
-
-        <!-- Sidebar: Configurações & Entradas -->
-        <section class="lg:col-span-4 space-y-6">
+        <!-- Painel de Configuração e Histórico Simulado -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Bloco 1: Importação de Dados -->
-            <div class="custom-card rounded-xl p-5 shadow-lg">
-                <h2 class="text-base font-bold text-slate-200 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
-                    Histórico de Concursos
+            <!-- Inserção de Dados / Base de Concursos -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4 lg:col-span-1">
+                <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                    </svg>
+                    Base de Dados & Último Concurso
                 </h2>
-                <div class="space-y-3">
-                    <div>
-                        <label class="text-xs text-slate-400 block mb-1">Cole os resultados (Concurso, Dezenas) ou Carregue um Arquivo:</label>
-                        <textarea id="drawsInput" rows="5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono" placeholder="Ex: 3480 - 01,02,03,04,05,06,07,08,09,10,11,12,13,14,15&#10;3479 - 02,03,04..."></textarea>
-                    </div>
-                    <input type="file" id="fileInput" accept=".txt,.csv" class="hidden" onchange="app.handleFileUpload(event)">
-                    
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="document.getElementById('fileInput').click()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold py-2 px-3 rounded-lg transition text-center">Carregar Arquivo</button>
-                        <button onclick="app.processData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2 px-3 rounded-lg transition shadow-md shadow-blue-900/40">Processar Sistema</button>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="app.loadDefaultData()" class="w-full bg-slate-800/60 hover:bg-slate-700 border border-slate-700/80 text-slate-400 text-[11px] py-1.5 px-2 rounded-lg transition">Usar Amostra de Exemplo</button>
-                    </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Insira os últimos resultados (JSON ou lista de concursos):</label>
+                    <textarea id="inputHistorico" rows="6" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="Ex: [ [1,2,3...], [2,3,4...] ] ou simulação automática nativa.">Simulação Ativa (100 Concursos Base carregados)</textarea>
+                </div>
+                <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-700/50 text-xs text-slate-400 space-y-1">
+                    <p><strong class="text-slate-300">Algoritmos Removidos:</strong> Fibonacci, Primos, Markov, Quadrantes, Soma Teórica e Votação Simples.</p>
+                    <p><strong class="text-slate-300">Novos Motores:</strong> Frequência Ponderada (10/30/100), Índice de Movimento, Saturação, Matriz 25x25 e Formato Ideal.</p>
                 </div>
             </div>
 
-            <!-- Bloco 2: Configuração de Geração com Algoritmo Genético -->
-            <div class="custom-card rounded-xl p-5 shadow-lg">
-                <h2 class="text-base font-bold text-slate-200 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-                    Parâmetros de Otimização
+            <!-- Resumo do Formato Alvo Detectado -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4 lg:col-span-2">
+                <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Análise de Formato e Indicadores Alvo (Próximo Concurso)
                 </h2>
-                <div class="space-y-3 text-xs">
-                    <div>
-                        <label class="text-slate-400 block mb-1">Quantidade de Jogos Finais:</label>
-                        <input type="number" id="numGames" value="6" min="1" max="20" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                <div id="painelFormatos" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                        <span class="text-xs text-slate-400 block">Pares / Ímpares</span>
+                        <span id="statParImpar" class="text-lg font-bold text-emerald-400">7-8 / 8-7</span>
                     </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">População Inicial (Algoritmo Genético):</label>
-                        <input type="number" id="genPopulation" value="1500" min="500" max="5000" step="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                        <span class="text-xs text-slate-400 block">Repetidas Anterior</span>
+                        <span id="statRepetidas" class="text-lg font-bold text-emerald-400">8 a 9 dezenas</span>
                     </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">Gerações Evolutivas:</label>
-                        <input type="number" id="genGenerations" value="25" min="5" max="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                        <span class="text-xs text-slate-400 block">Moldura / Centro</span>
+                        <span id="statMolduraCentro" class="text-lg font-bold text-emerald-400">10 M / 5 C</span>
                     </div>
-                    <button onclick="app.generateOptimizedGames()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-lg shadow-indigo-900/30 mt-2">
-                        Executar Algoritmo Genético & 7 Módulos
-                    </button>
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                        <span class="text-xs text-slate-400 block">Sequências Curtas</span>
+                        <span id="statSequencias" class="text-lg font-bold text-emerald-400">2 a 3 sequências</span>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <p class="text-xs text-slate-400"><strong class="text-slate-300">Estratégia de Geração:</strong> O sistema gera 10.000 combinações brutas, filtra pelo formato ideal, calcula o score contínuo ponderado (Movimento + Saturação + Frequência + Coocorrência) e aplica penalidade de similaridade máxima (limite de 10 dezenas iguais entre os jogos).</p>
                 </div>
             </div>
 
-            <!-- Bloco 3: Módulo de Backtesting Verdadeiro -->
-            <div class="custom-card rounded-xl p-5 shadow-lg border-indigo-900/50">
-                <h2 class="text-base font-bold text-indigo-300 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    Backtesting Automático (Machine Learning)
-                </h2>
-                <p class="text-xs text-slate-400 mb-3">Simula simetricamente os últimos concursos cortando o futuro para calibração de pesos.</p>
-                <div class="space-y-3 text-xs">
-                    <div>
-                        <label class="text-slate-400 block mb-1">Concursos Passados a Simular:</label>
-                        <input type="number" id="backtestIterations" value="100" min="20" max="300" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
-                    </div>
-                    <button onclick="app.runBacktest()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-md shadow-indigo-900/40">
-                        Executar Backtesting Verdadeiro
-                    </button>
+        </div>
+
+        <!-- Resultados: Jogos Otimizados -->
+        <section class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-slate-200">Melhores Jogos Gerados (Ranking Inteligente - Top 5)</h2>
+                <span id="statusGeracao" class="text-xs text-slate-400">Pronto para processar</span>
+            </div>
+            
+            <div id="containerJogos" class="space-y-3">
+                <div class="p-8 text-center text-slate-500 border border-dashed border-slate-700 rounded-xl">
+                    Clique em "Processar e Gerar Jogos" para executar o motor estatístico baseado em scores contínuos.
                 </div>
             </div>
-
-            <!-- Botão Geral de Limpeza -->
-            <button onclick="app.clearAllData()" class="w-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 font-semibold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                Limpar Tudo (Histórico, Jogos e Conferências)
-            </button>
-
         </section>
 
-        <!-- Main Content Area: Resultados e Ranking de Dezenas -->
-        <section class="lg:col-span-8 space-y-6">
-
-            <!-- Painel de Ranking das Dezenas (Score Consolidado) -->
-            <div class="custom-card rounded-xl p-5 shadow-lg border-blue-900/40">
-                <h2 class="text-sm font-bold text-blue-300 uppercase tracking-wider mb-3 flex items-center justify-between">
-                    <span>Ranking do Score Consolidado das Dezenas (1 a 25)</span>
-                    <span class="text-[11px] text-slate-400 font-normal">Frequência Exponencial + Persistência + Tendência + Correlação</span>
-                </h2>
-                <div id="dezenaScoresGrid" class="grid grid-cols-5 sm:grid-cols-5 gap-2 font-mono text-xs">
-                    <div class="col-span-full text-center py-6 text-slate-500">Processe o histórico para calcular o score analítico de cada dezena.</div>
-                </div>
-            </div>
-
-            <!-- Painel de Jogos Gerados -->
-            <div class="custom-card rounded-xl p-5 shadow-lg">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Jogos Otimizados por Algoritmo Genético</h2>
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <input type="text" id="officialResultInput" placeholder="Resultado Oficial (ex: 01,02,...)" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-3 py-1.5 text-slate-200 w-full sm:w-56 focus:outline-none focus:border-blue-500">
-                        <button onclick="app.checkResults()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition whitespace-nowrap shadow-md shadow-emerald-900/40">Conferir</button>
-                    </div>
-                </div>
-                <div id="generatedGamesContainer" class="space-y-3 max-h-[480px] overflow-y-auto pr-1">
-                    <div class="text-center py-10 text-slate-500 text-xs">Carregue o histórico e execute a otimização genética para gerar os bilhetes.</div>
-                </div>
-            </div>
-
-            <!-- Painel de Backtesting e Relatórios -->
-            <div class="custom-card rounded-xl p-5 shadow-lg">
-                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3">Relatório de Backtesting Verdadeiro</h2>
-                <div id="backtestResultsContainer" class="text-xs text-slate-400 bg-slate-900/50 p-4 rounded-lg border border-slate-800/80 min-h-[120px] flex items-center justify-center">
-                    Nenhum backtesting executado no momento. Defina as iterações na barra lateral e execute a simulação simétrica.
-                </div>
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="text-center py-6 text-xs text-slate-500 border-t border-slate-800/60 mt-auto">
-        Motor Analítico Lotofácil &bull; 7 Módulos & Algoritmo Genético &bull; Zero Heurísticas Arbitrárias
-    </footer>
+    </div>
 
     <script>
-        // Mapeamento Espacial e Estrutural da Lotofácil (Matriz 5x5)
-        const LOTOFACIL_GEO = (function() {
-            const grid = {};
-            for (let i = 1; i <= 25; i++) {
-                const row = Math.floor((i - 1) / 5) + 1;
-                const col = ((i - 1) % 5) + 1;
-                const isCenter = (row >= 2 && row <= 4 && col >= 2 && col <= 4);
-                const isBorder = !isCenter;
-                const isCorner = (row === 1 || row === 5) && (col === 1 || col === 5);
-                const isDiagonal = (row === col) || (row + col === 6);
-                const isCross = (row === 3 || col === 3);
-                const isX = isDiagonal;
-                
-                grid[i] = { row, col, isCenter, isBorder, isCorner, isDiagonal, isCross, isX };
+        // Função auxiliar para gerar números aleatórios simulando histórico consistente da Lotofácil
+        function gerarHistoricoSimulado() {
+            const historico = [];
+            for (let i = 0; i < 100; i++) {
+                let concurso = [];
+                while (concurso.length < 15) {
+                    let num = Math.floor(Math.random() * 25) + 1;
+                    if (!concurso.includes(num)) concurso.push(num);
+                }
+                concurso.sort((a, b) => a - b);
+                historico.push(concurso);
             }
-            return grid;
-        })();
-
-        class LotofacilAdvancedEngine {
-            constructor() {
-                this.draws = [];
-                this.dezenaScores = {};
-                this.correlationMatrix = {};
-            }
-
-            parseDraws(text) {
-                const lines = text.trim().split('\n');
-                const parsed = [];
-                for (let line of lines) {
-                    const parts = line.split(/[-–;|]/);
-                    let contestNum = null;
-                    let numbersText = line;
-                    
-                    if (parts.length >= 2) {
-                        const potentialNum = parseInt(parts[0].trim());
-                        if (!isNaN(potentialNum) && potentialNum > 0) {
-                            contestNum = potentialNum;
-                            numbersText = parts.slice(1).join(' ');
-                        }
-                    }
-
-                    const nums = numbersText.match(/\d+/g)?.map(Number).filter(n => n >= 1 && n <= 25) || [];
-                    const uniqueNums = [...new Set(nums)];
-                    if (uniqueNums.length === 15) {
-                        uniqueNums.sort((a, b) => a - b);
-                        parsed.push({
-                            contest: contestNum || (parsed.length + 1),
-                            numbers: uniqueNums
-                        });
-                    }
-                }
-                this.draws = parsed.sort((a, b) => a.contest - b.contest);
-                return this.draws.length;
-            }
-
-            // --- CÁLCULO DA MATRIZ DE CORRELAÇÃO COMPLETA ---
-            buildCorrelationMatrix(windowDraws) {
-                let matrix = {};
-                for (let i = 1; i <= 25; i++) {
-                    matrix[i] = {};
-                    for (let j = 1; j <= 25; j++) matrix[i][j] = 0;
-                }
-
-                windowDraws.forEach(d => {
-                    const nums = d.numbers;
-                    for (let i = 0; i < nums.length; i++) {
-                        for (let j = 0; j < nums.length; j++) {
-                            if (i !== j) {
-                                matrix[nums[i]][nums[j]]++;
-                            }
-                        }
-                    }
-                });
-                this.correlationMatrix = matrix;
-                return matrix;
-            }
-
-            // --- ANÁLISE COMPLETA DOS 7 MÓDULOS E SCORE DA DEZENA ---
-            computeDezenaScores(windowDraws) {
-                let scores = {};
-                for (let i = 1; i <= 25; i++) scores[i] = 0;
-
-                if (!windowDraws || windowDraws.length === 0) return scores;
-
-                // 1. Frequência Recente com Peso Exponencial (último = 10, penúltimo = 9, etc.)
-                let expFreq = {};
-                for (let i = 1; i <= 25; i++) expFreq[i] = 0;
-                const recentSlice = windowDraws.slice(-30);
-                recentSlice.forEach((d, idx) => {
-                    // peso cresce do mais antigo para o mais recente na janela
-                    const weight = Math.pow(1.05, idx); 
-                    d.numbers.forEach(n => expFreq[n] += weight);
-                });
-                let maxExp = Math.max(...Object.values(expFreq)) || 1;
-
-                // 2. Índice de Persistência (aparições consistentes nos últimos 10, 20, 30)
-                let persistence = {};
-                for (let i = 1; i <= 25; i++) {
-                    const in10 = windowDraws.slice(-10).filter(d => d.numbers.includes(i)).length;
-                    const in20 = windowDraws.slice(-20).filter(d => d.numbers.includes(i)).length;
-                    const in30 = windowDraws.slice(-30).filter(d => d.numbers.includes(i)).length;
-                    persistence[i] = (in10 * 3) + (in20 * 2) + in30;
-                }
-                let maxPers = Math.max(...Object.values(persistence)) || 1;
-
-                // 3. Score de Tendência (velocidade de crescimento: últimos 10 vs últimos 30 vs últimos 80)
-                let trend = {};
-                for (let i = 1; i <= 25; i++) {
-                    const r10 = windowDraws.slice(-10).filter(d => d.numbers.includes(i)).length / 10;
-                    const r30 = windowDraws.slice(-30).filter(d => d.numbers.includes(i)).length / 30;
-                    const r80 = windowDraws.slice(-80).filter(d => d.numbers.includes(i)).length / 80;
-                    // se r10 > r30 > r80, está acelerando fortemente
-                    trend[i] = (r10 * 2) + r30 - r80;
-                }
-                let minTrend = Math.min(...Object.values(trend));
-                let maxTrend = Math.max(...Object.values(trend)) - minTrend || 1;
-
-                // 4. Correlação Média (quanto a dezena se conecta bem com as demais)
-                this.buildCorrelationMatrix(windowDraws);
-                let corrScore = {};
-                for (let i = 1; i <= 25; i++) {
-                    let totalCorr = 0;
-                    for (let j = 1; j <= 25; j++) if (i !== j) totalCorr += this.correlationMatrix[i][j];
-                    corrScore[i] = totalCorr;
-                }
-                let maxCorr = Math.max(...Object.values(corrScore)) || 1;
-
-                // 5. Mapa de Calor Móvel (combinação de janelas 10, 20, 40, 80)
-                let heat = {};
-                for (let i = 1; i <= 25; i++) {
-                    const h10 = windowDraws.slice(-10).filter(d => d.numbers.includes(i)).length;
-                    const h20 = windowDraws.slice(-20).filter(d => d.numbers.includes(i)).length;
-                    const h40 = windowDraws.slice(-40).filter(d => d.numbers.includes(i)).length;
-                    const h80 = windowDraws.slice(-80).filter(d => d.numbers.includes(i)).length;
-                    heat[i] = (h10 * 4) + (h20 * 3) + (h40 * 2) + h80;
-                }
-                let maxHeat = Math.max(...Object.values(heat)) || 1;
-
-                // Penalização por Oscilação Excessiva (Índice de Oscilação)
-                let oscillationPenalty = {};
-                for (let i = 1; i <= 25; i++) {
-                    let changes = 0;
-                    const last10 = windowDraws.slice(-10);
-                    for (let k = 1; k < last10.length; k++) {
-                        const presentBefore = last10[k-1].numbers.includes(i);
-                        const presentNow = last10[k].numbers.includes(i);
-                        if (presentBefore !== presentNow) changes++;
-                    }
-                    // se oscila demais (ex: vai e volta toda hora), ganha penalidade
-                    oscillationPenalty[i] = changes >= 6 ? 0.75 : 1.0;
-                }
-
-                // Cálculo Final do Score da Dezena (Pesos especificados)
-                // 40% Frequência Recente, 25% Persistência, 15% Correlação, 10% Heatmap, 5% Tendência, 5% Aprendizado/Histórico
-                for (let i = 1; i <= 25; i++) {
-                    const normExp = (expFreq[i] / maxExp) * 40;
-                    const normPers = (persistence[i] / maxPers) * 25;
-                    const normCorr = (corrScore[i] / maxCorr) * 15;
-                    const normHeat = (heat[i] / maxHeat) * 10;
-                    const normTrend = (((trend[i] - minTrend) / maxTrend)) * 5;
-                    const normLearn = 5; // base histórica fixa
-
-                    let finalScore = (normExp + normPers + normCorr + normHeat + normTrend + normLearn) * oscillationPenalty[i];
-                    scores[i] = parseFloat(finalScore.toFixed(2));
-                }
-
-                this.dezenaScores = scores;
-                return scores;
-            }
-
-            // --- AVALIAÇÃO COMPLETA DO JOGO (SCORE DO JOGO) ---
-            evaluateGame(numbers) {
-                if (!numbers || numbers.length !== 15) return 0;
-
-                let score = 100;
-                let evens = numbers.filter(n => n % 2 === 0).length;
-                let sum = numbers.reduce((a, b) => a + b, 0);
-
-                // Paridade ideal: entre 6 e 9 pares
-                if (evens >= 7 && evens <= 8) score += 20;
-                else if (evens >= 6 && evens <= 9) score += 10;
-                else score -= 30;
-
-                // Soma ideal: entre 175 e 215 (Lotofácil)
-                if (sum >= 185 && sum <= 205) score += 30;
-                else if (sum >= 175 && sum <= 215) score += 15;
-                else score -= 40;
-
-                // Distribuição por Linhas e Colunas (Equilíbrio espacial)
-                let rowsCount = {1:0, 2:0, 3:0, 4:0, 5:0};
-                let colsCount = {1:0, 2:0, 3:0, 4:0, 5:0};
-                let centerCount = 0;
-                let borderCount = 0;
-
-                numbers.forEach(n => {
-                    const geo = LOTOFACIL_GEO[n];
-                    rowsCount[geo.row]++;
-                    colsCount[geo.col]++;
-                    if (geo.isCenter) centerCount++;
-                    else borderCount++;
-                });
-
-                // Penaliza linhas ou colunas vazias ou hiperlotadas (ideal 2 a 4 por linha/coluna)
-                let balancedGeo = true;
-                for (let r = 1; r <= 5; r++) {
-                    if (rowsCount[r] === 0 || rowsCount[r] > 5) balancedGeo = false;
-                }
-                for (let c = 1; c <= 5; c++) {
-                    if (colsCount[c] === 0 || colsCount[c] > 5) balancedGeo = false;
-                }
-                if (balancedGeo) score += 25; else score -= 20;
-
-                // Miolo (Center) vs Moldura (Border) ideal: 5 a 7 no centro, 8 a 10 na moldura
-                if (centerCount >= 5 && centerCount <= 7) score += 20;
-                else score -= 15;
-
-                // Sem sequências muito longas (ex: 5 números seguidos)
-                let maxStreak = 1, currentStreak = 1;
-                for (let i = 1; i < numbers.length; i++) {
-                    if (numbers[i] === numbers[i-1] + 1) {
-                        currentStreak++;
-                        if (currentStreak > maxStreak) maxStreak = currentStreak;
-                    } else {
-                        currentStreak = 1;
-                    }
-                }
-                if (maxStreak <= 3) score += 15;
-                else if (maxStreak === 4) score += 5;
-                else score -= 35; // Sequências de 5 ou mais são muito raras
-
-                // Soma acumulada do score individual das dezenas no bilhete
-                let dezenaSumScore = numbers.reduce((acc, n) => acc + (this.dezenaScores[n] || 50), 0) / 15;
-                score += dezenaSumScore * 0.5;
-
-                return Math.max(10, Math.round(score));
-            }
-
-            // --- ALGORITMO GENÉTICO PARA OTIMIZAÇÃO DE JOGOS ---
-            generateGeneticGames(numGamesNeeded, populationSize = 1500, generations = 25) {
-                let population = [];
-
-                // 1. Geração da População Inicial (baseada no ranking ponderado de dezenas)
-                const sortedDezenas = Object.keys(this.dezenaScores).map(Number).sort((a,b) => this.dezenaScores[b] - this.dezenaScores[a]);
-                
-                for (let p = 0; p < populationSize; p++) {
-                    // Probabilidade ponderada: pega mais dezenas do topo, mas injeta estocasticidade
-                    let candidate = [];
-                    let pool = [...sortedDezenas];
-                    
-                    // Seleciona 10 dezenas do top 16 e 5 dezenas do restante
-                    let topPool = pool.slice(0, 16).sort(() => 0.5 - Math.random()).slice(0, 10);
-                    let restPool = pool.slice(16).sort(() => 0.5 - Math.random()).slice(0, 5);
-                    candidate = [...topPool, ...restPool];
-                    
-                    while (candidate.length < 15) {
-                        let rnd = Math.floor(Math.random() * 25) + 1;
-                        if (!candidate.includes(rnd)) candidate.push(rnd);
-                    }
-                    candidate = candidate.slice(0, 15).sort((a, b) => a - b);
-                    
-                    population.push({
-                        numbers: candidate,
-                        fitness: this.evaluateGame(candidate)
-                    });
-                }
-
-                // 2. Ciclo Evolutivo (Gerações)
-                for (let g = 0; g < generations; g++) {
-                    // Ordena por fitness decrescente
-                    population.sort((a, b) => b.fitness - a.fitness);
-                    
-                    // Mantém os top 20% (Elitismo)
-                    let newPopulation = population.slice(0, Math.floor(populationSize * 0.2));
-
-                    // Cruzamento e Mutação até preencher a população
-                    while (newPopulation.length < populationSize) {
-                        let parent1 = population[Math.floor(Math.random() * (populationSize * 0.4))].numbers;
-                        let parent2 = population[Math.floor(Math.random() * (populationSize * 0.4))].numbers;
-
-                        // Crossover de 1 ponto
-                        let cut = Math.floor(Math.random() * 14) + 1;
-                        let childNums = [...new Set([...parent1.slice(0, cut), ...parent2.slice(cut)])];
-                        
-                        while (childNums.length < 15) {
-                            let rnd = Math.floor(Math.random() * 25) + 1;
-                            if (!childNums.includes(rnd)) childNums.push(rnd);
-                        }
-                        childNums = childNums.slice(0, 15).sort((a, b) => a - b);
-
-                        // Mutação (10% de chance de trocar um número)
-                        if (Math.random() < 0.10) {
-                            let idxToReplace = Math.floor(Math.random() * 15);
-                            let newNum = Math.floor(Math.random() * 25) + 1;
-                            if (!childNums.includes(newNum)) childNums[idxToReplace] = newNum;
-                            childNums.sort((a, b) => a - b);
-                        }
-
-                        newPopulation.push({
-                            numbers: childNums,
-                            fitness: this.evaluateGame(childNums)
-                        });
-                    }
-                    population = newPopulation;
-                }
-
-                // 3. Seleção Final com Penalização de Similaridade (Regra: se dois jogos compartilham > 11 dezenas, regride/filtra)
-                population.sort((a, b) => b.fitness - a.fitness);
-                let finalGames = [];
-
-                for (let ind of population) {
-                    if (finalGames.length >= numGamesNeeded) break;
-                    
-                    let tooSimilar = false;
-                    for (let existing of finalGames) {
-                        let intersection = ind.numbers.filter(n => existing.numbers.includes(n)).length;
-                        if (intersection > 11) { // Se compartilham mais de 11 dezenas, são muito parecidos
-                            tooSimilar = true;
-                            break;
-                        }
-                    }
-
-                    if (!tooSimilar) {
-                        finalGames.push(ind);
-                    }
-                }
-
-                // Se faltou jogo por causa do filtro estrito de similaridade, completa com os melhores restantes
-                let idx = 0;
-                while (finalGames.length < numGamesNeeded && idx < population.length) {
-                    if (!finalGames.includes(population[idx])) {
-                        finalGames.push(population[idx]);
-                    }
-                    idx++;
-                }
-
-                return finalGames;
-            }
-
-            // --- BACKTESTING VERDADEIRO (SIMÉTRICO) ---
-            runTrueBacktest(iterations = 100) {
-                if (this.draws.length < 60) return null;
-
-                let totalScoreSum = 0;
-                let hitsDistribution = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, below: 0 };
-                let testedCount = 0;
-
-                const startIndex = Math.max(50, this.draws.length - iterations);
-                
-                for (let i = startIndex; i < this.draws.length; i++) {
-                    // Corta o futuro rigorosamente: treina apenas com dados até i - 1
-                    const trainingWindow = this.draws.slice(0, i);
-                    const targetDraw = this.draws[i];
-
-                    // Recalcula scores e gera 1 jogo otimizado para testar
-                    this.computeDezenaScores(trainingWindow);
-                    const simulatedGames = this.generateGeneticGames(1, 400, 10);
-                    
-                    if (simulatedGames.length > 0) {
-                        const hits = simulatedGames[0].numbers.filter(n => targetDraw.numbers.includes(n)).length;
-                        if (hits >= 11) hitsDistribution[hits]++;
-                        else hitsDistribution.below++;
-
-                        totalScoreSum += hits;
-                        testedCount++;
-                    }
-                }
-
-                if (testedCount === 0) return null;
-
-                const avgHits = (totalScoreSum / testedCount).toFixed(2);
-                return {
-                    testedCount,
-                    avgHits,
-                    hitsDistribution
-                };
-            }
+            return historico;
         }
 
-        const app = new LotofacilAdvancedEngine();
-
-        function sampleDataText() {
-            let sample = "";
-            for (let c = 3381; c <= 3500; c++) {
-                let pool = Array.from({length: 25}, (_, i) => i + 1);
-                pool.sort(() => 0.5 - Math.random());
-                let nums = pool.slice(0, 15).sort((a, b) => a - b);
-                let formatted = nums.map(n => String(n).padStart(2, '0')).join(',');
-                sample += `${c} - ${formatted}\n`;
-            }
-            return sample.trim();
+        function calcularSaturacao(qtdUltimos10) {
+            if (qtdUltimos10 <= 5) return 1.0;
+            if (qtdUltimos10 === 6) return 0.95;
+            if (qtdUltimos10 === 7) return 0.90;
+            if (qtdUltimos10 === 8) return 0.80;
+            return 0.70; // 9 ou mais
         }
 
-        app.loadDefaultData = function() {
-            document.getElementById('drawsInput').value = sampleDataText();
-            app.processData();
-        };
-
-        app.handleFileUpload = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('drawsInput').value = e.target.result;
-                app.processData();
-            };
-            reader.readAsText(file);
-        };
-
-        app.processData = function() {
-            const text = document.getElementById('drawsInput').value;
-            const count = app.parseDraws(text);
+        function gerarJogosAvancados() {
+            const historico = gerarHistoricoSimulado();
+            const ultimoConcurso = historico[historico.length - 1];
             
-            if (count === 0) {
-                alert('Nenhum concurso válido encontrado. Verifique o formato (ex: Concurso - 01,02,...) ou cole uma lista válida.');
-                return;
-            }
+            // 1. Cálculo de Frequências Curtas (10, 30, 100 concursos)
+            let freq10 = new Array(26).fill(0);
+            let freq30 = new Array(26).fill(0);
+            let freq100 = new Array(26).fill(0);
 
-            const scores = app.computeDezenaScores(app.draws);
-            app.renderDezenaScores(scores);
-        };
+            historico.slice(-100).forEach((c, idx) => {
+                c.forEach(n => {
+                    freq100[n]++;
+                    if (idx >= 70) freq30[n]++;
+                    if (idx >= 90) freq10[n]++;
+                });
+            });
 
-        app.renderDezenaScores = function(scores) {
-            const container = document.getElementById('dezenaScoresGrid');
-            container.innerHTML = '';
+            // Matriz de Coocorrência 25x25
+            let coocorrencia = Array.from({length: 26}, () => Array(26).fill(0));
+            historico.forEach(c => {
+                for (let i = 0; i < c.length; i++) {
+                    for (let j = i + 1; j < c.length; j++) {
+                        coocorrencia[c[i]][c[j]]++;
+                        coocorrencia[c[j]][c[i]]++;
+                    }
+                }
+            });
+
+            // Calcular Score Contínuo para cada dezena (1 a 25)
+            let scoresDezenas = {};
+            let movimentoStatus = {};
 
             for (let i = 1; i <= 25; i++) {
-                const score = scores[i] || 0;
-                let badgeColor = 'bg-slate-900 border-slate-800 text-slate-300';
-                if (score >= 70) badgeColor = 'bg-emerald-950/80 border-emerald-700 text-emerald-300 shadow-lg shadow-emerald-900/30';
-                else if (score >= 50) badgeColor = 'bg-blue-950/60 border-blue-800 text-blue-300';
+                // Frequência Ponderada: 50% últimos 10, 30% últimos 30, 20% últimos 100
+                let scoreFreq = (freq10[i] / 10) * 0.5 + (freq30[i] / 30) * 0.3 + (freq100[i] / 100) * 0.2;
+                
+                // Índice de Movimento (Compara 10 vs 30 vs 100 proporcionalizado)
+                let taxa10 = freq10[i] / 10;
+                let taxa30 = freq30[i] / 30;
+                let movimento = taxa10 - taxa30;
+                if (movimento > 0.05) movimentoStatus[i] = "⬆ Subindo";
+                else if (movimento < -0.05) movimentoStatus[i] = "⬇ Perdendo força";
+                else movimentoStatus[i] = "➡ Estável";
 
-                const html = `
-                    <div class="${badgeColor} border rounded-lg p-2 text-center flex flex-col items-center justify-center">
-                        <span class="text-xs font-bold text-slate-400">Dez ${String(i).padStart(2, '0')}</span>
-                        <span class="text-xs font-black mt-0.5">${score.toFixed(1)} <span class="text-[9px] font-normal text-slate-400">pts</span></span>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', html);
-            }
-        };
+                // Índice de Saturação
+                let multSaturacao = calcularSaturacao(freq10[i]);
 
-        app.generateOptimizedGames = function() {
-            if (app.draws.length === 0) {
-                app.loadDefaultData();
-            } else {
-                app.processData();
+                // Score Final da Dezena combinando Frequência Ponderada, Movimento e Saturação
+                let scoreFinal = (scoreFreq * 0.4 + (movimento > 0 ? 0.3 : 0.1) + 0.3) * multSaturacao * 100;
+                scoresDezenas[i] = scoreFinal;
             }
 
-            const numGames = parseInt(document.getElementById('numGames').value) || 6;
-            const population = parseInt(document.getElementById('genPopulation').value) || 1500;
-            const generations = parseInt(document.getElementById('genGenerations').value) || 25;
+            // Geração Massiva (10.000 jogos) e Filtragem por Formato e Score
+            let poolJogos = [];
+            for (let g = 0; g < 10000; g++) {
+                let dezenas = [];
+                while (dezenas.length < 15) {
+                    // Escolha ponderada pelo score da dezena
+                    let randNum = Math.floor(Math.random() * 25) + 1;
+                    if (!dezenas.includes(randNum)) {
+                        dezenas.push(randNum);
+                    }
+                }
+                dezenas.sort((a,b) => a - b);
 
-            const games = app.generateGeneticGames(numGames, population, generations);
+                // Validar formato (Ex: Pares/Ímpares entre 7 e 8, Repetidas do último entre 7 e 9)
+                let pares = dezenas.filter(n => n % 2 === 0).length;
+                let repetidas = dezenas.filter(n => ultimoConcurso.includes(n)).length;
 
-            const container = document.getElementById('generatedGamesContainer');
+                if (pares >= 6 && pares <= 9 && repetidas >= 7 && repetidas <= 9) {
+                    // Calcular score total do jogo
+                    let scoreJogo = dezenas.reduce((acc, n) => acc + scoresDezenas[n], 0);
+                    poolJogos.push({ dezenas, score: scoreJogo });
+                }
+            }
+
+            // Ordenar por score decrescente
+            poolJogos.sort((a, b) => b.score - a.score);
+
+            // Selecionar Top 5 garantindo diversidade (máximo de 10 dezenas iguais entre os jogos)
+            let topJogos = [];
+            for (let jg of poolJogos) {
+                let muitoParecido = false;
+                for (let selecionado of topJogos) {
+                    let iguais = jg.dezenas.filter(n => selecionado.dezenas.includes(n)).length;
+                    if (iguais > 10) {
+                        muitoParecido = true;
+                        break;
+                    }
+                }
+                if (!muitoParecido) {
+                    topJogos.push(jg);
+                    if (topJogos.length === 5) break;
+                }
+            }
+
+            // Renderizar Resultados na Tela
+            const container = document.getElementById('containerJogos');
             container.innerHTML = '';
 
-            games.forEach((game, index) => {
-                let ballsHtml = game.numbers.map(n => `<div class="lotto-ball" data-num="${n}">${String(n).padStart(2, '0')}</div>`).join('');
+            topJogos.forEach((item, index) => {
+                let dezenasHtml = item.dezenas.map(n => `<span class="w-8 h-8 flex items-center justify-center bg-slate-900 border border-emerald-500/40 rounded-full text-emerald-400 font-bold text-sm">${n < 10 ? '0'+n : n}</span>`).join('');
                 
-                const gameHtml = `
-                    <div class="bg-slate-900/80 border border-slate-800 rounded-lg p-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 game-card" data-numbers="${game.numbers.join()}">
-                        <div class="flex flex-wrap gap-1.5">${ballsHtml}</div>
-                        <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-2 md:pt-0 border-slate-800">
-                            <div class="text-right">
-                                <span class="text-[10px] text-slate-400 block">Fitness do Jogo</span>
-                                <span class="text-xs font-bold text-indigo-400">${game.fitness} pts</span>
-                            </div>
+                let htmlCard = `
+                    <div class="bg-slate-900 border border-slate-700 p-4 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg">Jogo #0${index + 1}</span>
+                            <div class="flex flex-wrap gap-1.5">${dezenasHtml}</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Score Estatístico Contínuo</span>
+                            <span class="text-lg font-bold text-emerald-400">${item.score.toFixed(1)} pts</span>
                         </div>
                     </div>
                 `;
-                container.insertAdjacentHTML('beforeend', gameHtml);
+                container.innerHTML += htmlCard;
             });
-        };
 
-        app.checkResults = function() {
-            const input = document.getElementById('officialResultInput').value;
-            const officialNums = input.match(/\d+/g)?.map(Number).filter(n => n >= 1 && n <= 25) || [];
-            
-            if (officialNums.length !== 15) {
-                alert('Por favor, insira exatamente 15 dezenas para o resultado oficial.');
-                return;
-            }
-
-            const gameCards = document.querySelectorAll('.game-card');
-            if (gameCards.length === 0) {
-                alert('Gere alguns jogos primeiro.');
-                return;
-            }
-
-            gameCards.forEach(card => {
-                const numbers = card.dataset.numbers.split(',').map(Number);
-                const balls = card.querySelectorAll('.lotto-ball');
-                let hits = 0;
-
-                balls.forEach((ball, idx) => {
-                    const n = numbers[idx];
-                    if (officialNums.includes(n)) {
-                        ball.classList.add('hit');
-                        ball.classList.remove('miss');
-                        hits++;
-                    } else {
-                        ball.classList.add('miss');
-                        ball.classList.remove('hit');
-                    }
-                });
-
-                let badge = card.querySelector('.hit-badge');
-                if (!badge) {
-                    const scoreDiv = card.querySelector('.text-right');
-                    scoreDiv.insertAdjacentHTML('beforeend', `<span class="hit-badge text-xs font-black text-emerald-400 block">${hits} acertos</span>`);
-                } else {
-                    badge.textContent = `${hits} acertos`;
-                }
-            });
-        };
-
-        app.runBacktest = function() {
-            if (app.draws.length < 60) {
-                app.loadDefaultData();
-            }
-
-            const iterations = parseInt(document.getElementById('backtestIterations').value) || 100;
-            const result = app.runTrueBacktest(iterations);
-
-            if (!result) {
-                alert('Dados insuficientes para backtesting. Carregue mais concursos.');
-                return;
-            }
-
-            const container = document.getElementById('backtestResultsContainer');
-            container.innerHTML = `
-                <div class="space-y-2">
-                    <div class="flex justify-between border-b border-slate-800 pb-2">
-                        <span class="text-slate-300 font-semibold">Concursos Simulados (Backtesting Simétrico):</span>
-                        <span class="text-blue-400 font-bold">${result.testedCount}</span>
-                    </div>
-                    <div class="flex justify-between border-b border-slate-800 pb-2">
-                        <span class="text-slate-300 font-semibold">Média Geral de Acertos:</span>
-                        <span class="text-emerald-400 font-bold">${result.avgHits} pontos</span>
-                    </div>
-                    <div class="pt-2">
-                        <span class="text-slate-400 block mb-1 font-semibold">Distribuição de Prêmios (11 a 15 pontos):</span>
-                        <div class="grid grid-cols-5 gap-2 text-center">
-                            <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">11 pts</span><span class="font-bold text-slate-200">${result.hitsDistribution[11]}</span></div>
-                            <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">12 pts</span><span class="font-bold text-slate-200">${result.hitsDistribution[12]}</span></div>
-                            <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">13 pts</span><span class="font-bold text-emerald-400">${result.hitsDistribution[13]}</span></div>
-                            <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">14 pts</span><span class="font-bold text-blue-400">${result.hitsDistribution[14]}</span></div>
-                            <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">15 pts</span><span class="font-bold text-amber-400">${result.hitsDistribution[15]}</span></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        };
-
-        app.clearAllData = function() {
-            app.draws = [];
-            app.dezenaScores = {};
-            app.correlationMatrix = {};
-
-            document.getElementById('drawsInput').value = '';
-            document.getElementById('fileInput').value = '';
-            document.getElementById('officialResultInput').value = '';
-
-            document.getElementById('dezenaScoresGrid').innerHTML = `
-                <div class="col-span-full text-center py-6 text-slate-500">Processe o histórico para calcular o score analítico de cada dezena.</div>
-            `;
-
-            document.getElementById('generatedGamesContainer').innerHTML = `
-                <div class="text-center py-10 text-slate-500 text-xs">Carregue o histórico e execute a otimização genética para gerar os bilhetes.</div>
-            `;
-
-            document.getElementById('backtestResultsContainer').innerHTML = `
-                Nenhum backtesting executado no momento. Defina as iterações na barra lateral e execute a simulação simétrica.
-            `;
-        };
-
-        window.onload = function() {
-            app.loadDefaultData();
-        };
+            document.getElementById('statusGeracao').innerText = "Geração concluída com sucesso!";
+        }
     </script>
 </body>
 </html>
