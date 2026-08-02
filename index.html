@@ -16,7 +16,7 @@
         <header class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">Lotofácil - Geração Inteligente e Conferência</h1>
-                <p class="text-slate-500 text-sm mt-1">Análise de frequência, coocorrência, movimentação, ranking estatístico e backtesting.</p>
+                <p class="text-slate-500 text-sm mt-1">Análise de frequência, base de 7 mais fortes, rotação de menos frequentes, backtesting e conferência.</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <button onclick="analisarHistorico()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
@@ -25,11 +25,17 @@
                 <button onclick="gerarJogos()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
                     Gerar Jogos
                 </button>
+                <button onclick="gerarNovamente()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
+                    Gerar Novamente
+                </button>
                 <button onclick="executarBacktesting()" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
-                    Testar Estratégia (Backtesting)
+                    Backtesting
                 </button>
                 <button onclick="exportarJogosTXT()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl border border-slate-300 transition-all duration-200 text-sm">
-                    Exportar Jogos
+                    Exportar
+                </button>
+                <button onclick="limparJogos()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-2.5 rounded-xl border border-slate-300 transition-all duration-200 text-sm">
+                    Limpar Jogos
                 </button>
                 <button onclick="limparTudo()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold px-3 py-2.5 rounded-xl border border-rose-200 transition-all duration-200 text-sm">
                     Limpar Tudo
@@ -52,64 +58,49 @@
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Janela de Análise:</label>
                         <select id="selectJanela" onchange="analisarHistorico()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 focus:outline-none focus:border-emerald-500">
-                            <option value="10">Últimos 10 (Padrão)</option>
-                            <option value="20">20 concursos</option>
-                            <option value="30">30 concursos</option>
-                            <option value="50">50 concursos</option>
-                            <option value="100">100 concursos</option>
+                            <option value="10">Últimos 10</option>
+                            <option value="20">Últimos 20</option>
+                            <option value="30">Últimos 30</option>
+                            <option value="50">Últimos 50</option>
+                            <option value="100">Últimos 100</option>
                             <option value="all">Todos</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Qtd de Jogos:</label>
                         <select id="selectQtdJogos" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 focus:outline-none focus:border-emerald-500">
-                            <option value="3">3 Jogos (Padrão)</option>
+                            <option value="3">3 Jogos</option>
                             <option value="5">5 Jogos</option>
                             <option value="10">10 Jogos</option>
                             <option value="20">20 Jogos</option>
-                            <option value="50">50 Jogos</option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            <!-- Dashboard de Estatísticas e Distribuições -->
+            <!-- Dashboard de Estatísticas e Rankings -->
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 lg:col-span-2">
-                <h2 class="text-lg font-semibold text-slate-800">Dashboard de Padrões e Frequência</h2>
+                <h2 class="text-lg font-semibold text-slate-800">Dashboard de Frequência e Rankings</h2>
                 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <span class="text-xs text-slate-500 block">Núcleo Forte (Top Dezenas)</span>
-                        <span id="dashBaseTop9" class="text-xs font-bold text-emerald-700 mt-1 block">-</span>
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <span class="text-xs text-slate-500 block">Média Pares x Ímpares</span>
-                        <span id="dashParImpar" class="text-xs font-bold text-slate-700 mt-1 block">-</span>
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <span class="text-xs text-slate-500 block">Superior x Inferior</span>
-                        <span id="dashSupInf" class="text-xs font-bold text-slate-700 mt-1 block">-</span>
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <span class="text-xs text-slate-500 block">Centro x Laterais</span>
-                        <span id="dashCentLat" class="text-xs font-bold text-slate-700 mt-1 block">-</span>
-                    </div>
-                </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                        <span class="font-semibold text-slate-700 block">Ranking Individual das Dezenas (Score):</span>
-                        <span id="dashRankingDezenas" class="text-slate-600 block font-mono">-</span>
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <span class="font-semibold text-emerald-700 block text-sm">7 Dezenas Mais Frequentes (Base Principal):</span>
+                        <span id="dashRankingTop7" class="text-slate-700 block font-mono leading-relaxed">-</span>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                        <span class="font-semibold text-slate-700 block">Relatório de Backtesting:</span>
-                        <span id="dashBacktesting" class="text-slate-600 block">-</span>
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <span class="font-semibold text-slate-700 block text-sm">Dezenas Menos Frequentes (Grupo Variável):</span>
+                        <span id="dashRankingMenos" class="text-slate-600 block font-mono leading-relaxed max-h-24 overflow-y-auto">-</span>
                     </div>
                 </div>
 
-                <!-- Mapa de Calor Simplificado (Dezenas 1 a 25) -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                    <span class="font-semibold text-slate-700 block mb-1">Relatório de Backtesting Histórico:</span>
+                    <span id="dashBacktesting" class="text-slate-600 block">-</span>
+                </div>
+
+                <!-- Mapa de Calor (Dezenas 1 a 25) -->
                 <div>
-                    <span class="text-xs font-semibold text-slate-700 block mb-2">Mapa de Calor do Score (Dezenas 1 a 25):</span>
+                    <span class="text-xs font-semibold text-slate-700 block mb-2">Mapa de Calor da Frequência (01 a 25):</span>
                     <div id="mapaCalor" class="grid grid-cols-5 md:grid-cols-10 gap-1.5">
                         <!-- Preenchido via JS -->
                     </div>
@@ -165,40 +156,15 @@
             "3466\n02 03 05 07 09 11 12 14 16 18 19 21 23 24 25",
             "3467\n01 03 04 06 08 10 12 13 15 17 19 20 22 23 25",
             "3468\n02 03 05 07 09 10 11 14 16 17 19 20 22 24 25",
-            "3469\n01 02 04 06 08 11 13 15 17 18 20 21 23 24 25",
-            "3470\n02 03 05 07 09 10 12 14 16 18 19 21 22 24 25",
-            "3471\n01 03 04 06 08 10 11 13 15 17 18 20 21 23 25",
-            "3472\n02 04 05 07 09 11 12 14 16 17 19 20 22 24 25",
-            "3473\n01 02 03 06 08 10 11 13 15 17 18 20 22 23 25",
-            "3474\n02 03 05 07 09 10 12 14 16 18 19 21 23 24 25",
-            "3475\n01 02 04 06 08 10 11 13 15 17 18 20 22 24 25",
-            "3476\n02 03 05 07 09 11 12 14 16 18 19 21 23 24 25",
-            "3477\n01 03 04 06 08 10 12 13 15 17 19 20 22 23 25",
-            "3478\n02 03 05 07 09 10 11 14 16 17 19 20 22 24 25",
-            "3479\n01 02 04 06 08 11 13 15 17 18 20 21 23 24 25",
-            "3480\n02 03 05 07 09 10 12 14 16 18 19 21 22 24 25",
-            "3481\n01 03 04 06 08 10 11 13 15 17 18 20 21 23 25",
-            "3482\n02 04 05 07 09 11 12 14 16 17 19 20 22 24 25",
-            "3483\n01 02 03 06 08 10 11 13 15 17 18 20 22 23 25",
-            "3484\n02 03 05 07 09 10 12 14 16 18 19 21 23 24 25",
-            "3485\n01 02 04 06 08 10 11 13 15 17 18 20 21 23 25",
-            "3486\n02 03 05 07 09 11 12 14 16 18 19 21 23 24 25",
-            "3487\n01 03 04 06 08 10 12 13 15 17 19 20 22 23 25",
-            "3488\n02 03 05 07 09 10 11 14 16 17 19 20 22 24 25",
-            "3489\n01 02 04 06 08 11 13 15 17 18 20 21 23 24 25"
+            "3469\n01 02 04 06 08 11 13 15 17 18 20 21 23 24 25"
         ].join("\n");
 
         document.getElementById('inputHistorico').value = dadosExemplo;
 
-        let analiseAtual = null;
         let historicoGlobal = [];
+        let rankingAtual = [];
         let ultimosJogosGerados = [];
         let resultadoConferidoAtual = null;
-
-        const superior = [1,2,3,4,5,6,7,8,9,10];
-        const inferior = [16,17,18,19,20,21,22,23,24,25];
-        const centro = [7,8,9,12,13,14,17,18,19];
-        const laterais = [1,2,3,4,5,6,10,11,15,16,20,21,22,23,24,25];
 
         function parseHistorico(texto) {
             const linhas = texto.split('\n');
@@ -218,92 +184,33 @@
             return historico;
         }
 
-        function calcularMotorEstatistico(janelaSub) {
-            let tJogos = janelaSub.length;
-            let freqRecente = {};
-            let coocorrencia = {};
-            let movimentacao = {};
-
+        function calcularFrequencia(janelaSub) {
+            let contagem = {};
             for (let i = 1; i <= 25; i++) {
-                freqRecente[i] = 0;
-                movimentacao[i] = { consecutivas: 0, ausencia: 0, oscilacao: 0 };
-                coocorrencia[i] = {};
-                for (let j = 1; j <= 25; j++) {
-                    if (i !== j) coocorrencia[i][j] = 0;
-                }
+                contagem[i] = 0;
             }
 
-            // Frequência e Coocorrência
             janelaSub.forEach(jogo => {
                 jogo.forEach(n => {
-                    freqRecente[n]++;
-                    jogo.forEach(m => {
-                        if (n !== m) coocorrencia[n][m]++;
-                    });
+                    if (contagem[n] !== undefined) contagem[n]++;
                 });
             });
 
-            // Movimentação (últimos concursos)
+            let ranking = [];
             for (let i = 1; i <= 25; i++) {
-                let seq = 0;
-                let aus = 0;
-                let achouUltimo = false;
-                for (let k = janelaSub.length - 1; k >= 0; k--) {
-                    if (janelaSub[k].includes(i)) {
-                        if (!achouUltimo) seq++;
-                    } else {
-                        if (seq > 0 && !achouUltimo) {
-                            // já contou sequencia atual
-                        }
-                        if (!achouUltimo) aus++;
-                    }
+                ranking.push({ dezena: i, freq: contagem[i] });
+            }
+
+            // Ordenar do mais frequente para o menos frequente. 
+            // Em caso de empate, sortear/variar para garantir diversidade
+            ranking.sort((a, b) => {
+                if (b.freq !== a.freq) {
+                    return b.freq - a.freq;
                 }
-                movimentacao[i].consecutivas = seq;
-                movimentacao[i].ausencia = aus;
-            }
-
-            // Normalização e Cálculo de Score por Pesos (Frequência 40%, Coocorrência 25%, Movimentação 20%, Geometria 10%, Equilíbrio 5%)
-            let maxFreq = Math.max(...Object.values(freqRecente), 1);
-            let scoresDezena = [];
-
-            for (let i = 1; i <= 25; i++) {
-                let pFreq = (freqRecente[i] / maxFreq) * 40;
-                
-                // Coocorrência média com as demais
-                let coocTotal = Object.values(coocorrencia[i]).reduce((a,b)=>a+b, 0);
-                let pCooc = Math.min(25, (coocTotal / (24 * tJogos)) * 25);
-
-                // Movimentação (estabilidade / persistência)
-                let movScore = movimentacao[i].consecutivas > 0 ? 20 : 10;
-
-                // Geometria / Espacial
-                let geoScore = superior.includes(i) ? 10 : 8;
-
-                // Equilíbrio
-                let eqScore = 5;
-
-                let scoreFinal = Math.round(pFreq + pCooc + movScore + geoScore + eqScore);
-                scoresDezena.push({ dezena: i, score: Math.min(100, Math.max(10, scoreFinal)), cooc: coocorrencia[i] });
-            }
-
-            scoresDezena.sort((a,b) => b.score - a.score);
-
-            // Estatísticas gerais para o dashboard
-            let totalPares = 0, totalSup = 0, totalCent = 0;
-            janelaSub.forEach(jogo => {
-                totalPares += jogo.filter(n => n % 2 === 0).length;
-                totalSup += jogo.filter(n => superior.includes(n)).length;
-                totalCent += jogo.filter(n => centro.includes(n)).length;
+                return Math.random() - 0.5;
             });
 
-            return {
-                scoresDezena,
-                coocorrencia,
-                mediaPares: Math.round(totalPares / tJogos),
-                mediaSup: (totalSup / tJogos).toFixed(1),
-                mediaCent: (totalCent / tJogos).toFixed(1),
-                tJogos
-            };
+            return ranking;
         }
 
         function analisarHistorico() {
@@ -324,114 +231,144 @@
                 }
             }
 
-            analiseAtual = calcularMotorEstatistico(janela);
+            rankingAtual = calcularFrequencia(janela);
 
-            let top7 = analiseAtual.scoresDezena.slice(0, 7).map(x => x.dezena).sort((a,b)=>a-b);
-            document.getElementById('dashBaseTop9').innerText = top7.join(', ');
-            let mp = analiseAtual.mediaPares;
-            document.getElementById('dashParImpar').innerText = `${mp} Pares / ${15-mp} Ímpares`;
-            document.getElementById('dashSupInf').innerText = `${analiseAtual.mediaSup} Sup / ${(15 - analiseAtual.mediaSup).toFixed(1)} Inf`;
-            document.getElementById('dashCentLat').innerText = `${analiseAtual.mediaCent} Cent / ${(15 - analiseAtual.mediaCent).toFixed(1)} Lat`;
+            // 7 mais frequentes
+            let top7 = rankingAtual.slice(0, 7);
+            let top7Txt = top7.map(x => `${x.dezena < 10 ? '0'+x.dezena : x.dezena} → ${x.freq} vezes`).join(' | ');
+            document.getElementById('dashRankingTop7').innerText = top7Txt;
 
-            // Exibir ranking detalhado
-            let rankingTxt = analiseAtual.scoresDezena.slice(0, 5).map(x => `D${x.dezena}: ${x.score}pts`).join(' | ');
-            document.getElementById('dashRankingDezenas').innerText = rankingTxt;
+            // Menos frequentes
+            let menosFreq = rankingAtual.slice(7);
+            let menosTxt = menosFreq.map(x => `${x.dezena < 10 ? '0'+x.dezena : x.dezena} → ${x.freq}v`).join(' | ');
+            document.getElementById('dashRankingMenos').innerText = menosTxt;
 
-            renderizarMapaCalor(analiseAtual.scoresDezena);
-            document.getElementById('statusGeracao').innerText = `Análise concluída com ${analiseAtual.tJogos} concursos. Pronto para gerar jogos.`;
+            renderizarMapaCalor(rankingAtual);
+            document.getElementById('statusGeracao').innerText = `Análise concluída com ${janela.length} concursos. Pronto para gerar jogos.`;
         }
 
-        function renderizarMapaCalor(scoresDezena) {
+        function renderizarMapaCalor(ranking) {
             let container = document.getElementById('mapaCalor');
             container.innerHTML = '';
             
+            let maxFreq = Math.max(...ranking.map(x => x.freq), 1);
+
             for (let i = 1; i <= 25; i++) {
-                let item = scoresDezena.find(x => x.dezena === i);
-                let score = item ? item.score : 50;
-                let intensidade = score / 100;
+                let item = ranking.find(x => x.dezena === i);
+                let freq = item ? item.freq : 0;
+                let intensidade = freq / maxFreq;
                 let bgCor = `rgba(16, 185, 129, ${Math.max(0.15, intensidade)})`;
 
                 let el = document.createElement('div');
                 el.className = `p-2 rounded-lg text-center text-xs font-bold border border-slate-200 flex flex-col items-center justify-center`;
                 el.style.backgroundColor = bgCor;
-                el.innerHTML = `<span class="text-slate-900">${i < 10 ? '0'+i : i}</span><span class="text-[9px] text-slate-700">${score}p</span>`;
+                el.innerHTML = `<span class="text-slate-900">${i < 10 ? '0'+i : i}</span><span class="text-[9px] text-slate-700">${freq}v</span>`;
                 container.appendChild(el);
             }
         }
 
         function gerarJogos() {
-            if (!analiseAtual) {
+            if (rankingAtual.length === 0) {
                 analisarHistorico();
-                if (!analiseAtual) return;
+                if (rankingAtual.length === 0) return;
             }
 
             let qtdDesejada = parseInt(document.getElementById('selectQtdJogos').value) || 3;
-            let ranking = analiseAtual.scoresDezena;
             
-            // Preservar núcleo forte (6 a 7 dezenas principais)
-            let nucleoForte = ranking.slice(0, 7).map(x => x.dezena);
-            let dezenasSecundarias = ranking.slice(7).map(x => x.dezena);
+            // Separar Base Principal (7 mais frequentes)
+            let base7 = rankingAtual.slice(0, 7).map(x => x.dezena);
+            // Grupo de baixa frequência (12 dezenas menos frequentes para revezamento inteligente)
+            let grupoBaixa = rankingAtual.slice(7, 19).map(x => x.dezena);
+            let todasMenos = rankingAtual.slice(7).map(x => x.dezena);
 
             let jogosGerados = [];
-            let diversidadeLimite = 10; // Reduz gradualmente se necessário para garantir quantidade
 
-            while (jogosGerados.length < qtdDesejada && diversidadeLimite >= 5) {
-                let tentativas = 0;
-                while (jogosGerados.length < qtdDesejada && tentativas < 500) {
-                    tentativas++;
+            for (let i = 0; i < qtdDesejada; i++) {
+                let jogoDez = [];
+                let descricao = "";
 
-                    // Montagem baseada estritamente no ranking + coocorrência
-                    let jogoBase = [...nucleoForte];
-                    
-                    // Completar com base em coocorrência e ranking restante
-                    let poolDisponivel = [...dezenasSecundarias].sort(() => Math.random() - 0.5);
-                    let complementos = poolDisponivel.slice(0, 15 - jogoBase.length);
-                    
-                    // Se faltar para dar 15, pega do topo
-                    let jogoBruto = [...jogoBase, ...complementos];
-                    if (jogoBruto.length < 15) {
-                        let extras = ranking.map(x=>x.dezena).filter(n=>!jogoBruto.includes(n));
-                        jogoBruto = [...jogoBruto, ...extras.slice(0, 15 - jogoBruto.length)];
+                if (i === 0) {
+                    // Jogo 1: Base 7 + 8 menos frequentes topo
+                    let comp = [...todasMenos].slice(0, 8);
+                    jogoDez = [...base7, ...comp];
+                    descricao = "Base 7 + 8 menos frequentes principais";
+                } else if (i === 1) {
+                    // Jogo 2: Base 7 + outras 8 menos frequentes (evitando repetir exatamente o mesmo complemento)
+                    let comp = [...todasMenos].slice(4, 12);
+                    if (comp.length < 8) {
+                        comp = [...todasMenos].slice(0, 8).sort(() => Math.random() - 0.5);
                     }
-                    
-                    jogoBruto.sort((a,b) => a - b);
-                    jogoBruto = jogoBruto.slice(0, 15);
+                    jogoDez = [...base7, ...comp];
+                    descricao = "Base 7 + rotação de menos frequentes";
+                } else if (i === 2) {
+                    // Jogo 3: Apenas dezenas menos frequentes (jogo "contrário")
+                    let pool = [...todasMenos].sort(() => Math.random() - 0.5);
+                    jogoDez = pool.slice(0, 15);
+                    descricao = "Jogo Contrários (Apenas Menos Frequentes)";
+                } else if (i % 2 === 1) {
+                    // Jogo 4, 6...: Base + mistura aleatória do grupo de baixa frequência
+                    let poolBaixa = [...grupoBaixa].sort(() => Math.random() - 0.5);
+                    jogoDez = [...base7, ...poolBaixa.slice(0, 8)];
+                    descricao = "Base 7 + mistura do grupo de baixa frequência";
+                } else {
+                    // Jogo 5, 7...: Base + novas dezenas menos frequentes
+                    let poolAlt = [...todasMenos].sort(() => Math.random() - 0.5);
+                    jogoDez = [...base7, ...poolAlt.slice(0, 8)];
+                    descricao = "Base 7 + variação controlada de baixa frequência";
+                }
 
-                    // Controle rigoroso de diversidade (Regra 7 & 16)
-                    let muitoParecido = false;
-                    for (let existente of jogosGerados) {
-                        let iguais = jogoBruto.filter(n => existente.dezenas.includes(n)).length;
-                        if (iguais > diversidadeLimite) {
-                            muitoParecido = true;
+                // Garantir exatamente 15 dezenas únicas e ordenadas
+                jogoDez = [...new Set(jogoDez)].sort((a, b) => a - b);
+                while (jogoDez.length < 15) {
+                    let rand = Math.floor(Math.random() * 25) + 1;
+                    if (!jogoDez.includes(rand)) jogoDez.push(rand);
+                }
+                jogoDez = jogoDez.slice(0, 15);
+                jogoDez.sort((a, b) => a - b);
+
+                // Garantir diversidade: verificar se não passa de 12 dezenas iguais com jogos anteriores
+                let tentativas = 0;
+                while (tentativas < 10) {
+                    let muitoIgual = false;
+                    for (let jG of jogosGerados) {
+                        let iguais = jogoDez.filter(n => jG.dezenas.includes(n)).length;
+                        if (iguais > 12) {
+                            muitoIgual = true;
                             break;
                         }
                     }
-
-                    if (!muitoParecido || jogosGerados.length === 0) {
-                        let scoreJogo = jogoBruto.reduce((acc, n) => {
-                            let found = ranking.find(r => r.dezena === n);
-                            return acc + (found ? found.score : 50);
-                        }, 0);
-                        scoreJogo = Math.round(scoreJogo / 15);
-
-                        jogosGerados.push({
-                            dezenas: jogoBruto,
-                            score: scoreJogo,
-                            pares: jogoBruto.filter(n => n % 2 === 0).length,
-                            impares: 15 - jogoBruto.filter(n => n % 2 === 0).length,
-                            descricao: "Gerado por Ranking Estatístico e Coocorrência"
-                        });
+                    if (!muitoIgual || jogosGerados.length === 0) break;
+                    
+                    // Modificar levemente para garantir diversidade
+                    let poolR = [...todasMenos].sort(() => Math.random() - 0.5);
+                    if (i !== 2) {
+                        jogoDez = [...base7, ...poolR.slice(0, 8)].sort((a,b)=>a-b);
+                    } else {
+                        jogoDez = poolR.slice(0, 15).sort((a,b)=>a-b);
                     }
+                    tentativas++;
                 }
-                diversidadeLimite--; // Reduz rigor se travar na quantidade
+
+                let pares = jogoDez.filter(n => n % 2 === 0).length;
+                let impares = 15 - pares;
+
+                jogosGerados.push({
+                    dezenas: jogoDez,
+                    pares,
+                    impares,
+                    descricao
+                });
             }
 
-            jogosGerados.sort((a, b) => b.score - a.score);
             ultimosJogosGerados = jogosGerados;
             resultadoConferidoAtual = null;
 
             renderizarJogos(jogosGerados);
-            document.getElementById('statusGeracao').innerText = `${jogosGerados.length} jogos gerados com sucesso por ranking e coocorrência.`;
+            document.getElementById('statusGeracao').innerText = `${jogosGerados.length} jogos gerados seguindo a estratégia de frequência.`;
+        }
+
+        function gerarNovamente() {
+            gerarJogos();
         }
 
         function executarBacktesting() {
@@ -439,25 +376,24 @@
             let hist = parseHistorico(texto);
 
             if (hist.length < 15) {
-                alert("Insira pelo menos 15 concursos para executar o Backtesting estatístico.");
+                alert("Insira pelo menos 15 concursos para executar o Backtesting.");
                 return;
             }
 
+            let acertosCont = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, abaixo: 0 };
             let totalSimulacoes = 0;
             let somaAcertos = 0;
-            let acertosCont = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, abaixo: 0 };
 
-            // Validação nos últimos concursos disponíveis (janela deslizante)
-            let inicio = Math.max(10, hist.length - 30);
+            let inicio = Math.max(10, hist.length - 20);
             for (let i = 10; i < hist.length; i++) {
                 let subJanela = hist.slice(i - 10, i);
                 let alvo = hist[i];
 
-                let analiseSim = calcularMotorEstatistico(subJanela);
-                let nucleo = analiseSim.scoresDezena.slice(0, 7).map(x => x.dezena);
-                let resto = analiseSim.scoresDezena.slice(7).map(x => x.dezena);
+                let rankSim = calcularFrequencia(subJanela);
+                let baseSim = rankSim.slice(0, 7).map(x => x.dezena);
+                let menosSim = rankSim.slice(7).map(x => x.dezena);
 
-                let jogoSim = [...nucleo, ...resto.slice(0, 8)].sort((a,b)=>a-b);
+                let jogoSim = [...baseSim, ...menosSim.slice(0, 8)].sort((a,b)=>a-b);
                 let acertos = jogoSim.filter(n => alvo.includes(n)).length;
 
                 totalSimulacoes++;
@@ -471,12 +407,8 @@
             }
 
             let mediaAcertos = (somaAcertos / totalSimulacoes).toFixed(2);
-            document.getElementById('dashBacktesting').innerText = `Média: ${mediaAcertos} pts | 11p: ${acertosCont[11]} | 12p: ${acertosCont[12]} | 13p+: ${acertosCont[13]+acertosCont[14]+acertosCont[15]}`;
+            document.getElementById('dashBacktesting').innerText = `Média: ${mediaAcertos} pts | 11p: ${acertosCont[11]} | 12p: ${acertosCont[12]} | 13p: ${acertosCont[13]} | 14p: ${acertosCont[14]} | 15p: ${acertosCont[15]}`;
             document.getElementById('statusGeracao').innerText = `Backtesting concluído com ${totalSimulacoes} simulações.`;
-        }
-
-        function gerarNovamente() {
-            gerarJogos();
         }
 
         function limparJogos() {
@@ -493,13 +425,10 @@
         function limparTudo() {
             document.getElementById('inputHistorico').value = '';
             document.getElementById('inputConferencia').value = '';
-            analiseAtual = null;
+            rankingAtual = [];
             limparJogos();
-            document.getElementById('dashBaseTop9').innerText = '-';
-            document.getElementById('dashParImpar').innerText = '-';
-            document.getElementById('dashSupInf').innerText = '-';
-            document.getElementById('dashCentLat').innerText = '-';
-            document.getElementById('dashRankingDezenas').innerText = '-';
+            document.getElementById('dashRankingTop7').innerText = '-';
+            document.getElementById('dashRankingMenos').innerText = '-';
             document.getElementById('dashBacktesting').innerText = '-';
             document.getElementById('mapaCalor').innerHTML = '';
             document.getElementById('statusGeracao').innerText = "Sistema limpo.";
@@ -511,10 +440,10 @@
                 return;
             }
 
-            let conteudo = "JOGOS GERADOS - LOTOFÁCIL MOTOR ESTATÍSTICO\n\n";
+            let conteudo = "JOGOS GERADOS - LOTOFÁCIL ESTRATÉGIA DE FREQUÊNCIA\n\n";
             ultimosJogosGerados.forEach((j, idx) => {
                 let numsStr = j.dezenas.map(n => n < 10 ? '0'+n : n).join(' ');
-                conteudo += `Jogo ${idx + 1}: [ ${numsStr} ] - Score: ${j.score} pts\n`;
+                conteudo += `Jogo ${idx + 1}: [ ${numsStr} ] - ${j.descricao}\n`;
             });
 
             let blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
@@ -543,14 +472,12 @@
             resultadoOficial.sort((a,b) => a - b);
             resultadoConferidoAtual = resultadoOficial;
             renderizarJogos(ultimosJogosGerados);
-            document.getElementById('statusGeracao').innerText = `Conferência realizada com o resultado oficial fornecido.`;
+            document.getElementById('statusGeracao').innerText = `Conferência realizada com sucesso.`;
         }
 
         function renderizarJogos(jogos) {
             const container = document.getElementById('containerJogos');
             container.innerHTML = '';
-
-            let maiorScore = Math.max(...jogos.map(j => j.score));
 
             jogos.forEach((item, index) => {
                 let dezenasHtml = item.dezenas.map(n => {
@@ -568,9 +495,6 @@
                     return `<span class="w-8 h-8 flex items-center justify-center border rounded-full text-xs ${corBase}">${n < 10 ? '0'+n : n}</span>`;
                 }).join('');
 
-                let isTop = item.score === maiorScore;
-                let cardBorda = isTop ? 'border-emerald-500 shadow-md ring-1 ring-emerald-500' : 'border-slate-200';
-
                 let badgeAcertosHtml = '';
                 if (resultadoConferidoAtual) {
                     let qtdAcertos = item.dezenas.filter(n => resultadoConferidoAtual.includes(n)).length;
@@ -579,22 +503,22 @@
                 }
 
                 let htmlCard = `
-                    <div class="bg-white border ${cardBorda} p-5 rounded-2xl shadow-sm space-y-3 flex flex-col justify-between">
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-3 flex flex-col justify-between">
                         <div class="space-y-3">
                             <div class="flex justify-between items-center">
                                 <span class="text-xs font-bold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg">Jogo #0${index + 1}</span>
-                                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">${item.score} pts</span>
+                                <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">Estratégia Frequência</span>
                             </div>
                             <div class="flex flex-wrap gap-1.5 justify-center py-2">${dezenasHtml}</div>
                             ${badgeAcertosHtml}
-                            <div class="text-[11px] text-emerald-700 font-semibold text-center">${item.descricao}</div>
+                            <div class="text-[11px] text-slate-500 text-center">${item.descricao}</div>
                             <div class="grid grid-cols-2 gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
                                 <div><strong>Pares / Ímpares:</strong> ${item.pares} / ${item.impares}</div>
-                                <div><strong>Núcleo Forte:</strong> Preservado</div>
+                                <div><strong>Base 7:</strong> Ativa / Rotação</div>
                             </div>
                         </div>
                         <div class="text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-                            <strong>Critério:</strong> Ranking estatístico ponderado e matriz de coocorrência.
+                            <strong>Critério:</strong> Frequência simples com diversidade controlada.
                         </div>
                     </div>
                 `;
