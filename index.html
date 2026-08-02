@@ -529,10 +529,12 @@
                 try {
                     this.parseInput();
                     this.calculateStatistics();
+                    
+                    // Mostrar a tela ANTES de renderizar os gráficos
+                    document.getElementById('mainContent').classList.remove('hidden');
+                    
                     this.renderDashboard();
                     this.generateIntelligentGames();
-                    
-                    document.getElementById('mainContent').classList.remove('hidden');
                     
                     // Smooth scroll to results
                     document.getElementById('mainContent').scrollIntoView({ behavior: 'smooth' });
@@ -575,8 +577,6 @@
                     throw new Error("Nenhum concurso válido encontrado. Verifique o formato inserido.");
                 }
 
-                // Considerar os concursos como ordenados do mais recente para o mais antigo se o ID decrescer,
-                // Mas de forma genérica, vamos assumir que a ordem colada é a ordem (topo = mais recente)
                 this.data.rawDraws = this.data.rawDraws.slice(0, limit);
             },
 
@@ -604,9 +604,7 @@
                     const weight = total > 1 ? 1 - (0.5 * (index / (total - 1))) : 1;
                     
                     draw.numbers.forEach(num => {
-                        // Frequência pura
                         this.data.stats.frequencies.set(num, this.data.stats.frequencies.get(num) + 1);
-                        // Score ponderado
                         this.data.stats.weightedScores.set(num, this.data.stats.weightedScores.get(num) + weight);
 
                         // Regiões Espaciais (Baseado na cartela 5x5)
@@ -629,17 +627,15 @@
             },
 
             renderDashboard() {
-                // Update text stats
                 document.getElementById('statAnalyzed').innerText = this.data.rawDraws.length;
                 
                 const { top, bottom, center, edges } = this.data.stats.regions;
-                let predominant = center > edges / 2 ? "Centro Forte" : "Laterais Fortes"; // edges has 16 cells, center has 9
+                let predominant = center > edges / 2 ? "Centro Forte" : "Laterais Fortes"; 
                 document.getElementById('statPredominant').innerText = predominant;
 
                 let trend = top > bottom ? "Superiores (↑)" : "Inferiores (↓)";
                 document.getElementById('statTrend').innerText = trend;
 
-                // Encontrar top 2 quentes
                 let sorted = [...this.data.stats.weightedScores.entries()].sort((a,b) => b[1] - a[1]);
                 document.getElementById('statHot').innerText = `${String(sorted[0][0]).padStart(2,'0')}, ${String(sorted[1][0]).padStart(2,'0')}`;
 
@@ -660,7 +656,6 @@
             },
 
             renderHeatmap() {
-                // Obter min e max dos scores
                 const scores = [...this.data.stats.weightedScores.values()];
                 const max = Math.max(...scores);
                 const min = Math.min(...scores);
@@ -669,20 +664,16 @@
                     const cell = document.getElementById(`heat-cell-${i}`);
                     const score = this.data.stats.weightedScores.get(i);
                     
-                    // Normalizar score entre 0 e 1
                     const ratio = max === min ? 0.5 : (score - min) / (max - min);
                     
-                    // Interpolar cor entre azul escuro (frio) -> amarelo -> vermelho (quente)
                     let r, g, b;
                     if (ratio < 0.5) {
-                        // Frio (Azul) para Médio (Amarelo)
-                        const localRatio = ratio * 2; // 0 to 1
+                        const localRatio = ratio * 2; 
                         r = Math.round(52 + (243 - 52) * localRatio);
                         g = Math.round(152 + (156 - 152) * localRatio);
                         b = Math.round(219 + (18 - 219) * localRatio);
                     } else {
-                        // Médio (Amarelo) para Quente (Vermelho)
-                        const localRatio = (ratio - 0.5) * 2; // 0 to 1
+                        const localRatio = (ratio - 0.5) * 2; 
                         r = Math.round(243 + (231 - 243) * localRatio);
                         g = Math.round(156 + (76 - 156) * localRatio);
                         b = Math.round(18 + (60 - 18) * localRatio);
@@ -692,7 +683,6 @@
                 }
             },
 
-            // --- NATIVE CANVAS CHARTS IMPLEMENTATION (No external libraries) ---
             renderNativeCharts() {
                 this.drawBarChart('freqChart', 
                     [...this.data.stats.frequencies.keys()].map(k => String(k).padStart(2,'0')), 
@@ -715,7 +705,6 @@
                 const canvas = document.getElementById(canvasId);
                 const ctx = canvas.getContext('2d');
                 
-                // Setup Dpi for crisp rendering
                 const rect = canvas.parentElement.getBoundingClientRect();
                 canvas.width = rect.width * 2;
                 canvas.height = rect.height * 2;
@@ -730,7 +719,6 @@
                 const maxVal = Math.max(...data) || 1;
                 const barWidth = (width - padding * 2) / data.length - 4;
                 
-                // Draw axes
                 ctx.beginPath();
                 ctx.strokeStyle = '#e2e8f0';
                 ctx.moveTo(padding, padding);
@@ -738,24 +726,20 @@
                 ctx.lineTo(width - padding, height - padding);
                 ctx.stroke();
                 
-                // Draw bars
                 data.forEach((val, i) => {
                     const barHeight = (val / maxVal) * (height - padding * 2 - 20);
                     const x = padding + 2 + i * (barWidth + 4);
                     const y = height - padding - barHeight;
                     
-                    // Gradient
                     const gradient = ctx.createLinearGradient(0, y, 0, height - padding);
                     gradient.addColorStop(0, color);
-                    gradient.addColorStop(1, color + '88'); // Add transparency
+                    gradient.addColorStop(1, color + '88'); 
                     
                     ctx.fillStyle = gradient;
-                    // Draw rounded rect top
                     ctx.beginPath();
                     ctx.roundRect(x, y, barWidth, barHeight, [4, 4, 0, 0]);
                     ctx.fill();
                     
-                    // Labels
                     ctx.fillStyle = '#7f8c8d';
                     ctx.font = '10px sans-serif';
                     ctx.textAlign = 'center';
@@ -774,14 +758,17 @@
                 
                 const width = rect.width;
                 const height = rect.height;
-                const radius = Math.min(width, height) / 2 - 40;
+                
+                // Correção aplicada para evitar raio negativo
+                const radius = Math.max(10, (Math.min(width, height) / 2) - 40);
+                
                 const cx = width / 2;
                 const cy = height / 2;
                 
                 ctx.clearRect(0, 0, width, height);
                 
                 const total = data.reduce((a, b) => a + b, 0) || 1;
-                let startAngle = -0.5 * Math.PI; // Start at top
+                let startAngle = -0.5 * Math.PI; 
                 
                 data.forEach((val, i) => {
                     const sliceAngle = (val / total) * 2 * Math.PI;
@@ -794,7 +781,6 @@
                     ctx.fillStyle = colors[i];
                     ctx.fill();
                     
-                    // Draw label
                     const labelAngle = startAngle + sliceAngle / 2;
                     const labelX = cx + (radius + 20) * Math.cos(labelAngle);
                     const labelY = cy + (radius + 20) * Math.sin(labelAngle);
@@ -809,12 +795,10 @@
                 });
             },
 
-            // --- INTELLIGENT GAME GENERATOR ---
             generateIntelligentGames() {
                 const targetGamesCount = parseInt(document.getElementById('numGames').value);
                 const allNumbers = Array.from({length: 25}, (_, i) => i + 1);
                 
-                // Separar pares e ímpares, ordenados pelo peso estatístico (quentes primeiro)
                 const odds = allNumbers.filter(n => n % 2 !== 0).sort((a,b) => this.data.stats.weightedScores.get(b) - this.data.stats.weightedScores.get(a));
                 const evens = allNumbers.filter(n => n % 2 === 0).sort((a,b) => this.data.stats.weightedScores.get(b) - this.data.stats.weightedScores.get(a));
 
@@ -824,7 +808,6 @@
                     { odds: 9, evens: 6, label: 'Jogo 3 (9 Ímpares / 6 Pares)' }
                 ];
                 
-                // Se pedir mais, adicionar perfis baseados no que mais sai na lotofacil (geralmente 8/7 ou 7/8)
                 while(gameProfiles.length < targetGamesCount) {
                     gameProfiles.push({ odds: 8, evens: 7, label: `Jogo ${gameProfiles.length + 1} (Foco Espacial)` });
                 }
@@ -832,8 +815,6 @@
                 this.data.generatedGames = [];
 
                 gameProfiles.forEach(profile => {
-                    // Para gerar um jogo bem pontuado, vamos criar 100 candidatos estocásticos,
-                    // avaliá-los e pegar o melhor. Isso garante aderência estatística sem engessar.
                     let bestCandidate = null;
                     let bestScore = -1;
 
@@ -841,7 +822,6 @@
                         const candidate = this.generateCandidate(odds, evens, profile.odds, profile.evens);
                         const evaluation = this.evaluateGame(candidate);
                         
-                        // Evitar jogos repetidos
                         const isDuplicate = this.data.generatedGames.some(g => g.numbers.join(',') === candidate.sort((a,b)=>a-b).join(','));
                         
                         if (evaluation.score > bestScore && !isDuplicate) {
@@ -856,20 +836,16 @@
                     if(bestCandidate) this.data.generatedGames.push(bestCandidate);
                 });
 
-                // Ordenar por pontuação
                 this.data.generatedGames.sort((a, b) => b.evaluation.score - a.evaluation.score);
                 
                 this.renderGames();
             },
 
             generateCandidate(orderedOdds, orderedEvens, numOdds, numEvens) {
-                // Seleção enviesada: maior probabilidade de pegar os primeiros (quentes),
-                // mas garantindo variação (médios e frios).
                 const pickBiased = (arr, count) => {
                     let pool = [...arr];
                     let picked = [];
                     while(picked.length < count && pool.length > 0) {
-                        // Math.pow(Math.random(), 1.5) enviesa a seleção para o início do array
                         const idx = Math.floor(Math.pow(Math.random(), 1.5) * pool.length);
                         picked.push(pool[idx]);
                         pool.splice(idx, 1);
@@ -893,7 +869,6 @@
                 const centerSet = new Set([7,8,9,12,13,14,17,18,19]);
                 let hotCount = 0;
 
-                // Media do score das dezenas neste jogo
                 let weightSum = 0;
                 const globalMaxWeight = Math.max(...this.data.stats.weightedScores.values());
 
@@ -911,7 +886,6 @@
                     if(w > globalMaxWeight * 0.7) hotCount++; 
                 });
 
-                // Avaliação de Linhas e Colunas (Ideal: 3 por linha/coluna, aceitável 2 ou 4. Ruim: 0 ou 5)
                 let emptyLines = lines.filter(v => v === 0 || v === 5).length;
                 let emptyCols = cols.filter(v => v === 0 || v === 5).length;
                 if(emptyLines === 0) {
@@ -926,28 +900,24 @@
                     score -= emptyCols * 5;
                 }
 
-                // Centro / Moldura (Ideal: 5 a 6 no centro, 9 a 10 na moldura)
                 if(center >= 5 && center <= 7) {
                     attributes.push("Excelente distribuição espacial (Centro/Moldura)");
                 } else {
                     score -= Math.abs(center - 6) * 3;
                 }
 
-                // Superior / Inferior (Ideal equilibrado)
                 if(Math.abs(top - bottom) <= 2) {
                     attributes.push("Excelente equilíbrio entre parte superior e inferior");
                 } else {
                     score -= Math.abs(top - bottom) * 2;
                 }
 
-                // Mescla Quentes/Frias
                 if(hotCount >= 4 && hotCount <= 8) {
                     attributes.push("Excelente relação entre dezenas quentes e intermediárias/frias");
                 } else {
                     score -= Math.abs(hotCount - 6) * 2;
                 }
                 
-                // Sequências muito longas (Penalizar mais de 5 seguidos)
                 numbers.sort((a,b) => a-b);
                 let maxSeq = 1; let currentSeq = 1;
                 for(let i=1; i<numbers.length; i++){
@@ -958,12 +928,11 @@
                 if (maxSeq > 5) score -= (maxSeq - 5) * 4;
                 else attributes.push("Baixa concentração sequencial");
 
-                // Garantir limites
-                score = Math.max(0, Math.min(99.9, score + (Math.random() * 0.5))); // Add slight randomness for decimal display
+                score = Math.max(0, Math.min(99.9, score + (Math.random() * 0.5))); 
 
                 return {
                     score: score.toFixed(1),
-                    attributes: attributes.slice(0, 5) // Exibir os 5 melhores
+                    attributes: attributes.slice(0, 5) 
                 };
             },
 
