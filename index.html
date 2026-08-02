@@ -172,6 +172,9 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .stat-value {
@@ -186,6 +189,13 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        .stat-sublabel {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-top: 5px;
         }
 
         /* Heatmap */
@@ -208,7 +218,7 @@
             color: white;
             transition: transform 0.2s;
             text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-            background-color: var(--border-color); /* default */
+            background-color: var(--border-color);
         }
         
         .heatmap-cell:hover {
@@ -366,7 +376,7 @@
             <div class="card">
                 <h2 class="card-title">1. Entrada de Dados</h2>
                 <div class="form-group">
-                    <label for="drawsInput">Cole os Resultados (ex: 3480 \n 01 02 03...):</label>
+                    <label for="drawsInput">Cole os Resultados (Qualquer formato):</label>
                     <textarea id="drawsInput" placeholder="Cole aqui o histórico de concursos..."></textarea>
                 </div>
                 <div class="form-group">
@@ -378,15 +388,15 @@
             <div class="card">
                 <h2 class="card-title">2. Configurações</h2>
                 <div class="form-group">
-                    <label for="historyDepth">Concursos Analisados:</label>
+                    <label for="historyDepth">Concursos Analisados (Limite):</label>
                     <select id="historyDepth">
                         <option value="10">Últimos 10</option>
-                        <option value="20" selected>Últimos 20</option>
+                        <option value="20">Últimos 20</option>
                         <option value="30">Últimos 30</option>
-                        <option value="50">Últimos 50</option>
+                        <option value="50" selected>Últimos 50</option>
                         <option value="100">Últimos 100</option>
                         <option value="200">Últimos 200</option>
-                        <option value="99999">Todos disponíveis</option>
+                        <option value="99999">Todos os informados</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -409,7 +419,8 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="statAnalyzed">0</div>
-                    <div class="stat-label">Concursos Analisados</div>
+                    <div class="stat-label">Analisados</div>
+                    <div class="stat-sublabel" id="statDrawRange">-</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="statPredominant">Centro</div>
@@ -417,29 +428,29 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="statTrend">Alta</div>
-                    <div class="stat-label">Tendência (Superiores)</div>
+                    <div class="stat-label">Tendência Espacial</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="statHot">01, 15</div>
-                    <div class="stat-label">Dezenas Mais Quentes</div>
+                    <div class="stat-label">Mais Fortes (Peso)</div>
                 </div>
             </div>
 
             <div class="charts-container" style="margin-bottom: 1.5rem;">
                 <!-- Mapa de Calor -->
                 <div class="card">
-                    <h2 class="card-title">Mapa de Calor (Volante)</h2>
+                    <h2 class="card-title">Mapa de Calor (Tendência Recente)</h2>
                     <div class="heatmap-grid" id="heatmapGrid">
                         <!-- Células geradas via JS -->
                     </div>
                     <p style="text-align:center; font-size:0.8rem; margin-top:10px; color:var(--text-muted);">
-                        Cores mais intensas indicam maior frequência recente.
+                        Cores mais quentes: Altamente sorteadas nos jogos mais recentes.
                     </p>
                 </div>
 
                 <!-- Gráfico de Frequência -->
                 <div class="card">
-                    <h2 class="card-title">Frequência das Dezenas</h2>
+                    <h2 class="card-title">Frequência Ponderada</h2>
                     <div class="chart-wrapper">
                         <canvas id="freqChart"></canvas>
                     </div>
@@ -463,15 +474,15 @@
 
             <!-- Jogos Gerados -->
             <div class="card">
-                <h2 class="card-title">Jogos Sugeridos</h2>
+                <h2 class="card-title">Jogos Sugeridos (Otimizados)</h2>
                 <div class="games-grid" id="gamesGrid">
                     <!-- Cards de jogos gerados via JS -->
                 </div>
             </div>
 
             <div class="disclaimer">
-                <strong>Aviso de Transparência:</strong> Este sistema utiliza análise de dados históricos e critérios geométricos para montar jogos equilibrados. 
-                Os sorteios da Lotofácil são eventos aleatórios independentes; portanto, este software é estritamente uma ferramenta de estudos estatísticos e 
+                <strong>Aviso de Transparência:</strong> Este sistema utiliza análise de dados históricos (com peso maior para os sorteios recentes) e critérios geométricos para montar jogos equilibrados. 
+                Os sorteios da Lotofácil são eventos aleatórios independentes; portanto, este software é uma ferramenta de estudos estatísticos e 
                 <strong>NÃO garante resultados nem promete aumento nas chances de premiação.</strong>
             </div>
         </main>
@@ -480,16 +491,12 @@
     <div id="loading" class="loading-overlay hidden">Analisando Padrões...</div>
 
     <script>
-        /**
-         * Lógica Central - Analisador Lotofácil
-         * 100% Front-end, focado em performance (ES6, Map, Set)
-         */
         const app = {
             data: {
-                rawDraws: [], // Array de objetos { id, numbers: Set }
+                rawDraws: [], 
                 stats: {
-                    frequencies: new Map(), // num -> freq
-                    weightedScores: new Map(), // num -> score ponderado
+                    frequencies: new Map(), 
+                    weightedScores: new Map(), 
                     regions: { top: 0, bottom: 0, center: 0, edges: 0 },
                     lines: [0,0,0,0,0],
                     cols: [0,0,0,0,0]
@@ -500,7 +507,7 @@
             init() {
                 this.setupFileUpload();
                 this.generateEmptyHeatmap();
-                // Mock de entrada para facilidade do usuário
+                // Mock de entrada para exemplo inicial
                 document.getElementById('drawsInput').value = `3480\n01 02 03 05 06 07 08 10 12 13 14 15 18 22 25\n\n3479\n01 03 05 06 07 09 10 12 14 15 16 18 20 21 25`;
             },
 
@@ -522,21 +529,17 @@
 
             async analyzeAndGenerate() {
                 this.showLoading(true);
-                
-                // Allow UI to render loading state
                 await new Promise(resolve => setTimeout(resolve, 50));
 
                 try {
                     this.parseInput();
                     this.calculateStatistics();
                     
-                    // Mostrar a tela ANTES de renderizar os gráficos
                     document.getElementById('mainContent').classList.remove('hidden');
                     
                     this.renderDashboard();
                     this.generateIntelligentGames();
                     
-                    // Smooth scroll to results
                     document.getElementById('mainContent').scrollIntoView({ behavior: 'smooth' });
                 } catch (error) {
                     alert('Erro na análise: ' + error.message);
@@ -545,38 +548,51 @@
                 }
             },
 
+            // NOVA LEITURA DE DADOS - Mais inteligente e flexível
             parseInput() {
                 const text = document.getElementById('drawsInput').value;
                 const limit = parseInt(document.getElementById('historyDepth').value);
                 
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                this.data.rawDraws = [];
+                // Extrai todos os números do texto, ignorando letras e pontuações
+                const tokens = text.replace(/[^\d]/g, ' ').split(/\s+/).filter(t => t !== '');
                 
+                this.data.rawDraws = [];
                 let currentId = null;
-                for (let line of lines) {
-                    // Tenta identificar se é número do concurso (apenas 1 número isolado longo ou curto)
-                    if (/^\d{1,5}$/.test(line)) {
-                        currentId = parseInt(line);
-                        continue;
-                    }
+                let currentNumbers = [];
+                
+                for (let i = 0; i < tokens.length; i++) {
+                    const num = parseInt(tokens[i], 10);
+                    if (isNaN(num)) continue;
                     
-                    // Extrai dezenas (ignora tudo que não for dezena válida 01-25)
-                    const matches = line.match(/\b(0[1-9]|[12][0-5])\b/g);
-                    if (matches && matches.length >= 15) {
-                        // Pega as primeiras 15 exclusivas
-                        const numSet = new Set(matches.slice(0, 15).map(n => parseInt(n, 10)));
-                        this.data.rawDraws.push({
-                            id: currentId || this.data.rawDraws.length + 1,
-                            numbers: numSet
-                        });
-                        currentId = null;
+                    if (num > 25) {
+                        // Se for maior que 25, assumimos que é o número do concurso
+                        currentId = num;
+                        currentNumbers = []; // Reseta as dezenas ao achar um novo concurso
+                    } else if (num >= 1 && num <= 25) {
+                        if (!currentNumbers.includes(num)) {
+                            currentNumbers.push(num);
+                        }
+                        
+                        // Quando acumulamos 15 dezenas únicas, fechamos o jogo
+                        if (currentNumbers.length === 15) {
+                            this.data.rawDraws.push({
+                                id: currentId || (this.data.rawDraws.length + 1),
+                                numbers: new Set(currentNumbers)
+                            });
+                            currentNumbers = []; // Limpa para procurar o próximo jogo
+                            currentId = null;
+                        }
                     }
                 }
 
                 if (this.data.rawDraws.length === 0) {
-                    throw new Error("Nenhum concurso válido encontrado. Verifique o formato inserido.");
+                    throw new Error("Nenhum concurso válido encontrado. Verifique se os números de 01 a 25 estão presentes no texto.");
                 }
 
+                // ORDENAÇÃO FORÇADA: Coloca os concursos maiores (mais recentes) no topo da lista
+                this.data.rawDraws.sort((a, b) => b.id - a.id);
+
+                // Aplica o limite escolhido no menu suspenso
                 this.data.rawDraws = this.data.rawDraws.slice(0, limit);
             },
 
@@ -584,7 +600,6 @@
                 const draws = this.data.rawDraws;
                 const total = draws.length;
                 
-                // Reset stats
                 this.data.stats.frequencies = new Map();
                 this.data.stats.weightedScores = new Map();
                 this.data.stats.regions = { top: 0, bottom: 0, center: 0, edges: 0 };
@@ -596,18 +611,17 @@
                     this.data.stats.weightedScores.set(i, 0);
                 }
 
-                // Define central numbers (7,8,9, 12,13,14, 17,18,19)
                 const centerSet = new Set([7,8,9,12,13,14,17,18,19]);
 
                 draws.forEach((draw, index) => {
-                    // Peso: Mais recente (index 0) tem peso 1.0, mais antigo tem peso 0.5
+                    // CÁLCULO DE PESO: Como a lista está ordenada do maior concurso para o menor,
+                    // o index 0 (mais recente) tem peso 1.0. O mais antigo terá peso 0.5.
                     const weight = total > 1 ? 1 - (0.5 * (index / (total - 1))) : 1;
                     
                     draw.numbers.forEach(num => {
                         this.data.stats.frequencies.set(num, this.data.stats.frequencies.get(num) + 1);
                         this.data.stats.weightedScores.set(num, this.data.stats.weightedScores.get(num) + weight);
 
-                        // Regiões Espaciais (Baseado na cartela 5x5)
                         const row = Math.floor((num - 1) / 5);
                         const col = (num - 1) % 5;
                         
@@ -627,7 +641,15 @@
             },
 
             renderDashboard() {
-                document.getElementById('statAnalyzed').innerText = this.data.rawDraws.length;
+                const total = this.data.rawDraws.length;
+                document.getElementById('statAnalyzed').innerText = total;
+                
+                // EXIBE QUAIS CONCURSOS FORAM ANALISADOS
+                if (total > 0) {
+                    const newest = this.data.rawDraws[0].id;
+                    const oldest = this.data.rawDraws[total - 1].id;
+                    document.getElementById('statDrawRange').innerText = total > 1 ? `Do ${oldest} ao ${newest}` : `Conc: ${newest}`;
+                }
                 
                 const { top, bottom, center, edges } = this.data.stats.regions;
                 let predominant = center > edges / 2 ? "Centro Forte" : "Laterais Fortes"; 
@@ -685,8 +707,8 @@
 
             renderNativeCharts() {
                 this.drawBarChart('freqChart', 
-                    [...this.data.stats.frequencies.keys()].map(k => String(k).padStart(2,'0')), 
-                    [...this.data.stats.frequencies.values()], 
+                    [...this.data.stats.weightedScores.keys()].map(k => String(k).padStart(2,'0')), 
+                    [...this.data.stats.weightedScores.values()], 
                     '#2ecc71');
                 
                 this.drawBarChart('distChart', 
@@ -759,7 +781,6 @@
                 const width = rect.width;
                 const height = rect.height;
                 
-                // Correção aplicada para evitar raio negativo
                 const radius = Math.max(10, (Math.min(width, height) / 2) - 40);
                 
                 const cx = width / 2;
@@ -809,7 +830,7 @@
                 ];
                 
                 while(gameProfiles.length < targetGamesCount) {
-                    gameProfiles.push({ odds: 8, evens: 7, label: `Jogo ${gameProfiles.length + 1} (Foco Espacial)` });
+                    gameProfiles.push({ odds: 8, evens: 7, label: `Jogo ${gameProfiles.length + 1} (Foco Ponderado Recente)` });
                 }
 
                 this.data.generatedGames = [];
@@ -907,13 +928,13 @@
                 }
 
                 if(Math.abs(top - bottom) <= 2) {
-                    attributes.push("Excelente equilíbrio entre parte superior e inferior");
+                    attributes.push("Equilíbrio geométrico entre topo e base");
                 } else {
                     score -= Math.abs(top - bottom) * 2;
                 }
 
                 if(hotCount >= 4 && hotCount <= 8) {
-                    attributes.push("Excelente relação entre dezenas quentes e intermediárias/frias");
+                    attributes.push("Presença ideal das dezenas mais quentes (recentes)");
                 } else {
                     score -= Math.abs(hotCount - 6) * 2;
                 }
@@ -946,7 +967,7 @@
                     card.className = `game-card ${isTop ? 'recommended' : ''}`;
                     
                     if (isTop) {
-                        card.innerHTML += `<div class="recommended-badge">🏆 Jogo Mais Recomendado</div>`;
+                        card.innerHTML += `<div class="recommended-badge">🏆 Maior Equilíbrio Estatístico</div>`;
                     }
 
                     const numHtml = game.numbers.map(n => `<div class="number-ball">${String(n).padStart(2,'0')}</div>`).join('');
@@ -994,9 +1015,10 @@
             }
         };
 
-        // Initialize App
         document.addEventListener('DOMContentLoaded', () => {
             app.init();
+            
+            // Ajustei também a opção padrão do menu "Concursos Analisados" para 50 para já vir pronto para o seu uso!
         });
     </script>
 </body>
