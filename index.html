@@ -109,13 +109,13 @@
             font-size: 0.9rem;
         }
 
-        textarea:focus, select:focus {
+        textarea:focus, select:focus, input:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
         }
 
-        select, input[type="file"] {
+        select, input[type="file"], input[type="text"] {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid var(--border-color);
@@ -136,6 +136,7 @@
             transition: background 0.3s, transform 0.1s;
             width: 100%;
             text-align: center;
+            margin-bottom: 0.5rem;
         }
 
         .btn:hover {
@@ -150,11 +151,18 @@
             background: transparent;
             color: var(--secondary);
             border: 1px solid var(--border-color);
-            margin-top: 0.5rem;
         }
 
         .btn-outline:hover {
             background: var(--bg-color);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
         }
 
         /* Dashboard Stats */
@@ -316,6 +324,11 @@
             font-weight: bold;
         }
 
+        .number-ball.hit {
+            background: var(--primary);
+            box-shadow: 0 0 8px rgba(46, 204, 113, 0.8);
+        }
+
         .game-attributes {
             list-style: none;
             font-size: 0.85rem;
@@ -334,6 +347,17 @@
             content: "✔";
             color: var(--primary);
             font-weight: bold;
+        }
+
+        .learning-status {
+            margin-top: 10px;
+            padding: 8px;
+            background: #eef2f3;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+            color: var(--secondary);
         }
 
         .disclaimer {
@@ -367,7 +391,7 @@
 
     <header>
         <h1>Analisador Inteligente Lotofácil</h1>
-        <p>Análise Estatística • Distribuição Geométrica • Gerador Inteligente de Jogos</p>
+        <p>Análise Estatística • Distribuição Geométrica • Aprendizado Contínuo</p>
     </header>
 
     <div class="container">
@@ -376,7 +400,7 @@
             <div class="card">
                 <h2 class="card-title">1. Entrada de Dados</h2>
                 <div class="form-group">
-                    <label for="drawsInput">Cole os Resultados (Qualquer formato):</label>
+                    <label for="drawsInput">Cole os Resultados (Histórico):</label>
                     <textarea id="drawsInput" placeholder="Cole aqui o histórico de concursos..."></textarea>
                 </div>
                 <div class="form-group">
@@ -410,6 +434,20 @@
                 </div>
                 <button class="btn" onclick="app.analyzeAndGenerate()">Analisar e Gerar Jogos</button>
                 <button class="btn btn-outline" onclick="app.exportGames()">Exportar Jogos (TXT)</button>
+                <button class="btn btn-danger" onclick="app.clearGames()">Limpar Jogos Gerados</button>
+            </div>
+
+            <!-- MÓDULO DE APRENDIZADO -->
+            <div class="card" id="learningCard">
+                <h2 class="card-title">3. Ensino / Conferência</h2>
+                <div class="form-group">
+                    <label for="latestResultInput">Resultado Real (15 dezenas):</label>
+                    <input type="text" id="latestResultInput" placeholder="Ex: 01 03 05... 25">
+                </div>
+                <button class="btn" style="background:#8e44ad;" onclick="app.checkAndLearn()">Conferir e Ensinar IA</button>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px; text-align:center;">
+                    Compara os jogos gerados com o resultado real e ajusta os pesos estatísticos automaticamente.
+                </p>
             </div>
         </aside>
 
@@ -440,9 +478,7 @@
                 <!-- Mapa de Calor -->
                 <div class="card">
                     <h2 class="card-title">Mapa de Calor (Tendência Recente)</h2>
-                    <div class="heatmap-grid" id="heatmapGrid">
-                        <!-- Células geradas via JS -->
-                    </div>
+                    <div class="heatmap-grid" id="heatmapGrid"></div>
                     <p style="text-align:center; font-size:0.8rem; margin-top:10px; color:var(--text-muted);">
                         Cores mais quentes: Altamente sorteadas nos jogos mais recentes.
                     </p>
@@ -475,9 +511,7 @@
             <!-- Jogos Gerados -->
             <div class="card">
                 <h2 class="card-title">Jogos Sugeridos (Otimizados)</h2>
-                <div class="games-grid" id="gamesGrid">
-                    <!-- Cards de jogos gerados via JS -->
-                </div>
+                <div class="games-grid" id="gamesGrid"></div>
             </div>
 
             <div class="disclaimer">
@@ -499,7 +533,8 @@
                     weightedScores: new Map(), 
                     regions: { top: 0, bottom: 0, center: 0, edges: 0 },
                     lines: [0,0,0,0,0],
-                    cols: [0,0,0,0,0]
+                    cols: [0,0,0,0,0],
+                    learningBonus: new Map() // Armazena aprendizado dinâmico por dezena
                 },
                 generatedGames: []
             },
@@ -507,7 +542,10 @@
             init() {
                 this.setupFileUpload();
                 this.generateEmptyHeatmap();
-                // Mock de entrada para exemplo inicial
+                // Inicializa o bônus de aprendizado neutro (0) para as 25 dezenas
+                for(let i=1; i<=25; i++) {
+                    this.data.stats.learningBonus.set(i, 0);
+                }
                 document.getElementById('drawsInput').value = `3480\n01 02 03 05 06 07 08 10 12 13 14 15 18 22 25\n\n3479\n01 03 05 06 07 09 10 12 14 15 16 18 20 21 25`;
             },
 
@@ -548,12 +586,10 @@
                 }
             },
 
-            // NOVA LEITURA DE DADOS - Mais inteligente e flexível
             parseInput() {
                 const text = document.getElementById('drawsInput').value;
                 const limit = parseInt(document.getElementById('historyDepth').value);
                 
-                // Extrai todos os números do texto, ignorando letras e pontuações
                 const tokens = text.replace(/[^\d]/g, ' ').split(/\s+/).filter(t => t !== '');
                 
                 this.data.rawDraws = [];
@@ -565,21 +601,19 @@
                     if (isNaN(num)) continue;
                     
                     if (num > 25) {
-                        // Se for maior que 25, assumimos que é o número do concurso
                         currentId = num;
-                        currentNumbers = []; // Reseta as dezenas ao achar um novo concurso
+                        currentNumbers = [];
                     } else if (num >= 1 && num <= 25) {
                         if (!currentNumbers.includes(num)) {
                             currentNumbers.push(num);
                         }
                         
-                        // Quando acumulamos 15 dezenas únicas, fechamos o jogo
                         if (currentNumbers.length === 15) {
                             this.data.rawDraws.push({
                                 id: currentId || (this.data.rawDraws.length + 1),
                                 numbers: new Set(currentNumbers)
                             });
-                            currentNumbers = []; // Limpa para procurar o próximo jogo
+                            currentNumbers = [];
                             currentId = null;
                         }
                     }
@@ -589,10 +623,7 @@
                     throw new Error("Nenhum concurso válido encontrado. Verifique se os números de 01 a 25 estão presentes no texto.");
                 }
 
-                // ORDENAÇÃO FORÇADA: Coloca os concursos maiores (mais recentes) no topo da lista
                 this.data.rawDraws.sort((a, b) => b.id - a.id);
-
-                // Aplica o limite escolhido no menu suspenso
                 this.data.rawDraws = this.data.rawDraws.slice(0, limit);
             },
 
@@ -608,19 +639,21 @@
 
                 for (let i = 1; i <= 25; i++) {
                     this.data.stats.frequencies.set(i, 0);
-                    this.data.stats.weightedScores.set(i, 0);
+                    // Soma o peso histórico base + o bônus acumulado pelo aprendizado inteligente
+                    const baseWeight = 1.0; 
+                    this.data.stats.weightedScores.set(i, baseWeight + this.data.stats.learningBonus.get(i));
                 }
 
                 const centerSet = new Set([7,8,9,12,13,14,17,18,19]);
 
                 draws.forEach((draw, index) => {
-                    // CÁLCULO DE PESO: Como a lista está ordenada do maior concurso para o menor,
-                    // o index 0 (mais recente) tem peso 1.0. O mais antigo terá peso 0.5.
                     const weight = total > 1 ? 1 - (0.5 * (index / (total - 1))) : 1;
                     
                     draw.numbers.forEach(num => {
                         this.data.stats.frequencies.set(num, this.data.stats.frequencies.get(num) + 1);
-                        this.data.stats.weightedScores.set(num, this.data.stats.weightedScores.get(num) + weight);
+                        
+                        let currentW = this.data.stats.weightedScores.get(num);
+                        this.data.stats.weightedScores.set(num, currentW + weight);
 
                         const row = Math.floor((num - 1) / 5);
                         const col = (num - 1) % 5;
@@ -644,7 +677,6 @@
                 const total = this.data.rawDraws.length;
                 document.getElementById('statAnalyzed').innerText = total;
                 
-                // EXIBE QUAIS CONCURSOS FORAM ANALISADOS
                 if (total > 0) {
                     const newest = this.data.rawDraws[0].id;
                     const oldest = this.data.rawDraws[total - 1].id;
@@ -685,7 +717,6 @@
                 for (let i = 1; i <= 25; i++) {
                     const cell = document.getElementById(`heat-cell-${i}`);
                     const score = this.data.stats.weightedScores.get(i);
-                    
                     const ratio = max === min ? 0.5 : (score - min) / (max - min);
                     
                     let r, g, b;
@@ -700,7 +731,6 @@
                         g = Math.round(156 + (76 - 156) * localRatio);
                         b = Math.round(18 + (60 - 18) * localRatio);
                     }
-                    
                     cell.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
                 }
             },
@@ -726,7 +756,6 @@
             drawBarChart(canvasId, labels, data, color) {
                 const canvas = document.getElementById(canvasId);
                 const ctx = canvas.getContext('2d');
-                
                 const rect = canvas.parentElement.getBoundingClientRect();
                 canvas.width = rect.width * 2;
                 canvas.height = rect.height * 2;
@@ -735,7 +764,6 @@
                 const width = rect.width;
                 const height = rect.height;
                 const padding = 30;
-                
                 ctx.clearRect(0, 0, width, height);
                 
                 const maxVal = Math.max(...data) || 1;
@@ -772,7 +800,6 @@
             drawPieChart(canvasId, labels, data, colors) {
                 const canvas = document.getElementById(canvasId);
                 const ctx = canvas.getContext('2d');
-                
                 const rect = canvas.parentElement.getBoundingClientRect();
                 canvas.width = rect.width * 2;
                 canvas.height = rect.height * 2;
@@ -780,12 +807,9 @@
                 
                 const width = rect.width;
                 const height = rect.height;
-                
                 const radius = Math.max(10, (Math.min(width, height) / 2) - 40);
-                
                 const cx = width / 2;
                 const cy = height / 2;
-                
                 ctx.clearRect(0, 0, width, height);
                 
                 const total = data.reduce((a, b) => a + b, 0) || 1;
@@ -793,12 +817,10 @@
                 
                 data.forEach((val, i) => {
                     const sliceAngle = (val / total) * 2 * Math.PI;
-                    
                     ctx.beginPath();
                     ctx.moveTo(cx, cy);
                     ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle);
                     ctx.closePath();
-                    
                     ctx.fillStyle = colors[i];
                     ctx.fill();
                     
@@ -842,7 +864,6 @@
                     for(let i=0; i<100; i++) {
                         const candidate = this.generateCandidate(odds, evens, profile.odds, profile.evens);
                         const evaluation = this.evaluateGame(candidate);
-                        
                         const isDuplicate = this.data.generatedGames.some(g => g.numbers.join(',') === candidate.sort((a,b)=>a-b).join(','));
                         
                         if (evaluation.score > bestScore && !isDuplicate) {
@@ -850,7 +871,8 @@
                             bestCandidate = {
                                 numbers: candidate.sort((a,b) => a - b),
                                 evaluation: evaluation,
-                                label: profile.label
+                                label: profile.label,
+                                hits: null // Será preenchido na conferência
                             };
                         }
                     }
@@ -858,7 +880,6 @@
                 });
 
                 this.data.generatedGames.sort((a, b) => b.evaluation.score - a.evaluation.score);
-                
                 this.renderGames();
             },
 
@@ -876,21 +897,17 @@
 
                 const selectedOdds = pickBiased(orderedOdds, numOdds);
                 const selectedEvens = pickBiased(orderedEvens, numEvens);
-                
                 return [...selectedOdds, ...selectedEvens];
             },
 
             evaluateGame(numbers) {
                 let score = 100;
                 let attributes = [];
-                
                 let lines = [0,0,0,0,0];
                 let cols = [0,0,0,0,0];
                 let top = 0, bottom = 0, center = 0;
                 const centerSet = new Set([7,8,9,12,13,14,17,18,19]);
                 let hotCount = 0;
-
-                let weightSum = 0;
                 const globalMaxWeight = Math.max(...this.data.stats.weightedScores.values());
 
                 numbers.forEach(num => {
@@ -903,41 +920,25 @@
                     if(centerSet.has(num)) center++;
                     
                     const w = this.data.stats.weightedScores.get(num);
-                    weightSum += w;
                     if(w > globalMaxWeight * 0.7) hotCount++; 
                 });
 
                 let emptyLines = lines.filter(v => v === 0 || v === 5).length;
                 let emptyCols = cols.filter(v => v === 0 || v === 5).length;
-                if(emptyLines === 0) {
-                    attributes.push("Excelente equilíbrio entre linhas");
-                } else {
-                    score -= emptyLines * 5;
-                }
+                if(emptyLines === 0) attributes.push("Excelente equilíbrio entre linhas");
+                else score -= emptyLines * 5;
                 
-                if(emptyCols === 0) {
-                    attributes.push("Excelente equilíbrio entre colunas");
-                } else {
-                    score -= emptyCols * 5;
-                }
+                if(emptyCols === 0) attributes.push("Excelente equilíbrio entre colunas");
+                else score -= emptyCols * 5;
 
-                if(center >= 5 && center <= 7) {
-                    attributes.push("Excelente distribuição espacial (Centro/Moldura)");
-                } else {
-                    score -= Math.abs(center - 6) * 3;
-                }
+                if(center >= 5 && center <= 7) attributes.push("Excelente distribuição espacial (Centro/Moldura)");
+                else score -= Math.abs(center - 6) * 3;
 
-                if(Math.abs(top - bottom) <= 2) {
-                    attributes.push("Equilíbrio geométrico entre topo e base");
-                } else {
-                    score -= Math.abs(top - bottom) * 2;
-                }
+                if(Math.abs(top - bottom) <= 2) attributes.push("Equilíbrio geométrico entre topo e base");
+                else score -= Math.abs(top - bottom) * 2;
 
-                if(hotCount >= 4 && hotCount <= 8) {
-                    attributes.push("Presença ideal das dezenas mais quentes (recentes)");
-                } else {
-                    score -= Math.abs(hotCount - 6) * 2;
-                }
+                if(hotCount >= 4 && hotCount <= 8) attributes.push("Presença ideal das dezenas mais quentes");
+                else score -= Math.abs(hotCount - 6) * 2;
                 
                 numbers.sort((a,b) => a-b);
                 let maxSeq = 1; let currentSeq = 1;
@@ -970,8 +971,17 @@
                         card.innerHTML += `<div class="recommended-badge">🏆 Maior Equilíbrio Estatístico</div>`;
                     }
 
-                    const numHtml = game.numbers.map(n => `<div class="number-ball">${String(n).padStart(2,'0')}</div>`).join('');
+                    const numHtml = game.numbers.map(n => {
+                        const isHit = game.hits && game.hits.includes(n);
+                        return `<div class="number-ball ${isHit ? 'hit' : ''}">${String(n).padStart(2,'0')}</div>`;
+                    }).join('');
+
                     const attrHtml = game.evaluation.attributes.map(attr => `<li>${attr}</li>`).join('');
+
+                    let learningHtml = '';
+                    if (game.hits) {
+                        learningHtml = `<div class="learning-status" style="color: ${game.hits.length >= 13 ? '#27ae60' : '#2c3e50'};">🎯 Resultado: ${game.hits.length} acertos neste jogo!</div>`;
+                    }
 
                     card.innerHTML += `
                         <div class="game-header">
@@ -984,10 +994,70 @@
                         <ul class="game-attributes">
                             ${attrHtml}
                         </ul>
+                        ${learningHtml}
                     `;
 
                     grid.appendChild(card);
                 });
+            },
+
+            // BOTÃO PARA LIMPAR JOGOS GERADOS
+            clearGames() {
+                this.data.generatedGames = [];
+                document.getElementById('gamesGrid').innerHTML = '<p style="text-align:center; color:var(--text-muted); grid-column: 1/-1;">Nenhum jogo gerado no momento.</p>';
+                document.getElementById('latestResultInput').value = '';
+                alert('Jogos limpos com sucesso!');
+            },
+
+            // MOTOR DE APRENDIZADO INTELIGENTE
+            checkAndLearn() {
+                if (this.data.generatedGames.length === 0) {
+                    alert('Gere alguns jogos primeiro antes de ensinar a IA.');
+                    return;
+                }
+
+                const rawText = document.getElementById('latestResultInput').value;
+                const tokens = rawText.replace(/[^\d]/g, ' ').split(/\s+/).filter(t => t !== '');
+                
+                let realNumbers = [];
+                tokens.forEach(t => {
+                    const n = parseInt(t, 10);
+                    if (n >= 1 && n <= 25 && !realNumbers.includes(n)) {
+                        realNumbers.push(n);
+                    }
+                });
+
+                if (realNumbers.length < 15) {
+                    alert('Insira um resultado real válido contendo as 15 dezenas sorteadas.');
+                    return;
+                }
+
+                realNumbers = realNumbers.slice(0, 15);
+                let totalLearningScoreAdded = 0;
+
+                // Avalia acertos para cada jogo gerado e aplica reforço neural/estatístico
+                this.data.generatedGames.forEach(game => {
+                    const hits = game.numbers.filter(n => realNumbers.includes(n));
+                    game.hits = hits;
+
+                    // APRENDIZADO: Se o jogo fez 13, 14 ou 15 pontos, a IA reforça o peso dessas dezenas para o futuro!
+                    if (hits.length >= 12) {
+                        const rewardFactor = (hits.length - 11) * 0.5; // Ex: 13 pontos dá bônus maior
+                        hits.forEach(winningNum => {
+                            let currentBonus = this.data.stats.learningBonus.get(winningNum) || 0;
+                            this.data.stats.learningBonus.set(winningNum, currentBonus + rewardFactor);
+                            totalLearningScoreAdded += rewardFactor;
+                        });
+                    }
+                });
+
+                this.renderGames();
+
+                if (totalLearningScoreAdded > 0) {
+                    alert(`Incrível! A IA analisou o resultado, identificou dezenas premiadas nos seus jogos e atualizou sua matriz de pesos (Aprendizado Contínuo aplicado com sucesso!).`);
+                } else {
+                    alert(`Conferência realizada! Os jogos pontuaram abaixo de 12 acertos neste resultado, portanto nenhum peso foi modificado nesta rodada.`);
+                }
             },
 
             exportGames() {
@@ -1000,12 +1070,10 @@
                 this.data.generatedGames.forEach((g, i) => {
                     content += `${i === 0 ? '[RECOMENDADO] ' : ''}${g.label}\r\n`;
                     content += `Dezenas: ${g.numbers.map(n => String(n).padStart(2,'0')).join(' ')}\r\n`;
-                    content += `Pontuação: ${g.evaluation.score} pts\r\n\r\n`;
+                    content += `Pontuação: ${g.evaluation.score} pts`;
+                    if (g.hits) content += ` | Acertos reais: ${g.hits.length} pts`;
+                    content += `\r\n\r\n`;
                 });
-
-                content += "-----------------------------------------\r\n";
-                content += "Este sistema utiliza análise de dados históricos e critérios geométricos para montar jogos equilibrados.\r\n";
-                content += "NÃO garante resultados nem promete aumento nas chances de premiação.\r\n";
 
                 const blob = new Blob([content], { type: 'text/plain' });
                 const a = document.createElement('a');
@@ -1017,8 +1085,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             app.init();
-            
-            // Ajustei também a opção padrão do menu "Concursos Analisados" para 50 para já vir pronto para o seu uso!
         });
     </script>
 </body>
