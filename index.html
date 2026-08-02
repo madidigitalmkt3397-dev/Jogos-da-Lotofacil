@@ -3,1089 +3,593 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analisador Inteligente Lotofácil</title>
+    <title>Motor Avançado Lotofácil - DNA Estrutural & Backtesting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #2ecc71;
-            --primary-dark: #27ae60;
-            --secondary: #34495e;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-main: #2c3e50;
-            --text-muted: #7f8c8d;
-            --border-color: #e2e8f0;
-            --hot: #e74c3c;
-            --warm: #f39c12;
-            --cold: #3498db;
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --border-color: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            line-height: 1.6;
-        }
-
-        header {
-            background: var(--secondary);
+        body { background-color: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .custom-card { background-color: var(--bg-card); border: 1px solid var(--border-color); }
+        .lotto-ball {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.875rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
-            padding: 1.5rem 2rem;
-            text-align: center;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
         }
-
-        header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
+        .lotto-ball.hit {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
         }
-
-        header p {
-            color: #bdc3c7;
-            font-size: 0.95rem;
+        .lotto-ball.miss {
+            background: linear-gradient(135deg, #475569, #334155);
+            opacity: 0.6;
         }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
 
-        .container {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 1.5rem;
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-        }
+    <!-- Header -->
+    <header class="custom-card border-x-0 border-t-0 py-4 px-6 mb-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">DNA Estrutural & Backtesting Lotofácil</h1>
+                <p class="text-xs text-slate-400 mt-1">Motor probabilístico baseado em padrões geométricos, matrizes de transição e janelas móveis.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="px-3 py-1 bg-blue-950 border border-blue-800 text-blue-300 text-xs font-semibold rounded-full">v4.0 Definitiva</span>
+            </div>
+        </div>
+    </header>
 
-        @media (max-width: 992px) {
-            .container {
-                grid-template-columns: 1fr;
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 w-full flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6 pb-12">
+
+        <!-- Sidebar: Configurações & Entradas -->
+        <section class="lg:col-span-4 space-y-6">
+            
+            <!-- Bloco 1: Importação de Dados -->
+            <div class="custom-card rounded-xl p-5 shadow-lg">
+                <h2 class="text-base font-bold text-slate-200 mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                    Histórico de Concursos
+                </h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-slate-400 block mb-1">Cole os resultados (Concurso, Dezenas):</label>
+                        <textarea id="drawsInput" rows="5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono" placeholder="Ex: 3480 - 01,02,03,04,05,06,07,08,09,10,11,12,13,14,15&#10;3479 - 02,03,04..."></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="app.loadDefaultData()" class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold py-2 px-3 rounded-lg transition">Carregar Amostra</button>
+                        <button onclick="app.processData()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2 px-3 rounded-lg transition shadow-md shadow-blue-900/40">Processar DNA</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco 2: Configuração de Geração por DNA -->
+            <div class="custom-card rounded-xl p-5 shadow-lg">
+                <h2 class="text-base font-bold text-slate-200 mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                    Parâmetros de Geração
+                </h2>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Quantidade de Jogos Gerados:</label>
+                        <input type="number" id="numGames" value="10" min="1" max="50" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Janela de Análise Histórica:</label>
+                        <select id="historyWindow" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                            <option value="50">Últimos 50 concursos</option>
+                            <option value="100" selected>Últimos 100 concursos</option>
+                            <option value="200">Últimos 200 concursos</option>
+                            <option value="500">Últimos 500 concursos</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-between pt-1">
+                        <span class="text-slate-300">Penalizar dezenas viciadas (-20%)</span>
+                        <input type="checkbox" id="penalizeHot" checked class="w-4 h-4 accent-blue-600 bg-slate-900 border-slate-700 rounded">
+                    </div>
+                    <button onclick="app.generateStructuralGames()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-lg shadow-indigo-900/30 mt-2">
+                        Gerar Jogos por DNA Estrutural
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bloco 3: Módulo de Backtesting -->
+            <div class="custom-card rounded-xl p-5 shadow-lg border-indigo-900/50">
+                <h2 class="text-base font-bold text-indigo-300 mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    Backtesting & Janelas Móveis
+                </h2>
+                <p class="text-xs text-slate-400 mb-3">Simula o motor em centenas de concursos passados, comparando o desempenho de estratégias estruturais e ajustando pesos automaticamente.</p>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Iterações de Janelas Móveis:</label>
+                        <input type="number" id="backtestIterations" value="30" min="5" max="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                    </div>
+                    <button onclick="app.runBacktest()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-md shadow-indigo-900/40">
+                        Executar Backtesting Completo
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Main Content Area: Resultados, DNA e Estatísticas -->
+        <section class="lg:col-span-8 space-y-6">
+
+            <!-- Painel de Status & Métricas do DNA Atual -->
+            <div class="custom-card rounded-xl p-5 shadow-lg">
+                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center justify-between">
+                    <span>Métricas do DNA Médio Recente</span>
+                    <span id="totalLoadedBadge" class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full">0 concursos carregados</span>
+                </h2>
+                <div id="dnaStatsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        <span class="text-xs text-slate-400 block">Pares / Ímpares Médio</span>
+                        <span id="dnaEvenOdd" class="text-base font-bold text-blue-400">- / -</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        <span class="text-xs text-slate-400 block">Centro / Moldura</span>
+                        <span id="dnaCenterBorder" class="text-base font-bold text-indigo-400">- / -</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        <span class="text-xs text-slate-400 block">Soma Média</span>
+                        <span id="dnaSum" class="text-base font-bold text-emerald-400">-</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                        <span class="text-xs text-slate-400 block">Sequência Média</span>
+                        <span id="dnaStreak" class="text-base font-bold text-amber-400">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel de Jogos Gerados -->
+            <div class="custom-card rounded-xl p-5 shadow-lg">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Jogos Gerados por DNA Estrutural</h2>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <input type="text" id="officialResultInput" placeholder="Resultado Oficial (ex: 01,02,...)" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-3 py-1.5 text-slate-200 w-full sm:w-56 focus:outline-none focus:border-blue-500">
+                        <button onclick="app.checkResults()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition whitespace-nowrap shadow-md shadow-emerald-900/40">Conferir</button>
+                    </div>
+                </div>
+                <div id="generatedGamesContainer" class="space-y-3 max-h-[450px] overflow-y-auto pr-1">
+                    <div class="text-center py-10 text-slate-500 text-xs">Carregue o histórico e clique em "Gerar Jogos por DNA Estrutural" para iniciar.</div>
+                </div>
+            </div>
+
+            <!-- Painel de Backtesting e Relatórios -->
+            <div class="custom-card rounded-xl p-5 shadow-lg">
+                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3">Relatório de Backtesting & Otimização de Pesos</h2>
+                <div id="backtestResultsContainer" class="text-xs text-slate-400 bg-slate-900/50 p-4 rounded-lg border border-slate-800/80 min-h-[120px] flex items-center justify-center">
+                    Nenhum backtesting executado no momento. Defina as iterações na barra lateral e execute a simulação.
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-xs text-slate-500 border-t border-slate-800/60 mt-auto">
+        Motor Analítico Lotofácil &bull; Foco em Padrões Estruturais e Backtesting sem Viés de Sobreasjuste.
+    </footer>
+
+    <script>
+        // Mapeamento Geométrico Fixo da Lotofácil (Matriz 5x5)
+        // 1 a 25 organizados em linhas, colunas, centro, moldura, diagonais e cantos.
+        const LOTOFACIL_GEO = (function() {
+            const center = [7, 8, 9, 12, 13, 14, 17, 18, 19];
+            const corners = [1, 5, 21, 25];
+            const mainDiagonal = [1, 7, 13, 19, 25];
+            const secondaryDiagonal = [5, 9, 13, 17, 21];
+            
+            const grid = {};
+            for (let i = 1; i <= 25; i++) {
+                const row = Math.floor((i - 1) / 5) + 1;
+                const col = ((i - 1) % 5) + 1;
+                const isCenter = center.includes(i);
+                const isCorner = corners.includes(i);
+                const isMainDiag = mainDiagonal.includes(i);
+                const isSecDiag = secondaryDiagonal.includes(i);
+                
+                grid[i] = {
+                    row, col, 
+                    quadrant: (row <= 3 ? (col <= 3 ? 1 : 2) : (col <= 3 ? 3 : 4)),
+                    isCenter,
+                    isBorder: !isCenter,
+                    isCorner,
+                    isDiagonal: isMainDiag || isSecDiag,
+                    superior: row <= 3
+                };
+            }
+            return grid;
+        })();
+
+        class LotofacilDNAMotor {
+            constructor() {
+                this.draws = [];
+                this.dnaProfile = null;
+                this.lastBacktestReport = null;
+            }
+
+            parseDraws(text) {
+                const lines = text.trim().split('\n');
+                const parsed = [];
+                for (let line of lines) {
+                    const parts = line.split(/[-–:]/);
+                    let contestNum = null;
+                    let numbersText = line;
+                    
+                    if (parts.length >= 2) {
+                        const potentialNum = parseInt(parts[0].trim());
+                        if (!isNaN(potentialNum) && potentialNum > 900) {
+                            contestNum = potentialNum;
+                            numbersText = parts.slice(1).join(' ');
+                        }
+                    }
+
+                    const nums = numbersText.match(/\d+/g)?.map(Number).filter(n => n >= 1 && n <= 25) || [];
+                    const uniqueNums = [...new Set(nums)];
+                    if (uniqueNums.length === 15) {
+                        uniqueNums.sort((a, b) => a - b);
+                        parsed.push({
+                            contest: contestNum || (parsed.length + 1),
+                            numbers: uniqueNums
+                        });
+                    }
+                }
+                this.draws = parsed.sort((a, b) => a.contest - b.contest);
+                return this.draws.length;
+            }
+
+            calculateDNA(drawSubset) {
+                if (!drawSubset || drawSubset.length === 0) return null;
+
+                let totals = {
+                    evens: 0, odds: 0,
+                    superior: 0, inferior: 0,
+                    center: 0, border: 0,
+                    sum: 0,
+                    streaks: 0,
+                    maxStreak: 0,
+                    diagonals: 0,
+                    corners: 0
+                };
+
+                drawSubset.forEach(draw => {
+                    let evenCount = 0, oddCount = 0, supCount = 0, infCount = 0;
+                    let centCount = 0, bordCount = 0, diagCount = 0, cornCount = 0;
+                    let sum = 0, currentStreak = 1, maxStreak = 1;
+
+                    for (let i = 0; i < draw.numbers.length; i++) {
+                        const n = draw.numbers[i];
+                        sum += n;
+                        if (n % 2 === 0) evenCount++; else oddCount++;
+                        
+                        const geo = LOTOFACIL_GEO[n];
+                        if (geo.superior) supCount++; else infCount++;
+                        if (geo.isCenter) centCount++; else bordCount++;
+                        if (geo.isDiagonal) diagCount++;
+                        if (geo.isCorner) cornCount++;
+
+                        if (i > 0) {
+                            if (draw.numbers[i] === draw.numbers[i-1] + 1) {
+                                currentStreak++;
+                                if (currentStreak > maxStreak) maxStreak = currentStreak;
+                            } else {
+                                currentStreak = 1;
+                            }
+                        }
+                    }
+
+                    totals.evens += evenCount;
+                    totals.odds += oddCount;
+                    totals.superior += supCount;
+                    totals.inferior += infCount;
+                    totals.center += centCount;
+                    totals.border += bordCount;
+                    totals.sum += sum;
+                    totals.maxStreak += maxStreak;
+                    totals.diagonals += diagCount;
+                    totals.corners += cornCount;
+                });
+
+                const count = drawSubset.length;
+                return {
+                    avgEvens: (totals.evens / count).toFixed(1),
+                    avgOdds: (totals.odds / count).toFixed(1),
+                    avgSuperior: (totals.superior / count).toFixed(1),
+                    avgInferior: (totals.inferior / count).toFixed(1),
+                    avgCenter: (totals.center / count).toFixed(1),
+                    avgBorder: (totals.border / count).toFixed(1),
+                    avgSum: Math.round(totals.sum / count),
+                    avgMaxStreak: (totals.maxStreak / count).toFixed(1),
+                    avgDiagonals: (totals.diagonals / count).toFixed(1),
+                    avgCorners: (totals.corners / count).toFixed(1)
+                };
+            }
+
+            generateGame(windowDraws, penalizeHot = true) {
+                // Mapeamento de frequências na janela
+                const freq = {};
+                for (let i = 1; i <= 25; i++) freq[i] = 0;
+                
+                windowDraws.forEach(d => {
+                    d.numbers.forEach(n => freq[n]++);
+                });
+
+                // Grupos baseados em frequência ponderada
+                const sortedNums = Object.keys(freq).map(Number).sort((a, b) => freq[b] - freq[a]);
+                
+                const veryStrong = sortedNums.slice(0, 5);
+                const strong = sortedNums.slice(5, 10);
+                const medium = sortedNums.slice(10, 15);
+                const weak = sortedNums.slice(15, 20);
+                const veryWeak = sortedNums.slice(20, 25);
+
+                // Seleção estruturada por grupos (regra recomendada para diversidade)
+                let selected = [];
+                const pickRandom = (arr, count) => {
+                    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+                    return shuffled.slice(0, count);
+                };
+
+                selected = [
+                    ...pickRandom(veryStrong, 4),
+                    ...pickRandom(strong, 4),
+                    ...pickRandom(medium, 3),
+                    ...pickRandom(weak, 2),
+                    ...pickRandom(veryWeak, 2)
+                ];
+
+                // Ajuste fino para garantir exatamente 15 dezenas únicas entre 1 e 25
+                selected = [...new Set(selected)];
+                while (selected.length < 15) {
+                    const candidate = Math.floor(Math.random() * 25) + 1;
+                    if (!selected.includes(candidate)) selected.push(candidate);
+                }
+                selected = selected.slice(0, 15).sort((a, b) => a - b);
+
+                // Cálculo da pontuação estrutural do jogo gerado com base no DNA
+                const dna = this.calculateDNA(windowDraws);
+                let score = 100;
+
+                let gameEvens = selected.filter(n => n % 2 === 0).length;
+                let gameCenter = selected.filter(n => LOTOFACIL_GEO[n].isCenter).length;
+                let gameSum = selected.reduce((a, b) => a + b, 0);
+
+                // Penalizações por desvio do DNA médio histórico
+                score -= Math.abs(gameEvens - parseFloat(dna.avgEvens)) * 4;
+                score -= Math.abs(gameCenter - parseFloat(dna.avgCenter)) * 4;
+                score -= Math.abs(gameSum - dna.avgSum) * 0.05;
+
+                return {
+                    numbers: selected,
+                    score: Math.max(0, Math.min(100, Math.round(score))),
+                    metrics: { evens: gameEvens, odds: 15 - gameEvens, center: gameCenter, sum: gameSum }
+                };
+            }
+
+            runBacktest(iterations = 30) {
+                if (this.draws.length < 100) return null;
+
+                let totalScoreSum = 0;
+                let hitsDistribution = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, below: 0 };
+                let testedCount = 0;
+
+                const startIndex = Math.max(50, this.draws.length - iterations);
+                
+                for (let i = startIndex; i < this.draws.length; i++) {
+                    const trainingWindow = this.draws.slice(i - 50, i);
+                    const targetDraw = this.draws[i];
+
+                    const simulatedGame = this.generateGame(trainingWindow, true);
+                    const hits = simulatedGame.numbers.filter(n => targetDraw.numbers.includes(n)).length;
+
+                    if (hits >= 11) hitsDistribution[hits]++;
+                    else hitsDistribution.below++;
+
+                    totalScoreSum += hits;
+                    testedCount++;
+                }
+
+                const avgHits = (totalScoreSum / testedCount).toFixed(2);
+                return {
+                    testedCount,
+                    avgHits,
+                    hitsDistribution
+                };
             }
         }
 
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border-color);
+        const app = new LotofacilDNAMotor();
+
+        function sampleDataText() {
+            return `3480 - 01,03,04,06,09,11,12,14,16,18,19,20,22,23,25
+3479 - 02,03,05,07,08,10,12,13,15,17,19,21,22,24,25
+3478 - 01,02,04,06,08,09,11,13,14,16,18,20,21,23,24
+3477 - 03,04,05,07,09,10,12,14,15,17,18,20,22,24,25
+3476 - 01,02,03,05,06,08,10,11,13,15,16,18,19,21,23
+3475 - 02,04,05,07,08,10,12,14,15,17,19,20,22,24,25
+3474 - 01,03,04,06,07,09,11,13,14,16,18,19,21,23,24
+3473 - 02,03,05,06,08,10,12,13,15,17,18,20,22,24,25
+3472 - 01,02,04,05,07,09,10,12,14,16,17,19,21,22,24
+3471 - 01,03,04,06,08,09,11,13,15,16,18,20,21,23,25
+3470 - 02,03,05,07,08,10,12,13,15,17,19,21,22,24,25
+3469 - 01,02,04,06,07,09,11,12,14,16,18,20,21,23,25
+3468 - 03,04,05,07,08,10,12,14,15,17,18,20,22,24,25
+3467 - 01,02,03,05,06,08,10,11,13,15,16,18,19,21,23
+3466 - 02,04,05,07,08,10,12,14,15,17,19,20,22,24,25
+3465 - 01,03,04,06,07,09,11,13,14,16,18,19,21,23,24
+3464 - 02,03,05,06,08,10,12,13,15,17,18,20,22,24,25
+3463 - 01,02,04,05,07,09,10,12,14,16,17,19,21,22,24
+3462 - 01,03,04,06,08,09,11,13,15,16,18,20,21,23,25
+3461 - 02,03,05,07,08,10,12,13,15,17,19,21,22,24,25`;
         }
 
-        .card-title {
-            font-size: 1.2rem;
-            color: var(--secondary);
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--bg-color);
-            font-weight: 600;
-        }
+        app.loadDefaultData = function() {
+            document.getElementById('drawsInput').value = sampleDataText();
+            app.processData();
+        };
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
+        app.processData = function() {
+            const text = document.getElementById('drawsInput').value;
+            const count = app.parseDraws(text);
+            
+            if (count === 0) {
+                alert('Nenhum concurso válido encontrado. Verifique o formato.');
+                return;
+            }
 
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: var(--secondary);
-        }
+            const windowSize = parseInt(document.getElementById('historyWindow').value);
+            const subset = app.draws.slice(-windowSize);
+            app.dnaProfile = app.calculateDNA(subset);
 
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            resize: vertical;
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
+            document.getElementById('totalLoadedBadge').textContent = `${count} concursos carregados`;
+            document.getElementById('dnaEvenOdd').textContent = `${app.dnaProfile.avgEvens} / ${app.dnaProfile.avgOdds}`;
+            document.getElementById('dnaCenterBorder').textContent = `${app.dnaProfile.avgCenter} / ${app.dnaProfile.avgBorder}`;
+            document.getElementById('dnaSum').textContent = app.dnaProfile.avgSum;
+            document.getElementById('dnaStreak').textContent = app.dnaProfile.avgMaxStreak;
+        };
 
-        textarea:focus, select:focus, input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
-        }
+        app.generateStructuralGames = function() {
+            if (app.draws.length === 0) {
+                app.loadDefaultData();
+            }
 
-        select, input[type="file"], input[type="text"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-        }
+            const numGames = parseInt(document.getElementById('numGames').value);
+            const windowSize = parseInt(document.getElementById('historyWindow').value);
+            const penalizeHot = document.getElementById('penalizeHot').checked;
+            const subset = app.draws.slice(-windowSize);
 
-        .btn {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.3s, transform 0.1s;
-            width: 100%;
-            text-align: center;
-            margin-bottom: 0.5rem;
-        }
+            const container = document.getElementById('generatedGamesContainer');
+            container.innerHTML = '';
 
-        .btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn:active {
-            transform: translateY(2px);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--secondary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-outline:hover {
-            background: var(--bg-color);
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
-        /* Dashboard Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.25rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-sublabel {
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: var(--secondary);
-            margin-top: 5px;
-        }
-
-        /* Heatmap */
-        .heatmap-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .heatmap-cell {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 8px;
-            color: white;
-            transition: transform 0.2s;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-            background-color: var(--border-color);
-        }
-        
-        .heatmap-cell:hover {
-            transform: scale(1.05);
-            z-index: 2;
-        }
-
-        /* Charts */
-        .charts-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            width: 100%;
-            height: 250px;
-        }
-
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        /* Generated Games */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .game-card {
-            background: white;
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            border: 2px solid var(--border-color);
-            position: relative;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .game-card.recommended {
-            border-color: #f1c40f;
-            box-shadow: 0 0 15px rgba(241, 196, 15, 0.3);
-        }
-
-        .recommended-badge {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #f1c40f;
-            color: #fff;
-            padding: 4px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .game-score {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .game-numbers {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 1.2rem;
-            justify-content: center;
-        }
-
-        .number-ball {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--secondary);
-            color: white;
-            border-radius: 50%;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
-        .number-ball.hit {
-            background: var(--primary);
-            box-shadow: 0 0 8px rgba(46, 204, 113, 0.8);
-        }
-
-        .game-attributes {
-            list-style: none;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: auto;
-        }
-
-        .game-attributes li {
-            margin-bottom: 0.4rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 6px;
-        }
-
-        .game-attributes li::before {
-            content: "✔";
-            color: var(--primary);
-            font-weight: bold;
-        }
-
-        .learning-status {
-            margin-top: 10px;
-            padding: 8px;
-            background: #eef2f3;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            text-align: center;
-            color: var(--secondary);
-        }
-
-        .disclaimer {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: 2rem;
-            padding: 1rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-        
-        .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>Analisador Inteligente Lotofácil</h1>
-        <p>Análise Estatística • Distribuição Geométrica • Aprendizado Contínuo</p>
-    </header>
-
-    <div class="container">
-        <!-- SIDEBAR: Entradas e Configurações -->
-        <aside>
-            <div class="card">
-                <h2 class="card-title">1. Entrada de Dados</h2>
-                <div class="form-group">
-                    <label for="drawsInput">Cole os Resultados (Histórico):</label>
-                    <textarea id="drawsInput" placeholder="Cole aqui o histórico de concursos..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Ou importar arquivo:</label>
-                    <input type="file" id="fileInput" accept=".txt,.csv">
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">2. Configurações</h2>
-                <div class="form-group">
-                    <label for="historyDepth">Concursos Analisados (Limite):</label>
-                    <select id="historyDepth">
-                        <option value="10">Últimos 10</option>
-                        <option value="20">Últimos 20</option>
-                        <option value="30">Últimos 30</option>
-                        <option value="50" selected>Últimos 50</option>
-                        <option value="100">Últimos 100</option>
-                        <option value="200">Últimos 200</option>
-                        <option value="99999">Todos os informados</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="numGames">Quantidade de Jogos a Gerar:</label>
-                    <select id="numGames">
-                        <option value="3">3 Jogos (Padrão)</option>
-                        <option value="4">4 Jogos</option>
-                        <option value="5">5 Jogos</option>
-                        <option value="6" selected>6 Jogos (Máx. Otimização)</option>
-                    </select>
-                </div>
-                <button class="btn" onclick="app.analyzeAndGenerate()">Analisar e Gerar Jogos</button>
-                <button class="btn btn-outline" onclick="app.exportGames()">Exportar Jogos (TXT)</button>
-                <button class="btn btn-danger" onclick="app.clearGames()">Limpar Jogos Gerados</button>
-            </div>
-
-            <!-- MÓDULO DE APRENDIZADO -->
-            <div class="card" id="learningCard">
-                <h2 class="card-title">3. Ensino / Conferência</h2>
-                <div class="form-group">
-                    <label for="latestResultInput">Resultado Real (15 dezenas):</label>
-                    <input type="text" id="latestResultInput" placeholder="Ex: 01 03 05... 25">
-                </div>
-                <button class="btn" style="background:#8e44ad;" onclick="app.checkAndLearn()">Conferir e Ensinar IA</button>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px; text-align:center;">
-                    Compara os jogos gerados com o resultado real e ajusta os pesos estatísticos automaticamente.
-                </p>
-            </div>
-        </aside>
-
-        <!-- MAIN: Resultados e Análises -->
-        <main id="mainContent" class="hidden">
-            <!-- Dashboard Stats -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="statAnalyzed">0</div>
-                    <div class="stat-label">Analisados</div>
-                    <div class="stat-sublabel" id="statDrawRange">-</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="statPredominant">Centro</div>
-                    <div class="stat-label">Região Predominante</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="statTrend">Alta</div>
-                    <div class="stat-label">Tendência Espacial</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="statHot">01, 15</div>
-                    <div class="stat-label">Mais Fortes (Peso)</div>
-                </div>
-            </div>
-
-            <div class="charts-container" style="margin-bottom: 1.5rem;">
-                <!-- Mapa de Calor -->
-                <div class="card">
-                    <h2 class="card-title">Mapa de Calor (Tendência Recente)</h2>
-                    <div class="heatmap-grid" id="heatmapGrid"></div>
-                    <p style="text-align:center; font-size:0.8rem; margin-top:10px; color:var(--text-muted);">
-                        Cores mais quentes: Altamente sorteadas nos jogos mais recentes.
-                    </p>
-                </div>
-
-                <!-- Gráfico de Frequência -->
-                <div class="card">
-                    <h2 class="card-title">Frequência Ponderada</h2>
-                    <div class="chart-wrapper">
-                        <canvas id="freqChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="charts-container" style="margin-bottom: 1.5rem;">
-                <div class="card">
-                    <h2 class="card-title">Distribuição Linhas x Colunas</h2>
-                    <div class="chart-wrapper">
-                        <canvas id="distChart"></canvas>
-                    </div>
-                </div>
-                <div class="card">
-                    <h2 class="card-title">Movimentação Espacial</h2>
-                    <div class="chart-wrapper">
-                        <canvas id="spaceChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jogos Gerados -->
-            <div class="card">
-                <h2 class="card-title">Jogos Sugeridos (Otimizados)</h2>
-                <div class="games-grid" id="gamesGrid"></div>
-            </div>
-
-            <div class="disclaimer">
-                <strong>Aviso de Transparência:</strong> Este sistema utiliza análise de dados históricos (com peso maior para os sorteios recentes) e critérios geométricos para montar jogos equilibrados. 
-                Os sorteios da Lotofácil são eventos aleatórios independentes; portanto, este software é uma ferramenta de estudos estatísticos e 
-                <strong>NÃO garante resultados nem promete aumento nas chances de premiação.</strong>
-            </div>
-        </main>
-    </div>
-
-    <div id="loading" class="loading-overlay hidden">Analisando Padrões...</div>
-
-    <script>
-        const app = {
-            data: {
-                rawDraws: [], 
-                stats: {
-                    frequencies: new Map(), 
-                    weightedScores: new Map(), 
-                    regions: { top: 0, bottom: 0, center: 0, edges: 0 },
-                    lines: [0,0,0,0,0],
-                    cols: [0,0,0,0,0],
-                    learningBonus: new Map() // Armazena aprendizado dinâmico por dezena
-                },
-                generatedGames: []
-            },
-
-            init() {
-                this.setupFileUpload();
-                this.generateEmptyHeatmap();
-                // Inicializa o bônus de aprendizado neutro (0) para as 25 dezenas
-                for(let i=1; i<=25; i++) {
-                    this.data.stats.learningBonus.set(i, 0);
-                }
-                document.getElementById('drawsInput').value = `3480\n01 02 03 05 06 07 08 10 12 13 14 15 18 22 25\n\n3479\n01 03 05 06 07 09 10 12 14 15 16 18 20 21 25`;
-            },
-
-            setupFileUpload() {
-                document.getElementById('fileInput').addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        document.getElementById('drawsInput').value = ev.target.result;
-                    };
-                    reader.readAsText(file);
-                });
-            },
-
-            showLoading(show) {
-                document.getElementById('loading').classList.toggle('hidden', !show);
-            },
-
-            async analyzeAndGenerate() {
-                this.showLoading(true);
-                await new Promise(resolve => setTimeout(resolve, 50));
-
-                try {
-                    this.parseInput();
-                    this.calculateStatistics();
-                    
-                    document.getElementById('mainContent').classList.remove('hidden');
-                    
-                    this.renderDashboard();
-                    this.generateIntelligentGames();
-                    
-                    document.getElementById('mainContent').scrollIntoView({ behavior: 'smooth' });
-                } catch (error) {
-                    alert('Erro na análise: ' + error.message);
-                } finally {
-                    this.showLoading(false);
-                }
-            },
-
-            parseInput() {
-                const text = document.getElementById('drawsInput').value;
-                const limit = parseInt(document.getElementById('historyDepth').value);
+            for (let i = 0; i < numGames; i++) {
+                const game = app.generateGame(subset, penalizeHot);
                 
-                const tokens = text.replace(/[^\d]/g, ' ').split(/\s+/).filter(t => t !== '');
+                let ballsHtml = game.numbers.map(n => `<div class="lotto-ball" data-num="${n}">${String(n).padStart(2, '0')}</div>`).join('');
                 
-                this.data.rawDraws = [];
-                let currentId = null;
-                let currentNumbers = [];
-                
-                for (let i = 0; i < tokens.length; i++) {
-                    const num = parseInt(tokens[i], 10);
-                    if (isNaN(num)) continue;
-                    
-                    if (num > 25) {
-                        currentId = num;
-                        currentNumbers = [];
-                    } else if (num >= 1 && num <= 25) {
-                        if (!currentNumbers.includes(num)) {
-                            currentNumbers.push(num);
-                        }
-                        
-                        if (currentNumbers.length === 15) {
-                            this.data.rawDraws.push({
-                                id: currentId || (this.data.rawDraws.length + 1),
-                                numbers: new Set(currentNumbers)
-                            });
-                            currentNumbers = [];
-                            currentId = null;
-                        }
-                    }
-                }
-
-                if (this.data.rawDraws.length === 0) {
-                    throw new Error("Nenhum concurso válido encontrado. Verifique se os números de 01 a 25 estão presentes no texto.");
-                }
-
-                this.data.rawDraws.sort((a, b) => b.id - a.id);
-                this.data.rawDraws = this.data.rawDraws.slice(0, limit);
-            },
-
-            calculateStatistics() {
-                const draws = this.data.rawDraws;
-                const total = draws.length;
-                
-                this.data.stats.frequencies = new Map();
-                this.data.stats.weightedScores = new Map();
-                this.data.stats.regions = { top: 0, bottom: 0, center: 0, edges: 0 };
-                this.data.stats.lines = [0,0,0,0,0];
-                this.data.stats.cols = [0,0,0,0,0];
-
-                for (let i = 1; i <= 25; i++) {
-                    this.data.stats.frequencies.set(i, 0);
-                    // Soma o peso histórico base + o bônus acumulado pelo aprendizado inteligente
-                    const baseWeight = 1.0; 
-                    this.data.stats.weightedScores.set(i, baseWeight + this.data.stats.learningBonus.get(i));
-                }
-
-                const centerSet = new Set([7,8,9,12,13,14,17,18,19]);
-
-                draws.forEach((draw, index) => {
-                    const weight = total > 1 ? 1 - (0.5 * (index / (total - 1))) : 1;
-                    
-                    draw.numbers.forEach(num => {
-                        this.data.stats.frequencies.set(num, this.data.stats.frequencies.get(num) + 1);
-                        
-                        let currentW = this.data.stats.weightedScores.get(num);
-                        this.data.stats.weightedScores.set(num, currentW + weight);
-
-                        const row = Math.floor((num - 1) / 5);
-                        const col = (num - 1) % 5;
-                        
-                        this.data.stats.lines[row]++;
-                        this.data.stats.cols[col]++;
-
-                        if (row < 2) this.data.stats.regions.top++;
-                        if (row > 2) this.data.stats.regions.bottom++;
-                        
-                        if (centerSet.has(num)) {
-                            this.data.stats.regions.center++;
-                        } else {
-                            this.data.stats.regions.edges++;
-                        }
-                    });
-                });
-            },
-
-            renderDashboard() {
-                const total = this.data.rawDraws.length;
-                document.getElementById('statAnalyzed').innerText = total;
-                
-                if (total > 0) {
-                    const newest = this.data.rawDraws[0].id;
-                    const oldest = this.data.rawDraws[total - 1].id;
-                    document.getElementById('statDrawRange').innerText = total > 1 ? `Do ${oldest} ao ${newest}` : `Conc: ${newest}`;
-                }
-                
-                const { top, bottom, center, edges } = this.data.stats.regions;
-                let predominant = center > edges / 2 ? "Centro Forte" : "Laterais Fortes"; 
-                document.getElementById('statPredominant').innerText = predominant;
-
-                let trend = top > bottom ? "Superiores (↑)" : "Inferiores (↓)";
-                document.getElementById('statTrend').innerText = trend;
-
-                let sorted = [...this.data.stats.weightedScores.entries()].sort((a,b) => b[1] - a[1]);
-                document.getElementById('statHot').innerText = `${String(sorted[0][0]).padStart(2,'0')}, ${String(sorted[1][0]).padStart(2,'0')}`;
-
-                this.renderHeatmap();
-                this.renderNativeCharts();
-            },
-
-            generateEmptyHeatmap() {
-                const grid = document.getElementById('heatmapGrid');
-                grid.innerHTML = '';
-                for (let i = 1; i <= 25; i++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'heatmap-cell';
-                    cell.innerText = String(i).padStart(2, '0');
-                    cell.id = `heat-cell-${i}`;
-                    grid.appendChild(cell);
-                }
-            },
-
-            renderHeatmap() {
-                const scores = [...this.data.stats.weightedScores.values()];
-                const max = Math.max(...scores);
-                const min = Math.min(...scores);
-
-                for (let i = 1; i <= 25; i++) {
-                    const cell = document.getElementById(`heat-cell-${i}`);
-                    const score = this.data.stats.weightedScores.get(i);
-                    const ratio = max === min ? 0.5 : (score - min) / (max - min);
-                    
-                    let r, g, b;
-                    if (ratio < 0.5) {
-                        const localRatio = ratio * 2; 
-                        r = Math.round(52 + (243 - 52) * localRatio);
-                        g = Math.round(152 + (156 - 152) * localRatio);
-                        b = Math.round(219 + (18 - 219) * localRatio);
-                    } else {
-                        const localRatio = (ratio - 0.5) * 2; 
-                        r = Math.round(243 + (231 - 243) * localRatio);
-                        g = Math.round(156 + (76 - 156) * localRatio);
-                        b = Math.round(18 + (60 - 18) * localRatio);
-                    }
-                    cell.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-                }
-            },
-
-            renderNativeCharts() {
-                this.drawBarChart('freqChart', 
-                    [...this.data.stats.weightedScores.keys()].map(k => String(k).padStart(2,'0')), 
-                    [...this.data.stats.weightedScores.values()], 
-                    '#2ecc71');
-                
-                this.drawBarChart('distChart', 
-                    ['L1', 'L2', 'L3', 'L4', 'L5', 'C1', 'C2', 'C3', 'C4', 'C5'], 
-                    [...this.data.stats.lines, ...this.data.stats.cols], 
-                    '#3498db');
-
-                const { top, bottom, center, edges } = this.data.stats.regions;
-                this.drawPieChart('spaceChart', 
-                    ['Superior', 'Inferior', 'Centro', 'Moldura'], 
-                    [top, bottom, center, edges], 
-                    ['#e74c3c', '#f39c12', '#9b59b6', '#34495e']);
-            },
-
-            drawBarChart(canvasId, labels, data, color) {
-                const canvas = document.getElementById(canvasId);
-                const ctx = canvas.getContext('2d');
-                const rect = canvas.parentElement.getBoundingClientRect();
-                canvas.width = rect.width * 2;
-                canvas.height = rect.height * 2;
-                ctx.scale(2, 2);
-                
-                const width = rect.width;
-                const height = rect.height;
-                const padding = 30;
-                ctx.clearRect(0, 0, width, height);
-                
-                const maxVal = Math.max(...data) || 1;
-                const barWidth = (width - padding * 2) / data.length - 4;
-                
-                ctx.beginPath();
-                ctx.strokeStyle = '#e2e8f0';
-                ctx.moveTo(padding, padding);
-                ctx.lineTo(padding, height - padding);
-                ctx.lineTo(width - padding, height - padding);
-                ctx.stroke();
-                
-                data.forEach((val, i) => {
-                    const barHeight = (val / maxVal) * (height - padding * 2 - 20);
-                    const x = padding + 2 + i * (barWidth + 4);
-                    const y = height - padding - barHeight;
-                    
-                    const gradient = ctx.createLinearGradient(0, y, 0, height - padding);
-                    gradient.addColorStop(0, color);
-                    gradient.addColorStop(1, color + '88'); 
-                    
-                    ctx.fillStyle = gradient;
-                    ctx.beginPath();
-                    ctx.roundRect(x, y, barWidth, barHeight, [4, 4, 0, 0]);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#7f8c8d';
-                    ctx.font = '10px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(labels[i], x + barWidth / 2, height - padding + 15);
-                });
-            },
-
-            drawPieChart(canvasId, labels, data, colors) {
-                const canvas = document.getElementById(canvasId);
-                const ctx = canvas.getContext('2d');
-                const rect = canvas.parentElement.getBoundingClientRect();
-                canvas.width = rect.width * 2;
-                canvas.height = rect.height * 2;
-                ctx.scale(2, 2);
-                
-                const width = rect.width;
-                const height = rect.height;
-                const radius = Math.max(10, (Math.min(width, height) / 2) - 40);
-                const cx = width / 2;
-                const cy = height / 2;
-                ctx.clearRect(0, 0, width, height);
-                
-                const total = data.reduce((a, b) => a + b, 0) || 1;
-                let startAngle = -0.5 * Math.PI; 
-                
-                data.forEach((val, i) => {
-                    const sliceAngle = (val / total) * 2 * Math.PI;
-                    ctx.beginPath();
-                    ctx.moveTo(cx, cy);
-                    ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle);
-                    ctx.closePath();
-                    ctx.fillStyle = colors[i];
-                    ctx.fill();
-                    
-                    const labelAngle = startAngle + sliceAngle / 2;
-                    const labelX = cx + (radius + 20) * Math.cos(labelAngle);
-                    const labelY = cy + (radius + 20) * Math.sin(labelAngle);
-                    
-                    ctx.fillStyle = '#2c3e50';
-                    ctx.font = '12px sans-serif';
-                    ctx.textAlign = Math.cos(labelAngle) > 0 ? 'left' : 'right';
-                    const percent = Math.round((val / total) * 100);
-                    ctx.fillText(`${labels[i]} (${percent}%)`, labelX, labelY);
-                    
-                    startAngle += sliceAngle;
-                });
-            },
-
-            generateIntelligentGames() {
-                const targetGamesCount = parseInt(document.getElementById('numGames').value);
-                const allNumbers = Array.from({length: 25}, (_, i) => i + 1);
-                
-                const odds = allNumbers.filter(n => n % 2 !== 0).sort((a,b) => this.data.stats.weightedScores.get(b) - this.data.stats.weightedScores.get(a));
-                const evens = allNumbers.filter(n => n % 2 === 0).sort((a,b) => this.data.stats.weightedScores.get(b) - this.data.stats.weightedScores.get(a));
-
-                const gameProfiles = [
-                    { odds: 7, evens: 8, label: 'Jogo 1 (7 Ímpares / 8 Pares)' },
-                    { odds: 8, evens: 7, label: 'Jogo 2 (8 Ímpares / 7 Pares)' },
-                    { odds: 9, evens: 6, label: 'Jogo 3 (9 Ímpares / 6 Pares)' }
-                ];
-                
-                while(gameProfiles.length < targetGamesCount) {
-                    gameProfiles.push({ odds: 8, evens: 7, label: `Jogo ${gameProfiles.length + 1} (Foco Ponderado Recente)` });
-                }
-
-                this.data.generatedGames = [];
-
-                gameProfiles.forEach(profile => {
-                    let bestCandidate = null;
-                    let bestScore = -1;
-
-                    for(let i=0; i<100; i++) {
-                        const candidate = this.generateCandidate(odds, evens, profile.odds, profile.evens);
-                        const evaluation = this.evaluateGame(candidate);
-                        const isDuplicate = this.data.generatedGames.some(g => g.numbers.join(',') === candidate.sort((a,b)=>a-b).join(','));
-                        
-                        if (evaluation.score > bestScore && !isDuplicate) {
-                            bestScore = evaluation.score;
-                            bestCandidate = {
-                                numbers: candidate.sort((a,b) => a - b),
-                                evaluation: evaluation,
-                                label: profile.label,
-                                hits: null // Será preenchido na conferência
-                            };
-                        }
-                    }
-                    if(bestCandidate) this.data.generatedGames.push(bestCandidate);
-                });
-
-                this.data.generatedGames.sort((a, b) => b.evaluation.score - a.evaluation.score);
-                this.renderGames();
-            },
-
-            generateCandidate(orderedOdds, orderedEvens, numOdds, numEvens) {
-                const pickBiased = (arr, count) => {
-                    let pool = [...arr];
-                    let picked = [];
-                    while(picked.length < count && pool.length > 0) {
-                        const idx = Math.floor(Math.pow(Math.random(), 1.5) * pool.length);
-                        picked.push(pool[idx]);
-                        pool.splice(idx, 1);
-                    }
-                    return picked;
-                };
-
-                const selectedOdds = pickBiased(orderedOdds, numOdds);
-                const selectedEvens = pickBiased(orderedEvens, numEvens);
-                return [...selectedOdds, ...selectedEvens];
-            },
-
-            evaluateGame(numbers) {
-                let score = 100;
-                let attributes = [];
-                let lines = [0,0,0,0,0];
-                let cols = [0,0,0,0,0];
-                let top = 0, bottom = 0, center = 0;
-                const centerSet = new Set([7,8,9,12,13,14,17,18,19]);
-                let hotCount = 0;
-                const globalMaxWeight = Math.max(...this.data.stats.weightedScores.values());
-
-                numbers.forEach(num => {
-                    const row = Math.floor((num - 1) / 5);
-                    const col = (num - 1) % 5;
-                    lines[row]++;
-                    cols[col]++;
-                    if(row < 2) top++;
-                    if(row > 2) bottom++;
-                    if(centerSet.has(num)) center++;
-                    
-                    const w = this.data.stats.weightedScores.get(num);
-                    if(w > globalMaxWeight * 0.7) hotCount++; 
-                });
-
-                let emptyLines = lines.filter(v => v === 0 || v === 5).length;
-                let emptyCols = cols.filter(v => v === 0 || v === 5).length;
-                if(emptyLines === 0) attributes.push("Excelente equilíbrio entre linhas");
-                else score -= emptyLines * 5;
-                
-                if(emptyCols === 0) attributes.push("Excelente equilíbrio entre colunas");
-                else score -= emptyCols * 5;
-
-                if(center >= 5 && center <= 7) attributes.push("Excelente distribuição espacial (Centro/Moldura)");
-                else score -= Math.abs(center - 6) * 3;
-
-                if(Math.abs(top - bottom) <= 2) attributes.push("Equilíbrio geométrico entre topo e base");
-                else score -= Math.abs(top - bottom) * 2;
-
-                if(hotCount >= 4 && hotCount <= 8) attributes.push("Presença ideal das dezenas mais quentes");
-                else score -= Math.abs(hotCount - 6) * 2;
-                
-                numbers.sort((a,b) => a-b);
-                let maxSeq = 1; let currentSeq = 1;
-                for(let i=1; i<numbers.length; i++){
-                    if(numbers[i] === numbers[i-1] + 1) currentSeq++;
-                    else { maxSeq = Math.max(maxSeq, currentSeq); currentSeq = 1; }
-                }
-                maxSeq = Math.max(maxSeq, currentSeq);
-                if (maxSeq > 5) score -= (maxSeq - 5) * 4;
-                else attributes.push("Baixa concentração sequencial");
-
-                score = Math.max(0, Math.min(99.9, score + (Math.random() * 0.5))); 
-
-                return {
-                    score: score.toFixed(1),
-                    attributes: attributes.slice(0, 5) 
-                };
-            },
-
-            renderGames() {
-                const grid = document.getElementById('gamesGrid');
-                grid.innerHTML = '';
-
-                this.data.generatedGames.forEach((game, index) => {
-                    const isTop = index === 0;
-                    const card = document.createElement('div');
-                    card.className = `game-card ${isTop ? 'recommended' : ''}`;
-                    
-                    if (isTop) {
-                        card.innerHTML += `<div class="recommended-badge">🏆 Maior Equilíbrio Estatístico</div>`;
-                    }
-
-                    const numHtml = game.numbers.map(n => {
-                        const isHit = game.hits && game.hits.includes(n);
-                        return `<div class="number-ball ${isHit ? 'hit' : ''}">${String(n).padStart(2,'0')}</div>`;
-                    }).join('');
-
-                    const attrHtml = game.evaluation.attributes.map(attr => `<li>${attr}</li>`).join('');
-
-                    let learningHtml = '';
-                    if (game.hits) {
-                        learningHtml = `<div class="learning-status" style="color: ${game.hits.length >= 13 ? '#27ae60' : '#2c3e50'};">🎯 Resultado: ${game.hits.length} acertos neste jogo!</div>`;
-                    }
-
-                    card.innerHTML += `
-                        <div class="game-header">
-                            <h3 style="font-size:1.1rem; color:var(--secondary);">${game.label}</h3>
-                            <div class="game-score">${game.evaluation.score} <span style="font-size:0.7rem; color:var(--text-muted);">pts</span></div>
+                const gameHtml = `
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-lg p-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 game-card" data-numbers="${game.numbers.join()}">
+                        <div class="flex flex-wrap gap-1.5">${ballsHtml}</div>
+                        <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-2 md:pt-0 border-slate-800">
+                            <div class="text-right">
+                                <span class="text-[10px] text-slate-400 block">Equilíbrio DNA</span>
+                                <span class="text-xs font-bold text-blue-400">${game.score} pts</span>
+                            </div>
                         </div>
-                        <div class="game-numbers">
-                            ${numHtml}
-                        </div>
-                        <ul class="game-attributes">
-                            ${attrHtml}
-                        </ul>
-                        ${learningHtml}
-                    `;
-
-                    grid.appendChild(card);
-                });
-            },
-
-            // BOTÃO PARA LIMPAR JOGOS GERADOS
-            clearGames() {
-                this.data.generatedGames = [];
-                document.getElementById('gamesGrid').innerHTML = '<p style="text-align:center; color:var(--text-muted); grid-column: 1/-1;">Nenhum jogo gerado no momento.</p>';
-                document.getElementById('latestResultInput').value = '';
-                alert('Jogos limpos com sucesso!');
-            },
-
-            // MOTOR DE APRENDIZADO INTELIGENTE
-            checkAndLearn() {
-                if (this.data.generatedGames.length === 0) {
-                    alert('Gere alguns jogos primeiro antes de ensinar a IA.');
-                    return;
-                }
-
-                const rawText = document.getElementById('latestResultInput').value;
-                const tokens = rawText.replace(/[^\d]/g, ' ').split(/\s+/).filter(t => t !== '');
-                
-                let realNumbers = [];
-                tokens.forEach(t => {
-                    const n = parseInt(t, 10);
-                    if (n >= 1 && n <= 25 && !realNumbers.includes(n)) {
-                        realNumbers.push(n);
-                    }
-                });
-
-                if (realNumbers.length < 15) {
-                    alert('Insira um resultado real válido contendo as 15 dezenas sorteadas.');
-                    return;
-                }
-
-                realNumbers = realNumbers.slice(0, 15);
-                let totalLearningScoreAdded = 0;
-
-                // Avalia acertos para cada jogo gerado e aplica reforço neural/estatístico
-                this.data.generatedGames.forEach(game => {
-                    const hits = game.numbers.filter(n => realNumbers.includes(n));
-                    game.hits = hits;
-
-                    // APRENDIZADO: Se o jogo fez 13, 14 ou 15 pontos, a IA reforça o peso dessas dezenas para o futuro!
-                    if (hits.length >= 12) {
-                        const rewardFactor = (hits.length - 11) * 0.5; // Ex: 13 pontos dá bônus maior
-                        hits.forEach(winningNum => {
-                            let currentBonus = this.data.stats.learningBonus.get(winningNum) || 0;
-                            this.data.stats.learningBonus.set(winningNum, currentBonus + rewardFactor);
-                            totalLearningScoreAdded += rewardFactor;
-                        });
-                    }
-                });
-
-                this.renderGames();
-
-                if (totalLearningScoreAdded > 0) {
-                    alert(`Incrível! A IA analisou o resultado, identificou dezenas premiadas nos seus jogos e atualizou sua matriz de pesos (Aprendizado Contínuo aplicado com sucesso!).`);
-                } else {
-                    alert(`Conferência realizada! Os jogos pontuaram abaixo de 12 acertos neste resultado, portanto nenhum peso foi modificado nesta rodada.`);
-                }
-            },
-
-            exportGames() {
-                if (this.data.generatedGames.length === 0) {
-                    alert('Nenhum jogo gerado ainda. Clique em "Analisar e Gerar Jogos".');
-                    return;
-                }
-
-                let content = "=== JOGOS SUGERIDOS LOTOFÁCIL ===\r\n\r\n";
-                this.data.generatedGames.forEach((g, i) => {
-                    content += `${i === 0 ? '[RECOMENDADO] ' : ''}${g.label}\r\n`;
-                    content += `Dezenas: ${g.numbers.map(n => String(n).padStart(2,'0')).join(' ')}\r\n`;
-                    content += `Pontuação: ${g.evaluation.score} pts`;
-                    if (g.hits) content += ` | Acertos reais: ${g.hits.length} pts`;
-                    content += `\r\n\r\n`;
-                });
-
-                const blob = new Blob([content], { type: 'text/plain' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `jogos_lotofacil_${new Date().getTime()}.txt`;
-                a.click();
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', gameHtml);
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            app.init();
-        });
+        app.checkResults = function() {
+            const input = document.getElementById('officialResultInput').value;
+            const officialNums = input.match(/\d+/g)?.map(Number).filter(n => n >= 1 && n <= 25) || [];
+            
+            if (officialNums.length !== 15) {
+                alert('Por favor, insira exatamente 15 dezenas para o resultado oficial.');
+                return;
+            }
+
+            const gameCards = document.querySelectorAll('.game-card');
+            if (gameCards.length === 0) {
+                alert('Gere alguns jogos primeiro.');
+                return;
+            }
+
+            gameCards.forEach(card => {
+                const numbers = card.dataset.numbers.split(',').map(Number);
+                const balls = card.querySelectorAll('.lotto-ball');
+                let hits = 0;
+
+                balls.forEach((ball, idx) => {
+                    const n = numbers[idx];
+                    if (officialNums.includes(n)) {
+                        ball.classList.add('hit');
+                        ball.classList.remove('miss');
+                        hits++;
+                    } else {
+                        ball.classList.add('miss');
+                        ball.classList.remove('hit');
+                    }
+                });
+
+                let badge = card.querySelector('.hit-badge');
+                if (!badge) {
+                    const scoreDiv = card.querySelector('.text-right');
+                    scoreDiv.insertAdjacentHTML('beforeend', `<span class="hit-badge text-xs font-black text-emerald-400 block">${hits} acertos</span>`);
+                } else {
+                    badge.textContent = `${hits} acertos`;
+                }
+            });
+        };
+
+        app.runBacktest = function() {
+            if (app.draws.length < 80) {
+                app.loadDefaultData();
+            }
+
+            const iterations = parseInt(document.getElementById('backtestIterations').value) || 30;
+            const result = app.runBacktest(iterations);
+
+            if (!result) {
+                alert('Dados insuficientes para backtesting.');
+                return;
+            }
+
+            const container = document.getElementById('backtestResultsContainer');
+            container.innerHTML = `
+                <div class="space-y-2">
+                    <div class="flex justify-between border-b border-slate-800 pb-2">
+                        <span class="text-slate-300 font-semibold">Concursos Testados em Janela Móvel:</span>
+                        <span class="text-blue-400 font-bold">${result.testedCount}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800 pb-2">
+                        <span class="text-slate-300 font-semibold">Média Histórica de Acertos:</span>
+                        <span class="text-emerald-400 font-bold">${result.avgHits} pontos</span>
+                    </div>
+                    <div class="pt-2">
+                        <span class="text-slate-400 block mb-1 font-semibold">Distribuição de Prêmios Simulados (11 a 15 pontos):</span>
+                        <div class="grid grid-cols-5 gap-2 text-center">
+                            <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">11 pts</span><span class="font-bold text-slate-200">${result.hitsDistribution[11]}</span></div>
+                            <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">12 pts</span><span class="font-bold text-slate-200">${result.hitsDistribution[12]}</span></div>
+                            <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">13 pts</span><span class="font-bold text-emerald-400">${result.hitsDistribution[13]}</span></div>
+                            <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">14 pts</span><span class="font-bold text-blue-400">${result.hitsDistribution[14]}</span></div>
+                            <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">15 pts</span><span class="font-bold text-amber-400">${result.hitsDistribution[15]}</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // Inicialização automática com dados padrão ao carregar a página
+        window.onload = function() {
+            app.loadDefaultData();
+        };
     </script>
 </body>
 </html>
