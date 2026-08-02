@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Analisador Inteligente Lotofácil</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* =========================================================================
+   DESIGN TOKENS
+   ========================================================================= */
+:root{
+  --paper: #F2F5F8;
+  --surface: #FFFFFF;
+  --line: #DCE3EA;
+  --ink: #10203A;
+  --ink-soft: #57687D;
+  --ink-faint: #8A97A8;
+  --accent: #0F6E5C;
+  --accent-soft: #E3F2EE;
+  --accent-strong: #0B5445;
+  --warn: #B5791F;
+  --warn-soft: #FBF1DD;
+  --bad: #C1392B;
+  --bad-soft: #FBE7E4;
+  --heat-cold: #DCEBFA;
+  --heat-mid: #F5C453;
+  --heat-hot: #C1392B;
+  --display: 'Century Gothic', 'Avenir Next', 'Segoe UI Semibold', ui-sans-serif, system-ui, sans-serif;
+  --body: ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', 'Consolas', monospace;
+  --radius: 10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    linear-gradient(var(--paper),var(--paper)),
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(16,32,58,0.035) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(16,32,58,0.035) 40px);
+  color: var(--ink);
+  font-family: var(--body);
+  line-height: 1.5;
+}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 60px;}
+
+/* ---------- Header ---------- */
+header.top{margin-bottom:22px;}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-strong);}
+h1{
+  font-family:var(--display); font-weight:700; font-size:32px; margin:6px 0 4px;
+  letter-spacing:-0.01em;
+}
+.subtitle{color:var(--ink-soft); font-size:14.5px; margin:0 0 16px;}
+.disclaimer{
+  background:var(--warn-soft); border:1px solid #E9D5A6; color:#6B4C10;
+  border-radius:var(--radius); padding:11px 16px; font-size:13px; line-height:1.5;
+}
+.disclaimer b{color:#4E3A0C;}
+
+/* ---------- Layout ---------- */
+.layout{display:grid; grid-template-columns:280px 1fr; gap:22px; align-items:start; margin-top:22px;}
+@media (max-width:880px){ .layout{grid-template-columns:1fr;} }
+
+/* ---------- Cards ---------- */
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px 20px; margin-bottom:18px;
+}
+.card h2{
+  font-family:var(--display); font-size:16px; margin:0 0 4px; letter-spacing:.01em;
+}
+.card .card-sub{color:var(--ink-soft); font-size:12.5px; margin:0 0 14px;}
+
+/* ---------- Sidebar / config ---------- */
+aside.config{position:sticky; top:16px;}
+.config h3{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--ink-faint); margin:18px 0 8px;
+}
+.config h3:first-child{margin-top:0;}
+select, .btn-file{
+  width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:6px;
+  font-family:var(--body); font-size:13.5px; background:#fff; color:var(--ink);
+}
+.radio-row{display:flex; align-items:center; gap:8px; font-size:13px; padding:5px 0; cursor:pointer;}
+.radio-row input{accent-color:var(--accent);}
+.slider-row{margin-bottom:4px;}
+.slider-row label{display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink-soft); margin-bottom:4px;}
+.slider-row .val{font-family:var(--mono); color:var(--accent-strong); font-weight:600;}
+input[type=range]{width:100%; accent-color:var(--accent);}
+.peso-labels{display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-faint); font-family:var(--mono);}
+
+/* ---------- Buttons ---------- */
+button{font-family:var(--body); cursor:pointer; border:none;}
+.btn-primary{
+  background:var(--accent); color:#fff; font-weight:600; font-size:14px;
+  padding:11px 18px; border-radius:7px; width:100%;
+}
+.btn-primary:hover{background:var(--accent-strong);}
+.btn-primary:disabled{background:#B7C2CC; cursor:not-allowed;}
+.btn-secondary{
+  background:#fff; color:var(--ink); border:1px solid var(--line) !important; font-weight:600; font-size:13px;
+  padding:9px 14px; border-radius:7px;
+}
+.btn-secondary:hover{border-color:var(--accent) !important; color:var(--accent-strong);}
+.btn-ghost{
+  background:none; color:var(--ink-soft); font-size:12.5px; padding:6px 10px; border-radius:6px;
+  border:1px dashed var(--line) !important;
+}
+.btn-ghost:hover{color:var(--accent-strong); border-color:var(--accent) !important;}
+.btn-row{display:flex; gap:10px; flex-wrap:wrap;}
+
+/* ---------- Input area ---------- */
+textarea#entradaConcursos{
+  width:100%; min-height:170px; padding:12px; border:1px solid var(--line); border-radius:8px;
+  font-family:var(--mono); font-size:12.5px; resize:vertical; background:#FAFBFC; color:var(--ink);
+}
+.import-row{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;}
+.import-row input[type=file]{display:none;}
+
+/* ---------- Dashboard ---------- */
+.dashboard{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:20px;
+}
+.stat{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:12px 14px;
+}
+.stat .n{font-family:var(--display); font-size:22px; font-weight:700; color:var(--ink);}
+.stat .l{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint);}
+
+/* ---------- Cartela / heatmap ---------- */
+.cartela{
+  display:grid; grid-template-columns:repeat(5,1fr); gap:6px; max-width:340px; margin:8px auto 4px;
+}
+.cel{
+  aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+  border-radius:7px; font-family:var(--mono); font-weight:700; font-size:15px;
+  border:1px solid rgba(16,32,58,0.08);
+}
+.legenda-heat{display:flex; align-items:center; gap:8px; justify-content:center; margin-top:12px; font-size:11px; color:var(--ink-faint); font-family:var(--mono);}
+.legenda-barra{width:120px; height:8px; border-radius:4px; background:linear-gradient(90deg,var(--heat-cold),var(--heat-mid),var(--heat-hot));}
+
+/* ---------- Stat lists ---------- */
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+@media (max-width:640px){ .grid-2{grid-template-columns:1fr;} }
+.rank-list{list-style:none; margin:0; padding:0; font-size:13px;}
+.rank-list li{display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #F0F3F6;}
+.rank-list .dz{font-family:var(--mono); font-weight:700; background:var(--accent-soft); color:var(--accent-strong); border-radius:4px; padding:1px 7px;}
+.metric-list{list-style:none; margin:0; padding:0; font-size:13px;}
+.metric-list li{display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #F0F3F6;}
+.metric-list li b{font-family:var(--mono); color:var(--ink);}
+
+/* ---------- Geometria ---------- */
+.geo-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-top:10px;}
+.geo-item{background:#FAFBFC; border:1px solid var(--line); border-radius:8px; padding:10px 12px;}
+.geo-item .lbl{font-size:11.5px; color:var(--ink-soft);}
+.geo-item .pct{font-family:var(--display); font-size:19px; font-weight:700; color:var(--accent-strong);}
+.geo-bar{height:5px; border-radius:3px; background:#E7ECF1; margin-top:6px; overflow:hidden;}
+.geo-bar i{display:block; height:100%; background:var(--accent);}
+.movimento-list{list-style:none; margin:10px 0 0; padding:0; font-size:13px;}
+.movimento-list li{padding:5px 0;}
+
+/* ---------- Charts ---------- */
+.charts-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+@media (max-width:760px){ .charts-grid{grid-template-columns:1fr;} }
+canvas{width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff;}
+
+/* ---------- Jogos ---------- */
+.jogo-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px 18px; margin-bottom:14px;
+}
+.jogo-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;}
+.jogo-titulo{font-family:var(--display); font-weight:700; font-size:16px;}
+.jogo-score{
+  font-family:var(--mono); font-weight:700; font-size:14px; color:var(--accent-strong);
+  background:var(--accent-soft); padding:4px 10px; border-radius:20px;
+}
+.jogo-dezenas{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+.bola{
+  width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-weight:700; font-size:13px; background:var(--accent); color:#fff;
+}
+.motivos{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; font-size:12.5px; color:var(--ink-soft);}
+.motivos li:before{content:"✔ "; color:var(--accent); font-weight:700;}
+@media (max-width:520px){ .motivos{grid-template-columns:1fr;} }
+
+/* ---------- Utility ---------- */
+.hidden{display:none !important;}
+.section-title{font-family:var(--display); font-size:19px; font-weight:700; margin:26px 0 4px;}
+.section-sub{color:var(--ink-soft); font-size:13px; margin:0 0 14px;}
+.empty-note{color:var(--ink-faint); font-size:13px; padding:14px 0; text-align:center;}
+.avisos{background:var(--bad-soft); border:1px solid #EFC2BB; color:#7A241A; border-radius:var(--radius); padding:12px 16px; font-size:13px; margin-bottom:16px;}
+
+/* ---------- Print ---------- */
+@media print{
+  aside.config, .btn-row, .import-row, #cardEntrada, .no-print { display:none !important; }
+  body{background:#fff;}
+  .layout{display:block;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">Análise Estatística · Distribuição Geométrica · Gerador Inteligente</div>
+    <h1>Analisador Inteligente Lotofácil</h1>
+    <p class="subtitle">Analise padrões históricos dos concursos e monte jogos equilibrados com base em estatística e geometria da cartela.</p>
+    <div class="disclaimer">
+      <b>Importante:</b> esta ferramenta analisa dados históricos e aplica critérios estatísticos e geométricos para montar jogos equilibrados.
+      Ela <b>não prevê resultados nem aumenta a probabilidade de ganho</b> — os sorteios da Lotofácil são aleatórios e cada dezena tem sempre a mesma chance em cada novo concurso.
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ============================= SIDEBAR / CONFIGURAÇÕES ============================= -->
+    <aside class="config card">
+      <h2>Configurações</h2>
+      <p class="card-sub">Ajuste os critérios antes de gerar os jogos.</p>
+
+      <h3>Concursos analisados</h3>
+      <select id="cfgQtdConcursos">
+        <option value="10">Últimos 10</option>
+        <option value="20" selected>Últimos 20</option>
+        <option value="30">Últimos 30</option>
+        <option value="50">Últimos 50</option>
+        <option value="100">Últimos 100</option>
+      </select>
+
+      <h3>Jogos a gerar</h3>
+      <select id="cfgQtdJogos">
+        <option value="3">3 jogos</option>
+        <option value="4" selected>4 jogos</option>
+        <option value="5">5 jogos</option>
+      </select>
+
+      <h3>Estratégia de pares e ímpares</h3>
+      <label class="radio-row"><input type="radio" name="paresImpares" value="7-8"> 7 ímpares / 8 pares</label>
+      <label class="radio-row"><input type="radio" name="paresImpares" value="8-7" checked> 8 ímpares / 7 pares</label>
+      <label class="radio-row"><input type="radio" name="paresImpares" value="9-6"> 9 ímpares / 6 pares</label>
+      <label class="radio-row"><input type="radio" name="paresImpares" value="auto"> Automático (baseado no histórico)</label>
+
+      <h3>Dezenas quentes no jogo</h3>
+      <div class="slider-row">
+        <label>Quantidade priorizada <span class="val" id="valQuentes">5</span></label>
+        <input type="range" id="cfgQuentes" min="0" max="15" value="5">
+      </div>
+
+      <h3>Dezenas frias no jogo</h3>
+      <div class="slider-row">
+        <label>Quantidade priorizada <span class="val" id="valFrias">2</span></label>
+        <input type="range" id="cfgFrias" min="0" max="15" value="2">
+      </div>
+
+      <h3>Peso dos últimos concursos</h3>
+      <div class="slider-row">
+        <input type="range" id="cfgPeso" min="0" max="2" value="1" step="1">
+        <div class="peso-labels"><span>Baixo</span><span>Médio</span><span>Alto</span></div>
+      </div>
+
+      <h3>Ações</h3>
+      <div class="btn-row" style="flex-direction:column;">
+        <button class="btn-primary" id="btnGerarJogos" disabled>🎯 Gerar Jogos</button>
+        <button class="btn-secondary" id="btnNovaAnalise" style="width:100%;">🔄 Nova Análise</button>
+      </div>
+    </aside>
+
+    <!-- ============================= CONTEÚDO PRINCIPAL ============================= -->
+    <main>
+
+      <div id="avisos" class="avisos hidden"></div>
+
+      <!-- Entrada de dados -->
+      <div class="card" id="cardEntrada">
+        <h2>Concursos</h2>
+        <p class="card-sub">Cole os concursos no formato número + 15 dezenas, ou importe um arquivo TXT/CSV. O mais recente deve vir primeiro.</p>
+        <textarea id="entradaConcursos" placeholder="3456
+01 02 03 05 06 07 08 10 11 12 15 18 20 23 25
+
+3455
+01 03 04 05 06 07 09 10 12 13 15 16 18 21 24"></textarea>
+        <div class="import-row">
+          <label class="btn-secondary">📄 Importar TXT<input type="file" id="fileTxt" accept=".txt"></label>
+          <label class="btn-secondary">📊 Importar CSV<input type="file" id="fileCsv" accept=".csv"></label>
+          <button class="btn-primary" id="btnAnalisar" style="width:auto; padding:9px 20px;">📈 Analisar Concursos</button>
+        </div>
+      </div>
+
+      <!-- Dashboard -->
+      <div id="dashboard" class="dashboard hidden"></div>
+
+      <!-- Estatística -->
+      <div id="secEstatistica" class="hidden">
+        <div class="section-title">Análise Estatística</div>
+        <p class="section-sub">Frequências, atrasos, sequências e composição dos concursos analisados.</p>
+        <div class="grid-2">
+          <div class="card">
+            <h2>Ranking — mais sorteadas</h2>
+            <ul class="rank-list" id="listMaisSorteadas"></ul>
+          </div>
+          <div class="card">
+            <h2>Ranking — menos sorteadas</h2>
+            <ul class="rank-list" id="listMenosSorteadas"></ul>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2>Dezenas mais atrasadas</h2>
+            <p class="card-sub">Concursos desde a última vez que saiu.</p>
+            <ul class="rank-list" id="listAtrasadas"></ul>
+          </div>
+          <div class="card">
+            <h2>Composição dos concursos</h2>
+            <ul class="metric-list" id="listComposicao"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mapa geométrico / heatmap -->
+      <div id="secGeometrico" class="hidden">
+        <div class="section-title">Mapa Geométrico</div>
+        <p class="section-sub">Cor mais escura = dezena sai com mais frequência no período analisado.</p>
+        <div class="card">
+          <div class="cartela" id="cartelaHeat"></div>
+          <div class="legenda-heat"><span>Sai pouco</span><div class="legenda-barra"></div><span>Sai muito</span></div>
+        </div>
+
+        <div class="section-title">Análise Geométrica</div>
+        <p class="section-sub">Percentual de dezenas sorteadas em cada região da cartela.</p>
+        <div class="card">
+          <div class="geo-grid" id="geoGridPrincipal"></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2>Linhas e colunas</h2>
+            <div class="geo-grid" id="geoGridLinhasColunas"></div>
+          </div>
+          <div class="card">
+            <h2>Diagonais e quadrantes</h2>
+            <div class="geo-grid" id="geoGridDiagonaisQuad"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Análise de movimento</h2>
+          <p class="card-sub">Comparando a metade mais recente com a metade mais antiga do período analisado.</p>
+          <ul class="movimento-list" id="listMovimento"></ul>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div id="secGraficos" class="hidden">
+        <div class="section-title">Gráficos</div>
+        <p class="section-sub">Visualizações geradas em canvas puro, sem bibliotecas externas.</p>
+        <div class="charts-grid">
+          <div class="card"><h2>Frequência das dezenas</h2><canvas id="chartFrequencia" width="560" height="220"></canvas></div>
+          <div class="card"><h2>Distribuição por linha</h2><canvas id="chartLinhas" width="560" height="220"></canvas></div>
+          <div class="card"><h2>Distribuição por coluna</h2><canvas id="chartColunas" width="560" height="220"></canvas></div>
+          <div class="card"><h2>Distribuição geométrica</h2><canvas id="chartGeometria" width="560" height="220"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Jogos gerados -->
+      <div id="secJogos" class="hidden">
+        <div class="section-title">Jogos Sugeridos</div>
+        <p class="section-sub">Montados combinando frequência histórica, equilíbrio geométrico e a estratégia escolhida — não são previsões.</p>
+        <div id="jogosContainer"></div>
+        <div class="btn-row no-print">
+          <button class="btn-secondary" id="btnExportarTxt">⬇️ Exportar TXT</button>
+          <button class="btn-secondary" id="btnImprimir">🖨️ Imprimir / Gerar PDF</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   ESTADO GLOBAL
+   ========================================================================= */
+const Estado = {
+  concursosTodos: [],       // todos os concursos lidos da entrada, mais recente primeiro
+  concursosAnalisados: [],  // fatia usada na análise (respeita "quantidade de concursos")
+  stats: null,              // resultado do EstatisticaModulo
+  geometria: null,          // resultado do GeometriaModulo
+  jogos: []                 // últimos jogos gerados
+};
+
+/* =========================================================================
+   CAMADA 1 — PARSER (leitura e interpretação dos concursos)
+   ========================================================================= */
+const ParserModulo = {
+  // Aceita tanto "número do concurso + linha de dezenas" quanto linhas CSV com 15 números direto.
+  parseTexto(texto) {
+    const linhas = (texto || '').split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    const concursos = [];
+    let i = 0;
+    const extrairDezenas = (linha) => linha.split(/[\s,;]+/).filter(Boolean).filter(t => /^\d{1,2}$/.test(t));
+
+    while (i < linhas.length) {
+      const linha = linhas[i];
+      const comoDezenas = extrairDezenas(linha);
+
+      if (comoDezenas.length >= 15) {
+        // linha já contém as 15 dezenas (formato CSV simples, sem número de concurso)
+        concursos.push({ numero: String(concursos.length + 1), dezenas: comoDezenas.slice(0, 15).map(Number).sort((a, b) => a - b) });
+        i++;
+        continue;
+      }
+
+      if (/^\d+$/.test(linha) && i + 1 < linhas.length) {
+        const dezenasProxima = extrairDezenas(linhas[i + 1]);
+        if (dezenasProxima.length >= 15) {
+          concursos.push({ numero: linha, dezenas: dezenasProxima.slice(0, 15).map(Number).sort((a, b) => a - b) });
+          i += 2;
+          continue;
+        }
+      }
+      i++; // linha não reconhecida — ignora
+    }
+    return concursos;
+  },
+
+  lerArquivoComoTexto(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsText(file, 'UTF-8');
+    });
+  }
+};
+
+/* =========================================================================
+   CAMADA 2 — ESTATÍSTICA
+   ========================================================================= */
+const EstatisticaModulo = {
+  PRIMOS: new Set([2, 3, 5, 7, 11, 13, 17, 19, 23]),
+  FIBONACCI: new Set([1, 2, 3, 5, 8, 13, 21]),
+  MULTIPLOS3: new Set([3, 6, 9, 12, 15, 18, 21, 24]),
+
+  calcular(concursos, pesoRecencia) {
+    const N = concursos.length;
+    const freq = new Map();
+    const freqPonderada = new Map();
+    for (let d = 1; d <= 25; d++) { freq.set(d, 0); freqPonderada.set(d, 0); }
+
+    let somaTotalSomas = 0, maiorSoma = -Infinity, menorSoma = Infinity;
+    let somaAmplitudes = 0, maiorSequencia = 0, menorSequencia = Infinity;
+    let somaPrimos = 0, somaFib = 0, somaMult3 = 0, somaPares = 0, somaImpares = 0;
+    let somaRepeticaoConsecutiva = 0, comparacoesRepeticao = 0;
+
+    concursos.forEach((c, idx) => {
+      const peso = this._pesoPara(idx, N, pesoRecencia);
+      c.dezenas.forEach(d => {
+        freq.set(d, freq.get(d) + 1);
+        freqPonderada.set(d, freqPonderada.get(d) + peso);
+      });
+
+      const soma = c.dezenas.reduce((a, b) => a + b, 0);
+      somaTotalSomas += soma;
+      maiorSoma = Math.max(maiorSoma, soma);
+      menorSoma = Math.min(menorSoma, soma);
+      somaAmplitudes += (Math.max(...c.dezenas) - Math.min(...c.dezenas));
+
+      const seqAtual = this._maiorSequenciaConsecutiva(c.dezenas);
+      maiorSequencia = Math.max(maiorSequencia, seqAtual);
+      menorSequencia = Math.min(menorSequencia, seqAtual);
+
+      let primos = 0, fib = 0, mult3 = 0, pares = 0, impares = 0;
+      c.dezenas.forEach(d => {
+        if (this.PRIMOS.has(d)) primos++;
+        if (this.FIBONACCI.has(d)) fib++;
+        if (this.MULTIPLOS3.has(d)) mult3++;
+        if (d % 2 === 0) pares++; else impares++;
+      });
+      somaPrimos += primos; somaFib += fib; somaMult3 += mult3;
+      somaPares += pares; somaImpares += impares;
+
+      if (idx < N - 1) {
+        const proximo = concursos[idx + 1];
+        const intersecao = c.dezenas.filter(d => proximo.dezenas.includes(d)).length;
+        somaRepeticaoConsecutiva += intersecao;
+        comparacoesRepeticao++;
+      }
+    });
+
+    // dezenas atrasadas: concursos desde a última aparição (0 = saiu no último concurso analisado)
+    const atrasos = new Map();
+    for (let d = 1; d <= 25; d++) {
+      let atraso = N; // nunca apareceu no período
+      for (let idx = 0; idx < N; idx++) {
+        if (concursos[idx].dezenas.includes(d)) { atraso = idx; break; }
+      }
+      atrasos.set(d, atraso);
+    }
+
+    const repetidasUltimoConcurso = (N >= 2) ? concursos[0].dezenas.filter(d => concursos[1].dezenas.includes(d)).length : 0;
+
+    return {
+      totalConcursos: N,
+      freq, freqPonderada,
+      atrasos,
+      repetidasUltimoConcurso,
+      mediaRepeticaoConsecutiva: comparacoesRepeticao ? somaRepeticaoConsecutiva / comparacoesRepeticao : 0,
+      maiorSequencia,
+      menorSequencia: isFinite(menorSequencia) ? menorSequencia : 0,
+      somaMedia: N ? somaTotalSomas / N : 0,
+      mediaDezenas: N ? (somaTotalSomas / N) / 15 : 0,
+      amplitudeMedia: N ? somaAmplitudes / N : 0,
+      maiorSoma: isFinite(maiorSoma) ? maiorSoma : 0,
+      menorSoma: isFinite(menorSoma) ? menorSoma : 0,
+      mediaPrimos: N ? somaPrimos / N : 0,
+      mediaFibonacci: N ? somaFib / N : 0,
+      mediaMultiplos3: N ? somaMult3 / N : 0,
+      mediaPares: N ? somaPares / N : 0,
+      mediaImpares: N ? somaImpares / N : 0
+    };
+  },
+
+  _pesoPara(idx, N, nivel) {
+    // nivel: 0 = baixo (sem ponderação), 1 = médio, 2 = alto
+    if (nivel === 0 || N <= 1) return 1;
+    const fatorMax = nivel === 1 ? 1 : 2; // médio: até 2x | alto: até 3x
+    return 1 + fatorMax * ((N - 1 - idx) / (N - 1));
+  },
+
+  _maiorSequenciaConsecutiva(dezenasOrdenadas) {
+    let maior = 1, atual = 1;
+    for (let i = 1; i < dezenasOrdenadas.length; i++) {
+      if (dezenasOrdenadas[i] === dezenasOrdenadas[i - 1] + 1) { atual++; maior = Math.max(maior, atual); }
+      else atual = 1;
+    }
+    return maior;
+  }
+};
+
+/* =========================================================================
+   CAMADA 3 — GEOMETRIA DA CARTELA
+   ========================================================================= */
+const GeometriaModulo = {
+  linhas: [[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15],[16,17,18,19,20],[21,22,23,24,25]],
+  colunas: [[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],[5,10,15,20,25]],
+  diagonalPrincipal: [1,7,13,19,25],
+  diagonalSecundaria: [5,9,13,17,21],
+  cantos: [1,5,21,25],
+  laterais: [2,3,4,22,23,24,6,11,16,10,15,20],
+  centro: [7,8,9,12,13,14,17,18,19],
+  superior: [1,2,3,4,5,6,7,8,9,10],
+  inferior: [16,17,18,19,20,21,22,23,24,25],
+  quadranteSE: [1,2,6,7],
+  quadranteSD: [4,5,9,10],
+  quadranteIE: [16,17,21,22],
+  quadranteID: [19,20,24,25],
+
+  _contarRegiao(concursos, regiao) {
+    const set = new Set(regiao);
+    let total = 0;
+    concursos.forEach(c => { c.dezenas.forEach(d => { if (set.has(d)) total++; }); });
+    return total;
+  },
+
+  _percentual(concursos, regiao) {
+    const total = concursos.length * 15;
+    if (!total) return 0;
+    return (this._contarRegiao(concursos, regiao) / total) * 100;
+  },
+
+  calcularDistribuicao(concursos) {
+    const pct = (regiao) => this._percentual(concursos, regiao);
+    return {
+      superior: pct(this.superior),
+      inferior: pct(this.inferior),
+      centro: pct(this.centro),
+      laterais: pct(this.laterais),
+      cantos: pct(this.cantos),
+      diagonalPrincipal: pct(this.diagonalPrincipal),
+      diagonalSecundaria: pct(this.diagonalSecundaria),
+      linhas: this.linhas.map(l => pct(l)),
+      colunas: this.colunas.map(c => pct(c)),
+      quadranteSE: pct(this.quadranteSE),
+      quadranteSD: pct(this.quadranteSD),
+      quadranteIE: pct(this.quadranteIE),
+      quadranteID: pct(this.quadranteID)
+    };
+  },
+
+  calcularMovimento(concursos) {
+    if (concursos.length < 4) return [];
+    const meio = Math.floor(concursos.length / 2);
+    const recentes = concursos.slice(0, meio);
+    const antigos = concursos.slice(meio);
+    const regioes = [
+      ['parte superior', this.superior], ['parte inferior', this.inferior],
+      ['centro', this.centro], ['laterais', this.laterais], ['cantos', this.cantos],
+      ['diagonal principal', this.diagonalPrincipal], ['diagonal secundária', this.diagonalSecundaria]
+    ];
+    return regioes.map(([nome, regiao]) => {
+      const pctRecente = this._percentual(recentes, regiao);
+      const pctAntigo = this._percentual(antigos, regiao);
+      const diff = pctRecente - pctAntigo;
+      let tendencia = 'estável';
+      if (diff > 3) tendencia = 'concentrando mais';
+      else if (diff < -3) tendencia = 'concentrando menos';
+      return { nome, pctRecente, pctAntigo, diff, tendencia };
+    });
+  }
+};
+
+/* =========================================================================
+   CAMADA 4 — HEATMAP (escala de cor por frequência)
+   ========================================================================= */
+const HeatmapModulo = {
+  corPara(valorNormalizado) {
+    // 0 = frio (azul claro) -> 0.5 = médio (âmbar) -> 1 = quente (vermelho)
+    const t = Math.max(0, Math.min(1, valorNormalizado));
+    const cFrio = [220, 235, 250], cMedio = [245, 196, 83], cQuente = [193, 57, 43];
+    let c1, c2, k;
+    if (t < 0.5) { c1 = cFrio; c2 = cMedio; k = t / 0.5; } else { c1 = cMedio; c2 = cQuente; k = (t - 0.5) / 0.5; }
+    const r = Math.round(c1[0] + (c2[0] - c1[0]) * k);
+    const g = Math.round(c1[1] + (c2[1] - c1[1]) * k);
+    const b = Math.round(c1[2] + (c2[2] - c1[2]) * k);
+    return `rgb(${r},${g},${b})`;
+  },
+
+  textoContrastante(valorNormalizado) {
+    return valorNormalizado > 0.55 ? '#ffffff' : '#10203A';
+  }
+};
+
+/* =========================================================================
+   CAMADA 5 — GRÁFICOS (canvas puro, sem bibliotecas)
+   ========================================================================= */
+const GraficosModulo = {
+  _limpar(ctx, w, h) { ctx.clearRect(0, 0, w, h); },
+
+  desenharBarras(canvasId, labels, valores, opts = {}) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    this._limpar(ctx, w, h);
+
+    const margemEsq = 34, margemBaixo = 26, margemTopo = 10, margemDir = 8;
+    const areaW = w - margemEsq - margemDir, areaH = h - margemTopo - margemBaixo;
+    const max = Math.max(...valores, 1) * 1.15;
+    const larguraBarra = areaW / valores.length;
+
+    // eixo
+    ctx.strokeStyle = '#DCE3EA'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(margemEsq, margemTopo); ctx.lineTo(margemEsq, h - margemBaixo); ctx.lineTo(w - margemDir, h - margemBaixo); ctx.stroke();
+
+    valores.forEach((v, i) => {
+      const alturaBarra = (v / max) * areaH;
+      const x = margemEsq + i * larguraBarra + larguraBarra * 0.15;
+      const y = h - margemBaixo - alturaBarra;
+      const largura = larguraBarra * 0.7;
+      ctx.fillStyle = opts.corFn ? opts.corFn(v, max, i) : '#0F6E5C';
+      ctx.fillRect(x, y, largura, alturaBarra);
+
+      if (labels.length <= 26) {
+        ctx.fillStyle = '#57687D';
+        ctx.font = '9px ui-monospace, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(String(labels[i]), x + largura / 2, h - margemBaixo + 11);
+      }
+    });
+  }
+};
+
+/* =========================================================================
+   CAMADA 6 — MOTOR DE PONTUAÇÃO
+   ========================================================================= */
+const PontuacaoModulo = {
+  pontuar(dezenas, contexto, jogosJaEscolhidos) {
+    const pares = dezenas.filter(d => d % 2 === 0).length;
+    const impares = 15 - pares;
+
+    // 1) Pares/ímpares vs. alvo da estratégia
+    let scoreParImpar = 100;
+    if (contexto.alvoImpares != null) {
+      scoreParImpar = Math.max(0, 100 - Math.abs(impares - contexto.alvoImpares) * 14);
+    }
+
+    // 2) Frequência: mistura de dezenas quentes/mornas/frias em proporção saudável
+    const freqMax = Math.max(...contexto.freq.values());
+    const mediaFreqNormalizada = dezenas.reduce((s, d) => s + contexto.freq.get(d) / freqMax, 0) / 15;
+    const scoreFrequencia = Math.max(0, 100 - Math.abs(mediaFreqNormalizada - 0.55) * 180);
+
+    // 3) Quentes / frias conforme configurado
+    const quentesNoJogo = dezenas.filter(d => contexto.hotSet.has(d)).length;
+    const friasNoJogo = dezenas.filter(d => contexto.coldSet.has(d)).length;
+    const scoreQuentesFrias = 100
+      - Math.abs(quentesNoJogo - contexto.hotTarget) * 8
+      - Math.abs(friasNoJogo - contexto.coldTarget) * 8;
+
+    // 4) Geometria: compara % do jogo em cada região com a média histórica
+    const regioesGeo = [
+      ['superior', GeometriaModulo.superior], ['inferior', GeometriaModulo.inferior],
+      ['centro', GeometriaModulo.centro], ['laterais', GeometriaModulo.laterais], ['cantos', GeometriaModulo.cantos]
+    ];
+    let somaDesvioGeo = 0;
+    regioesGeo.forEach(([nome, regiao]) => {
+      const set = new Set(regiao);
+      const pctJogo = (dezenas.filter(d => set.has(d)).length / 15) * 100;
+      const pctHist = contexto.geometria[nome];
+      somaDesvioGeo += Math.abs(pctJogo - pctHist);
+    });
+    const scoreGeometria = Math.max(0, 100 - somaDesvioGeo * 1.3);
+
+    // 5) Repetição em relação ao último concurso, comparado à média histórica de repetição
+    let scoreRepeticao = 100;
+    if (contexto.ultimoConcurso) {
+      const repNoJogo = dezenas.filter(d => contexto.ultimoConcurso.includes(d)).length;
+      scoreRepeticao = Math.max(0, 100 - Math.abs(repNoJogo - contexto.mediaRepeticao) * 10);
+    }
+
+    // 6) Concentração: penaliza linha/coluna com excesso e sequências longas
+    let penalidadeConcentracao = 0;
+    GeometriaModulo.linhas.forEach(l => { const n = dezenas.filter(d => l.includes(d)).length; if (n > 4) penalidadeConcentracao += (n - 4) * 12; });
+    GeometriaModulo.colunas.forEach(c => { const n = dezenas.filter(d => c.includes(d)).length; if (n > 4) penalidadeConcentracao += (n - 4) * 12; });
+    const ordenadas = [...dezenas].sort((a, b) => a - b);
+    const maiorSeq = EstatisticaModulo._maiorSequenciaConsecutiva(ordenadas);
+    if (maiorSeq > 4) penalidadeConcentracao += (maiorSeq - 4) * 15;
+    const scoreConcentracao = Math.max(0, 100 - penalidadeConcentracao);
+
+    // 7) Diversidade em relação aos outros jogos já escolhidos neste lote
+    let scoreDiversidade = 100;
+    if (jogosJaEscolhidos && jogosJaEscolhidos.length) {
+      const maiorSobreposicao = Math.max(...jogosJaEscolhidos.map(j => j.filter(d => dezenas.includes(d)).length));
+      scoreDiversidade = Math.max(0, 100 - Math.max(0, maiorSobreposicao - 8) * 12);
+    }
+
+    const final = (
+      scoreParImpar * 0.15 +
+      scoreFrequencia * 0.15 +
+      scoreQuentesFrias * 0.15 +
+      scoreGeometria * 0.25 +
+      scoreRepeticao * 0.15 +
+      scoreConcentracao * 0.10 +
+      scoreDiversidade * 0.05
+    );
+
+    const motivos = [];
+    motivos.push(`${impares} ímpares`); motivos.push(`${pares} pares`);
+    motivos.push(`${quentesNoJogo} dezena(s) quente(s)`); motivos.push(`${friasNoJogo} dezena(s) fria(s)`);
+    if (scoreGeometria >= 75) motivos.push('distribuição geométrica equilibrada');
+    if (scoreConcentracao >= 85) motivos.push('baixa concentração em linhas/colunas');
+    if (scoreDiversidade >= 85) motivos.push('alta diversidade frente aos demais jogos');
+    if (scoreRepeticao >= 75) motivos.push('repetição coerente com o histórico');
+    const centroSet = new Set(GeometriaModulo.centro);
+    if (Math.abs((dezenas.filter(d => centroSet.has(d)).length / 15 * 100) - contexto.geometria.centro) < 8) motivos.push('centro equilibrado');
+
+    return { score: Math.max(0, Math.min(100, final)), pares, impares, quentesNoJogo, friasNoJogo, motivos };
+  }
+};
+
+/* =========================================================================
+   CAMADA 7 — GERADOR DE JOGOS
+   ========================================================================= */
+const GeradorModulo = {
+  gerar(qtdJogos, config, stats, geometria, concursos) {
+    const freq = stats.freqPonderada;
+    const ranking = [...freq.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]);
+    const hotSet = new Set(ranking.slice(0, config.hotCount));
+    const coldSet = new Set(ranking.slice(-config.coldCount || ranking.length));
+    const warmPool = ranking.filter(d => !hotSet.has(d) && !coldSet.has(d));
+    const hotPool = [...hotSet], coldPool = [...coldSet];
+
+    const alvoImpares = config.paresImpares === 'auto' ? Math.round(stats.mediaImpares) : config.alvoImpares;
+
+    const contexto = {
+      freq: stats.freq,
+      hotSet, coldSet, hotTarget: Math.min(config.hotCount, 15), coldTarget: Math.min(config.coldCount, 15),
+      geometria, alvoImpares,
+      ultimoConcurso: concursos.length ? concursos[0].dezenas : null,
+      mediaRepeticao: stats.mediaRepeticaoConsecutiva
+    };
+
+    const candidatos = [];
+    const TENTATIVAS = 400;
+    for (let t = 0; t < TENTATIVAS; t++) {
+      const jogo = this._construirCandidato(hotPool, coldPool, warmPool, contexto);
+      if (jogo) candidatos.push(jogo);
+    }
+
+    candidatos.forEach(c => { c._res = PontuacaoModulo.pontuar(c, contexto, []); });
+    candidatos.sort((a, b) => b._res.score - a._res.score);
+
+    const escolhidos = [];
+    let limiteSobreposicao = 9; // no máx. essa quantidade de números iguais entre dois jogos
+    while (escolhidos.length < qtdJogos && limiteSobreposicao <= 14) {
+      for (const cand of candidatos) {
+        if (escolhidos.length >= qtdJogos) break;
+        const jaEscolhido = escolhidos.some(e => cand.filter(d => e.dezenas.includes(d)).length > limiteSobreposicao);
+        const duplicado = escolhidos.some(e => e.dezenas.join(',') === cand.join(','));
+        if (!jaEscolhido && !duplicado) {
+          const res = PontuacaoModulo.pontuar(cand, contexto, escolhidos.map(e => e.dezenas));
+          escolhidos.push({ dezenas: cand, score: res.score, motivos: res.motivos });
+        }
+      }
+      limiteSobreposicao++;
+    }
+
+    return escolhidos.slice(0, qtdJogos).sort((a, b) => b.score - a.score);
+  },
+
+  _construirCandidato(hotPool, coldPool, warmPool, contexto) {
+    const hotN = Math.min(contexto.hotTarget, hotPool.length);
+    const coldN = Math.min(contexto.coldTarget, coldPool.length, 15 - hotN);
+    let warmN = 15 - hotN - coldN;
+    if (warmN < 0) warmN = 0;
+
+    let selecao = new Set([
+      ...this._amostra(hotPool, hotN),
+      ...this._amostra(coldPool, coldN),
+      ...this._amostra(warmPool, warmN)
+    ]);
+
+    // completa caso tenha faltado (pools pequenos)
+    const todos = Array.from({ length: 25 }, (_, i) => i + 1);
+    while (selecao.size < 15) {
+      const restante = todos.filter(d => !selecao.has(d));
+      selecao.add(restante[Math.floor(Math.random() * restante.length)]);
+    }
+    let dezenas = [...selecao].slice(0, 15);
+
+    // repara paridade se houver alvo definido
+    if (contexto.alvoImpares != null) {
+      dezenas = this._repararParidade(dezenas, contexto.alvoImpares);
+    }
+
+    return dezenas.sort((a, b) => a - b);
+  },
+
+  _amostra(pool, n) {
+    const copia = [...pool];
+    const resultado = [];
+    for (let i = 0; i < n && copia.length; i++) {
+      const idx = Math.floor(Math.random() * copia.length);
+      resultado.push(copia.splice(idx, 1)[0]);
+    }
+    return resultado;
+  },
+
+  _repararParidade(dezenas, alvoImpares) {
+    let atual = new Set(dezenas);
+    let tentativas = 0;
+    while (tentativas < 30) {
+      const impares = [...atual].filter(d => d % 2 !== 0).length;
+      if (impares === alvoImpares) break;
+      const todos = Array.from({ length: 25 }, (_, i) => i + 1).filter(d => !atual.has(d));
+      if (impares < alvoImpares) {
+        const candidatosImpar = todos.filter(d => d % 2 !== 0);
+        const remoçãoPar = [...atual].filter(d => d % 2 === 0);
+        if (candidatosImpar.length && remoçãoPar.length) {
+          atual.delete(remoçãoPar[Math.floor(Math.random() * remoçãoPar.length)]);
+          atual.add(candidatosImpar[Math.floor(Math.random() * candidatosImpar.length)]);
+        } else break;
+      } else {
+        const candidatosPar = todos.filter(d => d % 2 === 0);
+        const remoçãoImpar = [...atual].filter(d => d % 2 !== 0);
+        if (candidatosPar.length && remoçãoImpar.length) {
+          atual.delete(remoçãoImpar[Math.floor(Math.random() * remoçãoImpar.length)]);
+          atual.add(candidatosPar[Math.floor(Math.random() * candidatosPar.length)]);
+        } else break;
+      }
+      tentativas++;
+    }
+    return [...atual];
+  }
+};
+
+/* =========================================================================
+   CAMADA 8 — INTERFACE (renderização)
+   ========================================================================= */
+const InterfaceModulo = {
+  formatPct(v) { return v.toFixed(1) + '%'; },
+  formatNum(v, casas = 1) { return v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas }); },
+
+  renderDashboard(stats) {
+    const el = document.getElementById('dashboard');
+    el.classList.remove('hidden');
+    const freqValues = [...stats.freq.values()];
+    const dezenasComOcorrencia = [...stats.freq.values()].filter(v => v > 0).length;
+    const itens = [
+      ['Concursos analisados', stats.totalConcursos],
+      ['Dezenas com ocorrência', dezenasComOcorrencia + '/25'],
+      ['Maior frequência', Math.max(...freqValues)],
+      ['Menor frequência', Math.min(...freqValues)],
+      ['Repetição média', this.formatNum(stats.mediaRepeticaoConsecutiva)],
+      ['Pares (média)', this.formatNum(stats.mediaPares)],
+      ['Ímpares (média)', this.formatNum(stats.mediaImpares)],
+      ['Maior soma', stats.maiorSoma],
+      ['Menor soma', stats.menorSoma]
+    ];
+    el.innerHTML = itens.map(([l, n]) => `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+  },
+
+  renderEstatistica(stats) {
+    document.getElementById('secEstatistica').classList.remove('hidden');
+
+    const ranking = [...stats.freq.entries()].sort((a, b) => b[1] - a[1]);
+    const maisSorteadas = ranking.slice(0, 10);
+    const menosSorteadas = [...ranking].sort((a, b) => a[1] - b[1]).slice(0, 10);
+    const atrasadas = [...stats.atrasos.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    const renderRank = (arr, unidade) => arr.map(([d, v]) =>
+      `<li><span class="dz">${String(d).padStart(2, '0')}</span><span>${v} ${unidade}</span></li>`).join('');
+
+    document.getElementById('listMaisSorteadas').innerHTML = renderRank(maisSorteadas, 'vezes');
+    document.getElementById('listMenosSorteadas').innerHTML = renderRank(menosSorteadas, 'vezes');
+    document.getElementById('listAtrasadas').innerHTML = renderRank(atrasadas, 'concurso(s)');
+
+    const comp = [
+      ['Repetidas do último concurso', stats.repetidasUltimoConcurso],
+      ['Maior sequência encontrada', stats.maiorSequencia],
+      ['Menor sequência (por concurso)', stats.menorSequencia],
+      ['Soma média das dezenas', this.formatNum(stats.somaMedia)],
+      ['Média das dezenas', this.formatNum(stats.mediaDezenas)],
+      ['Amplitude média', this.formatNum(stats.amplitudeMedia)],
+      ['Média de primos', this.formatNum(stats.mediaPrimos)],
+      ['Média de Fibonacci', this.formatNum(stats.mediaFibonacci)],
+      ['Média de múltiplos de 3', this.formatNum(stats.mediaMultiplos3)]
+    ];
+    document.getElementById('listComposicao').innerHTML = comp.map(([l, v]) => `<li><span>${l}</span><b>${v}</b></li>`).join('');
+  },
+
+  renderCartelaHeatmap(stats) {
+    document.getElementById('secGeometrico').classList.remove('hidden');
+    const el = document.getElementById('cartelaHeat');
+    const max = Math.max(...stats.freq.values(), 1);
+    let html = '';
+    for (let d = 1; d <= 25; d++) {
+      const norm = stats.freq.get(d) / max;
+      const cor = HeatmapModulo.corPara(norm);
+      const corTexto = HeatmapModulo.textoContrastante(norm);
+      html += `<div class="cel" style="background:${cor}; color:${corTexto};" title="${stats.freq.get(d)} ocorrência(s)">${String(d).padStart(2, '0')}</div>`;
+    }
+    el.innerHTML = html;
+  },
+
+  renderGeometria(geometria, movimento) {
+    const item = (lbl, pct) => `
+      <div class="geo-item"><div class="lbl">${lbl}</div><div class="pct">${this.formatPct(pct)}</div>
+      <div class="geo-bar"><i style="width:${Math.min(100, pct)}%"></i></div></div>`;
+
+    document.getElementById('geoGridPrincipal').innerHTML =
+      item('Parte superior', geometria.superior) + item('Parte inferior', geometria.inferior) +
+      item('Centro', geometria.centro) + item('Laterais', geometria.laterais) + item('Cantos', geometria.cantos);
+
+    document.getElementById('geoGridLinhasColunas').innerHTML =
+      geometria.linhas.map((v, i) => item(`Linha ${i + 1}`, v)).join('') +
+      geometria.colunas.map((v, i) => item(`Coluna ${i + 1}`, v)).join('');
+
+    document.getElementById('geoGridDiagonaisQuad').innerHTML =
+      item('Diagonal principal', geometria.diagonalPrincipal) + item('Diagonal secundária', geometria.diagonalSecundaria) +
+      item('Quad. sup. esquerdo', geometria.quadranteSE) + item('Quad. sup. direito', geometria.quadranteSD) +
+      item('Quad. inf. esquerdo', geometria.quadranteIE) + item('Quad. inf. direito', geometria.quadranteID);
+
+    const listaMov = movimento.length
+      ? movimento.map(m => `<li><b>${m.nome}:</b> ${m.tendencia} (${m.pctRecente > m.pctAntigo ? '+' : ''}${this.formatNum(m.diff)} p.p. vs. período anterior)</li>`).join('')
+      : '<li class="empty-note">Analise mais concursos para detectar tendências de movimento.</li>';
+    document.getElementById('listMovimento').innerHTML = listaMov;
+  },
+
+  renderGraficos(stats, geometria) {
+    document.getElementById('secGraficos').classList.remove('hidden');
+    const max = Math.max(...stats.freq.values(), 1);
+
+    GraficosModulo.desenharBarras('chartFrequencia',
+      [...stats.freq.keys()].map(d => String(d).padStart(2, '0')),
+      [...stats.freq.values()],
+      { corFn: (v) => HeatmapModulo.corPara(v / max) });
+
+    GraficosModulo.desenharBarras('chartLinhas', ['L1', 'L2', 'L3', 'L4', 'L5'], geometria.linhas, { corFn: () => '#0F6E5C' });
+    GraficosModulo.desenharBarras('chartColunas', ['C1', 'C2', 'C3', 'C4', 'C5'], geometria.colunas, { corFn: () => '#0B5445' });
+    GraficosModulo.desenharBarras('chartGeometria',
+      ['Superior', 'Centro', 'Inferior', 'Laterais', 'Cantos'],
+      [geometria.superior, geometria.centro, geometria.inferior, geometria.laterais, geometria.cantos],
+      { corFn: () => '#B5791F' });
+  },
+
+  renderJogos(jogos) {
+    document.getElementById('secJogos').classList.remove('hidden');
+    const el = document.getElementById('jogosContainer');
+    el.innerHTML = jogos.map((j, i) => `
+      <div class="jogo-card">
+        <div class="jogo-head">
+          <span class="jogo-titulo">Jogo ${i + 1}</span>
+          <span class="jogo-score">${j.score.toFixed(1).replace('.', ',')} pontos</span>
+        </div>
+        <div class="jogo-dezenas">${j.dezenas.map(d => `<span class="bola">${String(d).padStart(2, '0')}</span>`).join('')}</div>
+        <ul class="motivos">${j.motivos.map(m => `<li>${m}</li>`).join('')}</ul>
+      </div>
+    `).join('');
+  }
+};
+
+/* =========================================================================
+   CAMADA 9 — EXPORTAÇÃO
+   ========================================================================= */
+const ExportacaoModulo = {
+  exportarTxt(jogos) {
+    if (!jogos.length) return alert('Gere os jogos antes de exportar.');
+    let txt = 'JOGOS SUGERIDOS — ANALISADOR INTELIGENTE LOTOFÁCIL\n';
+    txt += 'Análise estatística e geométrica de dados históricos — não é previsão de resultado.\n\n';
+    jogos.forEach((j, i) => {
+      txt += `Jogo ${i + 1} — ${j.score.toFixed(1)} pontos\n`;
+      txt += j.dezenas.map(d => String(d).padStart(2, '0')).join(' ') + '\n\n';
+    });
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'jogos_lotofacil.txt'; a.click();
+    URL.revokeObjectURL(url);
+  },
+  imprimir() { window.print(); }
+};
+
+/* =========================================================================
+   CAMADA 10 — CONTROLADOR PRINCIPAL
+   ========================================================================= */
+function lerConfig() {
+  const paresImparesVal = document.querySelector('input[name="paresImpares"]:checked').value;
+  let alvoImpares = null;
+  if (paresImparesVal === '7-8') alvoImpares = 7;
+  else if (paresImparesVal === '8-7') alvoImpares = 8;
+  else if (paresImparesVal === '9-6') alvoImpares = 9;
+
+  return {
+    qtdConcursos: parseInt(document.getElementById('cfgQtdConcursos').value, 10),
+    qtdJogos: parseInt(document.getElementById('cfgQtdJogos').value, 10),
+    paresImpares: paresImparesVal,
+    alvoImpares,
+    hotCount: parseInt(document.getElementById('cfgQuentes').value, 10),
+    coldCount: parseInt(document.getElementById('cfgFrias').value, 10),
+    pesoRecencia: parseInt(document.getElementById('cfgPeso').value, 10)
+  };
+}
+
+function mostrarAviso(msg) {
+  const el = document.getElementById('avisos');
+  if (!msg) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+  el.classList.remove('hidden');
+  el.innerHTML = msg;
+}
+
+function analisarConcursos() {
+  const texto = document.getElementById('entradaConcursos').value;
+  const todos = ParserModulo.parseTexto(texto);
+
+  if (todos.length < 2) {
+    mostrarAviso('⚠️ Não consegui reconhecer concursos suficientes no texto. Confira o formato: número do concurso em uma linha e as 15 dezenas na linha seguinte.');
+    return;
+  }
+  mostrarAviso(null);
+
+  const config = lerConfig();
+  const N = Math.min(config.qtdConcursos, todos.length);
+  Estado.concursosTodos = todos;
+  Estado.concursosAnalisados = todos.slice(0, N);
+
+  Estado.stats = EstatisticaModulo.calcular(Estado.concursosAnalisados, config.pesoRecencia);
+  Estado.geometria = GeometriaModulo.calcularDistribuicao(Estado.concursosAnalisados);
+  const movimento = GeometriaModulo.calcularMovimento(Estado.concursosAnalisados);
+
+  InterfaceModulo.renderDashboard(Estado.stats);
+  InterfaceModulo.renderEstatistica(Estado.stats);
+  InterfaceModulo.renderCartelaHeatmap(Estado.stats);
+  InterfaceModulo.renderGeometria(Estado.geometria, movimento);
+  InterfaceModulo.renderGraficos(Estado.stats, Estado.geometria);
+
+  document.getElementById('btnGerarJogos').disabled = false;
+  if (N < config.qtdConcursos) {
+    mostrarAviso(`ℹ️ Foram encontrados apenas ${todos.length} concurso(s) no texto — a análise usou todos eles (menos que os ${config.qtdConcursos} solicitados).`);
+  }
+}
+
+function gerarJogos() {
+  if (!Estado.stats) return;
+  const config = lerConfig();
+  Estado.jogos = GeradorModulo.gerar(config.qtdJogos, config, Estado.stats, Estado.geometria, Estado.concursosAnalisados);
+  InterfaceModulo.renderJogos(Estado.jogos);
+  document.getElementById('secJogos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function novaAnalise() {
+  document.getElementById('entradaConcursos').value = '';
+  Estado.concursosTodos = []; Estado.concursosAnalisados = []; Estado.stats = null; Estado.geometria = null; Estado.jogos = [];
+  ['dashboard', 'secEstatistica', 'secGeometrico', 'secGraficos', 'secJogos'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  mostrarAviso(null);
+  document.getElementById('btnGerarJogos').disabled = true;
+}
+
+/* ---------- Ligações de eventos ---------- */
+document.getElementById('btnAnalisar').addEventListener('click', analisarConcursos);
+document.getElementById('btnGerarJogos').addEventListener('click', gerarJogos);
+document.getElementById('btnNovaAnalise').addEventListener('click', novaAnalise);
+document.getElementById('btnExportarTxt').addEventListener('click', () => ExportacaoModulo.exportarTxt(Estado.jogos));
+document.getElementById('btnImprimir').addEventListener('click', () => ExportacaoModulo.imprimir());
+
+document.getElementById('cfgQuentes').addEventListener('input', (e) => document.getElementById('valQuentes').textContent = e.target.value);
+document.getElementById('cfgFrias').addEventListener('input', (e) => document.getElementById('valFrias').textContent = e.target.value);
+
+document.getElementById('fileTxt').addEventListener('change', async (e) => {
+  if (!e.target.files[0]) return;
+  document.getElementById('entradaConcursos').value = await ParserModulo.lerArquivoComoTexto(e.target.files[0]);
+});
+document.getElementById('fileCsv').addEventListener('change', async (e) => {
+  if (!e.target.files[0]) return;
+  document.getElementById('entradaConcursos').value = await ParserModulo.lerArquivoComoTexto(e.target.files[0]);
+});
+</script>
+</body>
+</html>
