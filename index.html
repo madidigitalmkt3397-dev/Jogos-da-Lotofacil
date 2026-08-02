@@ -39,7 +39,6 @@
             background: linear-gradient(135deg, #475569, #334155);
             opacity: 0.6;
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -56,7 +55,7 @@
                 <p class="text-xs text-slate-400 mt-1">Motor probabilístico baseado em padrões geométricos, matrizes de transição e janelas móveis.</p>
             </div>
             <div class="flex items-center gap-3">
-                <span class="px-3 py-1 bg-blue-950 border border-blue-800 text-blue-300 text-xs font-semibold rounded-full">v4.0 Definitiva</span>
+                <span class="px-3 py-1 bg-blue-950 border border-blue-800 text-blue-300 text-xs font-semibold rounded-full">v4.1 Corrigida</span>
             </div>
         </div>
     </header>
@@ -75,12 +74,18 @@
                 </h2>
                 <div class="space-y-3">
                     <div>
-                        <label class="text-xs text-slate-400 block mb-1">Cole os resultados (Concurso, Dezenas):</label>
+                        <label class="text-xs text-slate-400 block mb-1">Cole os resultados (Concurso, Dezenas) ou Carregue um Arquivo:</label>
                         <textarea id="drawsInput" rows="5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono" placeholder="Ex: 3480 - 01,02,03,04,05,06,07,08,09,10,11,12,13,14,15&#10;3479 - 02,03,04..."></textarea>
                     </div>
+                    <!-- Input oculto para carregar arquivo .txt / .csv -->
+                    <input type="file" id="fileInput" accept=".txt,.csv" class="hidden" onchange="app.handleFileUpload(event)">
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="document.getElementById('fileInput').click()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold py-2 px-3 rounded-lg transition text-center">Carregar Arquivo</button>
+                        <button onclick="app.processData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2 px-3 rounded-lg transition shadow-md shadow-blue-900/40">Processar DNA</button>
+                    </div>
                     <div class="flex gap-2">
-                        <button onclick="app.loadDefaultData()" class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold py-2 px-3 rounded-lg transition">Carregar Amostra</button>
-                        <button onclick="app.processData()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2 px-3 rounded-lg transition shadow-md shadow-blue-900/40">Processar DNA</button>
+                        <button onclick="app.loadDefaultData()" class="w-full bg-slate-800/60 hover:bg-slate-700 border border-slate-700/80 text-slate-400 text-[11px] py-1.5 px-2 rounded-lg transition">Usar Amostra de Exemplo</button>
                     </div>
                 </div>
             </div>
@@ -103,6 +108,7 @@
                             <option value="100" selected>Últimos 100 concursos</option>
                             <option value="200">Últimos 200 concursos</option>
                             <option value="500">Últimos 500 concursos</option>
+                            <option value="all">Todos os concursos carregados</option>
                         </select>
                     </div>
                     <div class="flex items-center justify-between pt-1">
@@ -121,17 +127,23 @@
                     <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                     Backtesting & Janelas Móveis
                 </h2>
-                <p class="text-xs text-slate-400 mb-3">Simula o motor em centenas de concursos passados, comparando o desempenho de estratégias estruturais e ajustando pesos automaticamente.</p>
+                <p class="text-xs text-slate-400 mb-3">Simula o motor em concursos passados usando janelas deslizantes para avaliar a consistência da estratégia estrutural.</p>
                 <div class="space-y-3 text-xs">
                     <div>
                         <label class="text-slate-400 block mb-1">Iterações de Janelas Móveis:</label>
-                        <input type="number" id="backtestIterations" value="30" min="5" max="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                        <input type="number" id="backtestIterations" value="30" min="5" max="200" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
                     </div>
                     <button onclick="app.runBacktest()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-md shadow-indigo-900/40">
                         Executar Backtesting Completo
                     </button>
                 </div>
             </div>
+
+            <!-- Botão Geral de Limpeza -->
+            <button onclick="app.clearAllData()" class="w-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 font-semibold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Limpar Tudo (Histórico, Jogos e Conferências)
+            </button>
 
         </section>
 
@@ -197,7 +209,6 @@
 
     <script>
         // Mapeamento Geométrico Fixo da Lotofácil (Matriz 5x5)
-        // 1 a 25 organizados em linhas, colunas, centro, moldura, diagonais e cantos.
         const LOTOFACIL_GEO = (function() {
             const center = [7, 8, 9, 12, 13, 14, 17, 18, 19];
             const corners = [1, 5, 21, 25];
@@ -230,20 +241,19 @@
             constructor() {
                 this.draws = [];
                 this.dnaProfile = null;
-                this.lastBacktestReport = null;
             }
 
             parseDraws(text) {
                 const lines = text.trim().split('\n');
                 const parsed = [];
                 for (let line of lines) {
-                    const parts = line.split(/[-–:]/);
+                    const parts = line.split(/[-–;|]/);
                     let contestNum = null;
                     let numbersText = line;
                     
                     if (parts.length >= 2) {
                         const potentialNum = parseInt(parts[0].trim());
-                        if (!isNaN(potentialNum) && potentialNum > 900) {
+                        if (!isNaN(potentialNum) && potentialNum > 0) {
                             contestNum = potentialNum;
                             numbersText = parts.slice(1).join(' ');
                         }
@@ -259,6 +269,7 @@
                         });
                     }
                 }
+                // Ordenação cronológica garantida (do menor para o maior concurso)
                 this.draws = parsed.sort((a, b) => a.contest - b.contest);
                 return this.draws.length;
             }
@@ -330,8 +341,17 @@
                 };
             }
 
+            getSubset(windowParam) {
+                if (windowParam === 'all' || this.draws.length === 0) {
+                    return [...this.draws];
+                }
+                const size = parseInt(windowParam);
+                if (isNaN(size)) return [...this.draws];
+                // Pega exatamente os últimos N concursos disponíveis
+                return this.draws.slice(-size);
+            }
+
             generateGame(windowDraws, penalizeHot = true) {
-                // Mapeamento de frequências na janela
                 const freq = {};
                 for (let i = 1; i <= 25; i++) freq[i] = 0;
                 
@@ -339,7 +359,6 @@
                     d.numbers.forEach(n => freq[n]++);
                 });
 
-                // Grupos baseados em frequência ponderada
                 const sortedNums = Object.keys(freq).map(Number).sort((a, b) => freq[b] - freq[a]);
                 
                 const veryStrong = sortedNums.slice(0, 5);
@@ -348,7 +367,6 @@
                 const weak = sortedNums.slice(15, 20);
                 const veryWeak = sortedNums.slice(20, 25);
 
-                // Seleção estruturada por grupos (regra recomendada para diversidade)
                 let selected = [];
                 const pickRandom = (arr, count) => {
                     const shuffled = [...arr].sort(() => 0.5 - Math.random());
@@ -363,7 +381,6 @@
                     ...pickRandom(veryWeak, 2)
                 ];
 
-                // Ajuste fino para garantir exatamente 15 dezenas únicas entre 1 e 25
                 selected = [...new Set(selected)];
                 while (selected.length < 15) {
                     const candidate = Math.floor(Math.random() * 25) + 1;
@@ -371,7 +388,6 @@
                 }
                 selected = selected.slice(0, 15).sort((a, b) => a - b);
 
-                // Cálculo da pontuação estrutural do jogo gerado com base no DNA
                 const dna = this.calculateDNA(windowDraws);
                 let score = 100;
 
@@ -379,10 +395,11 @@
                 let gameCenter = selected.filter(n => LOTOFACIL_GEO[n].isCenter).length;
                 let gameSum = selected.reduce((a, b) => a + b, 0);
 
-                // Penalizações por desvio do DNA médio histórico
-                score -= Math.abs(gameEvens - parseFloat(dna.avgEvens)) * 4;
-                score -= Math.abs(gameCenter - parseFloat(dna.avgCenter)) * 4;
-                score -= Math.abs(gameSum - dna.avgSum) * 0.05;
+                if (dna) {
+                    score -= Math.abs(gameEvens - parseFloat(dna.avgEvens)) * 4;
+                    score -= Math.abs(gameCenter - parseFloat(dna.avgCenter)) * 4;
+                    score -= Math.abs(gameSum - dna.avgSum) * 0.05;
+                }
 
                 return {
                     numbers: selected,
@@ -392,16 +409,17 @@
             }
 
             runBacktest(iterations = 30) {
-                if (this.draws.length < 100) return null;
+                if (this.draws.length < 50) return null;
 
                 let totalScoreSum = 0;
                 let hitsDistribution = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, below: 0 };
                 let testedCount = 0;
 
-                const startIndex = Math.max(50, this.draws.length - iterations);
+                const windowSize = 50;
+                const startIndex = Math.max(windowSize, this.draws.length - iterations);
                 
                 for (let i = startIndex; i < this.draws.length; i++) {
-                    const trainingWindow = this.draws.slice(i - 50, i);
+                    const trainingWindow = this.draws.slice(i - windowSize, i);
                     const targetDraw = this.draws[i];
 
                     const simulatedGame = this.generateGame(trainingWindow, true);
@@ -413,6 +431,8 @@
                     totalScoreSum += hits;
                     testedCount++;
                 }
+
+                if (testedCount === 0) return null;
 
                 const avgHits = (totalScoreSum / testedCount).toFixed(2);
                 return {
@@ -426,26 +446,16 @@
         const app = new LotofacilDNAMotor();
 
         function sampleDataText() {
-            return `3480 - 01,03,04,06,09,11,12,14,16,18,19,20,22,23,25
-3479 - 02,03,05,07,08,10,12,13,15,17,19,21,22,24,25
-3478 - 01,02,04,06,08,09,11,13,14,16,18,20,21,23,24
-3477 - 03,04,05,07,09,10,12,14,15,17,18,20,22,24,25
-3476 - 01,02,03,05,06,08,10,11,13,15,16,18,19,21,23
-3475 - 02,04,05,07,08,10,12,14,15,17,19,20,22,24,25
-3474 - 01,03,04,06,07,09,11,13,14,16,18,19,21,23,24
-3473 - 02,03,05,06,08,10,12,13,15,17,18,20,22,24,25
-3472 - 01,02,04,05,07,09,10,12,14,16,17,19,21,22,24
-3471 - 01,03,04,06,08,09,11,13,15,16,18,20,21,23,25
-3470 - 02,03,05,07,08,10,12,13,15,17,19,21,22,24,25
-3469 - 01,02,04,06,07,09,11,12,14,16,18,20,21,23,25
-3468 - 03,04,05,07,08,10,12,14,15,17,18,20,22,24,25
-3467 - 01,02,03,05,06,08,10,11,13,15,16,18,19,21,23
-3466 - 02,04,05,07,08,10,12,14,15,17,19,20,22,24,25
-3465 - 01,03,04,06,07,09,11,13,14,16,18,19,21,23,24
-3464 - 02,03,05,06,08,10,12,13,15,17,18,20,22,24,25
-3463 - 01,02,04,05,07,09,10,12,14,16,17,19,21,22,24
-3462 - 01,03,04,06,08,09,11,13,15,16,18,20,21,23,25
-3461 - 02,03,05,07,08,10,12,13,15,17,19,21,22,24,25`;
+            let sample = "";
+            // Gera uma amostra robusta de 100 concursos sintéticos consistentes para testes imediatos
+            for (let c = 3381; c <= 3480; c++) {
+                let pool = Array.from({length: 25}, (_, i) => i + 1);
+                pool.sort(() => 0.5 - Math.random());
+                let nums = pool.slice(0, 15).sort((a, b) => a - b);
+                let formatted = nums.map(n => String(n).padStart(2, '0')).join(',');
+                sample += `${c} - ${formatted}\n`;
+            }
+            return sample.trim();
         }
 
         app.loadDefaultData = function() {
@@ -453,17 +463,28 @@
             app.processData();
         };
 
+        app.handleFileUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('drawsInput').value = e.target.result;
+                app.processData();
+            };
+            reader.readAsText(file);
+        };
+
         app.processData = function() {
             const text = document.getElementById('drawsInput').value;
             const count = app.parseDraws(text);
             
             if (count === 0) {
-                alert('Nenhum concurso válido encontrado. Verifique o formato.');
+                alert('Nenhum concurso válido encontrado. Verifique o formato (ex: Concurso - 01,02,...) ou cole uma lista válida.');
                 return;
             }
 
-            const windowSize = parseInt(document.getElementById('historyWindow').value);
-            const subset = app.draws.slice(-windowSize);
+            const windowParam = document.getElementById('historyWindow').value;
+            const subset = app.getSubset(windowParam);
             app.dnaProfile = app.calculateDNA(subset);
 
             document.getElementById('totalLoadedBadge').textContent = `${count} concursos carregados`;
@@ -476,12 +497,15 @@
         app.generateStructuralGames = function() {
             if (app.draws.length === 0) {
                 app.loadDefaultData();
+            } else {
+                // Assegura que o DNA reflete a seleção atual antes de gerar
+                app.processData();
             }
 
-            const numGames = parseInt(document.getElementById('numGames').value);
-            const windowSize = parseInt(document.getElementById('historyWindow').value);
+            const numGames = parseInt(document.getElementById('numGames').value) || 10;
+            const windowParam = document.getElementById('historyWindow').value;
             const penalizeHot = document.getElementById('penalizeHot').checked;
-            const subset = app.draws.slice(-windowSize);
+            const subset = app.getSubset(windowParam);
 
             const container = document.getElementById('generatedGamesContainer');
             container.innerHTML = '';
@@ -549,7 +573,7 @@
         };
 
         app.runBacktest = function() {
-            if (app.draws.length < 80) {
+            if (app.draws.length < 60) {
                 app.loadDefaultData();
             }
 
@@ -557,7 +581,7 @@
             const result = app.runBacktest(iterations);
 
             if (!result) {
-                alert('Dados insuficientes para backtesting.');
+                alert('Dados insuficientes para backtesting. Carregue mais concursos.');
                 return;
             }
 
@@ -583,6 +607,34 @@
                         </div>
                     </div>
                 </div>
+            `;
+        };
+
+        app.clearAllData = function() {
+            // Limpa o array interno de dados
+            app.draws = [];
+            app.dnaProfile = null;
+
+            // Limpa campos de texto e inputs
+            document.getElementById('drawsInput').value = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('officialResultInput').value = '';
+
+            // Reseta distintivos e métricas do DNA
+            document.getElementById('totalLoadedBadge').textContent = '0 concursos carregados';
+            document.getElementById('dnaEvenOdd').textContent = '- / -';
+            document.getElementById('dnaCenterBorder').textContent = '- / -';
+            document.getElementById('dnaSum').textContent = '-';
+            document.getElementById('dnaStreak').textContent = '-';
+
+            // Limpa a lista de jogos gerados
+            document.getElementById('generatedGamesContainer').innerHTML = `
+                <div class="text-center py-10 text-slate-500 text-xs">Carregue o histórico e clique em "Gerar Jogos por DNA Estrutural" para iniciar.</div>
+            `;
+
+            // Limpa o painel de backtesting
+            document.getElementById('backtestResultsContainer').innerHTML = `
+                Nenhum backtesting executado no momento. Defina as iterações na barra lateral e execute a simulação.
             `;
         };
 
