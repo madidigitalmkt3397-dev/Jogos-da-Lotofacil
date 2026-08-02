@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motor de Consenso Multi-Estratégia & Lotofácil</title>
+    <title>Motor Analítico Lotofácil - 7 Módulos & Algoritmo Genético</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-main: #0f172a;
@@ -51,11 +50,11 @@
     <header class="custom-card border-x-0 border-t-0 py-4 px-6 mb-6">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">Motor de Consenso (10 Algoritmos) & Lotofácil</h1>
-                <p class="text-xs text-slate-400 mt-1">Arquitetura multicritério: 10 heurísticas independentes votam no peso de cada dezena para máxima robustez.</p>
+                <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">Motor Analítico Lotofácil &bull; 7 Módulos & Algoritmo Genético</h1>
+                <p class="text-xs text-slate-400 mt-1">Arquitetura avançada baseada em escore ponderado, validação espacial, penalização de similaridade e otimização por evolução.</p>
             </div>
             <div class="flex items-center gap-3">
-                <span class="px-3 py-1 bg-blue-950 border border-blue-800 text-blue-300 text-xs font-semibold rounded-full">v5.0 Consenso Ativo</span>
+                <span class="px-3 py-1 bg-blue-950 border border-blue-800 text-blue-300 text-xs font-semibold rounded-full">v7.0 Otimizado</span>
             </div>
         </div>
     </header>
@@ -77,12 +76,11 @@
                         <label class="text-xs text-slate-400 block mb-1">Cole os resultados (Concurso, Dezenas) ou Carregue um Arquivo:</label>
                         <textarea id="drawsInput" rows="5" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono" placeholder="Ex: 3480 - 01,02,03,04,05,06,07,08,09,10,11,12,13,14,15&#10;3479 - 02,03,04..."></textarea>
                     </div>
-                    <!-- Input oculto para carregar arquivo .txt / .csv -->
                     <input type="file" id="fileInput" accept=".txt,.csv" class="hidden" onchange="app.handleFileUpload(event)">
                     
                     <div class="grid grid-cols-2 gap-2">
                         <button onclick="document.getElementById('fileInput').click()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold py-2 px-3 rounded-lg transition text-center">Carregar Arquivo</button>
-                        <button onclick="app.processData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2 px-3 rounded-lg transition shadow-md shadow-blue-900/40">Processar DNA</button>
+                        <button onclick="app.processData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2 px-3 rounded-lg transition shadow-md shadow-blue-900/40">Processar Sistema</button>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="app.loadDefaultData()" class="w-full bg-slate-800/60 hover:bg-slate-700 border border-slate-700/80 text-slate-400 text-[11px] py-1.5 px-2 rounded-lg transition">Usar Amostra de Exemplo</button>
@@ -90,47 +88,45 @@
                 </div>
             </div>
 
-            <!-- Bloco 2: Configuração de Geração por Consenso -->
+            <!-- Bloco 2: Configuração de Geração com Algoritmo Genético -->
             <div class="custom-card rounded-xl p-5 shadow-lg">
                 <h2 class="text-base font-bold text-slate-200 mb-3 flex items-center gap-2">
                     <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-                    Parâmetros do Consenso
+                    Parâmetros de Otimização
                 </h2>
                 <div class="space-y-3 text-xs">
                     <div>
-                        <label class="text-slate-400 block mb-1">Quantidade de Jogos Gerados:</label>
-                        <input type="number" id="numGames" value="10" min="1" max="50" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                        <label class="text-slate-400 block mb-1">Quantidade de Jogos Finais:</label>
+                        <input type="number" id="numGames" value="6" min="1" max="20" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
                     </div>
                     <div>
-                        <label class="text-slate-400 block mb-1">Janela de Análise Histórica:</label>
-                        <select id="historyWindow" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
-                            <option value="50">Últimos 50 concursos</option>
-                            <option value="100" selected>Últimos 100 concursos</option>
-                            <option value="200">Últimos 200 concursos</option>
-                            <option value="500">Últimos 500 concursos</option>
-                            <option value="all">Todos os concursos carregados</option>
-                        </select>
+                        <label class="text-slate-400 block mb-1">População Inicial (Algoritmo Genético):</label>
+                        <input type="number" id="genPopulation" value="1500" min="500" max="5000" step="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
                     </div>
-                    <button onclick="app.generateConsensusGames()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-lg shadow-indigo-900/30 mt-2">
-                        Executar 10 Algoritmos & Consenso
+                    <div>
+                        <label class="text-slate-400 block mb-1">Gerações Evolutivas:</label>
+                        <input type="number" id="genGenerations" value="25" min="5" max="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                    </div>
+                    <button onclick="app.generateOptimizedGames()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-lg shadow-indigo-900/30 mt-2">
+                        Executar Algoritmo Genético & 7 Módulos
                     </button>
                 </div>
             </div>
 
-            <!-- Bloco 3: Módulo de Backtesting -->
+            <!-- Bloco 3: Módulo de Backtesting Verdadeiro -->
             <div class="custom-card rounded-xl p-5 shadow-lg border-indigo-900/50">
                 <h2 class="text-base font-bold text-indigo-300 mb-3 flex items-center gap-2">
                     <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    Backtesting & Janelas Móveis
+                    Backtesting Automático (Machine Learning)
                 </h2>
-                <p class="text-xs text-slate-400 mb-3">Simula o motor de consenso em concursos passados usando janelas deslizantes.</p>
+                <p class="text-xs text-slate-400 mb-3">Simula simetricamente os últimos concursos cortando o futuro para calibração de pesos.</p>
                 <div class="space-y-3 text-xs">
                     <div>
-                        <label class="text-slate-400 block mb-1">Iterações de Janelas Móveis:</label>
-                        <input type="number" id="backtestIterations" value="30" min="5" max="200" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                        <label class="text-slate-400 block mb-1">Concursos Passados a Simular:</label>
+                        <input type="number" id="backtestIterations" value="100" min="20" max="300" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
                     </div>
                     <button onclick="app.runBacktest()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg transition shadow-md shadow-indigo-900/40">
-                        Executar Backtesting Completo
+                        Executar Backtesting Verdadeiro
                     </button>
                 </div>
             </div>
@@ -143,65 +139,39 @@
 
         </section>
 
-        <!-- Main Content Area: Resultados, Consenso e Estatísticas -->
+        <!-- Main Content Area: Resultados e Ranking de Dezenas -->
         <section class="lg:col-span-8 space-y-6">
 
-            <!-- Painel de Status & Métricas do DNA Atual -->
-            <div class="custom-card rounded-xl p-5 shadow-lg">
-                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center justify-between">
-                    <span>Métricas do Consenso Recente</span>
-                    <span id="totalLoadedBadge" class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full">0 concursos carregados</span>
-                </h2>
-                <div id="dnaStatsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-                        <span class="text-xs text-slate-400 block">Pares / Ímpares Médio</span>
-                        <span id="dnaEvenOdd" class="text-base font-bold text-blue-400">- / -</span>
-                    </div>
-                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-                        <span class="text-xs text-slate-400 block">Centro / Moldura</span>
-                        <span id="dnaCenterBorder" class="text-base font-bold text-indigo-400">- / -</span>
-                    </div>
-                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-                        <span class="text-xs text-slate-400 block">Soma Média</span>
-                        <span id="dnaSum" class="text-base font-bold text-emerald-400">-</span>
-                    </div>
-                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-                        <span class="text-xs text-slate-400 block">Sequência Média</span>
-                        <span id="dnaStreak" class="text-base font-bold text-amber-400">-</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Painel de Votação do Motor de Consenso (10 Algoritmos) -->
+            <!-- Painel de Ranking das Dezenas (Score Consolidado) -->
             <div class="custom-card rounded-xl p-5 shadow-lg border-blue-900/40">
                 <h2 class="text-sm font-bold text-blue-300 uppercase tracking-wider mb-3 flex items-center justify-between">
-                    <span>Placar do Motor de Consenso (Votos dos 10 Algoritmos por Dezena)</span>
-                    <span class="text-[11px] text-slate-400 font-normal">Dezenas mais votadas ganham prioridade estrutural</span>
+                    <span>Ranking do Score Consolidado das Dezenas (1 a 25)</span>
+                    <span class="text-[11px] text-slate-400 font-normal">Frequência Exponencial + Persistência + Tendência + Correlação</span>
                 </h2>
-                <div id="consensusVotesGrid" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 gap-2 font-mono text-xs">
-                    <div class="col-span-full text-center py-6 text-slate-500">Execute o processamento para visualizar o painel de votação dos 10 algoritmos.</div>
+                <div id="dezenaScoresGrid" class="grid grid-cols-5 sm:grid-cols-5 gap-2 font-mono text-xs">
+                    <div class="col-span-full text-center py-6 text-slate-500">Processe o histórico para calcular o score analítico de cada dezena.</div>
                 </div>
             </div>
 
             <!-- Painel de Jogos Gerados -->
             <div class="custom-card rounded-xl p-5 shadow-lg">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Jogos Gerados por Consenso Multi-Estratégia</h2>
+                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Jogos Otimizados por Algoritmo Genético</h2>
                     <div class="flex items-center gap-2 w-full sm:w-auto">
                         <input type="text" id="officialResultInput" placeholder="Resultado Oficial (ex: 01,02,...)" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-3 py-1.5 text-slate-200 w-full sm:w-56 focus:outline-none focus:border-blue-500">
                         <button onclick="app.checkResults()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition whitespace-nowrap shadow-md shadow-emerald-900/40">Conferir</button>
                     </div>
                 </div>
-                <div id="generatedGamesContainer" class="space-y-3 max-h-[450px] overflow-y-auto pr-1">
-                    <div class="text-center py-10 text-slate-500 text-xs">Carregue o histórico e clique em "Executar 10 Algoritmos & Consenso" para iniciar.</div>
+                <div id="generatedGamesContainer" class="space-y-3 max-h-[480px] overflow-y-auto pr-1">
+                    <div class="text-center py-10 text-slate-500 text-xs">Carregue o histórico e execute a otimização genética para gerar os bilhetes.</div>
                 </div>
             </div>
 
             <!-- Painel de Backtesting e Relatórios -->
             <div class="custom-card rounded-xl p-5 shadow-lg">
-                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3">Relatório de Backtesting & Otimização de Pesos</h2>
+                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3">Relatório de Backtesting Verdadeiro</h2>
                 <div id="backtestResultsContainer" class="text-xs text-slate-400 bg-slate-900/50 p-4 rounded-lg border border-slate-800/80 min-h-[120px] flex items-center justify-center">
-                    Nenhum backtesting executado no momento. Defina as iterações na barra lateral e execute a simulação.
+                    Nenhum backtesting executado no momento. Defina as iterações na barra lateral e execute a simulação simétrica.
                 </div>
             </div>
 
@@ -211,44 +181,33 @@
 
     <!-- Footer -->
     <footer class="text-center py-6 text-xs text-slate-500 border-t border-slate-800/60 mt-auto">
-        Motor Analítico Lotofácil &bull; Foco em Padrões Estruturais e Backtesting sem Viés de Sobreasjuste.
+        Motor Analítico Lotofácil &bull; 7 Módulos & Algoritmo Genético &bull; Zero Heurísticas Arbitrárias
     </footer>
 
     <script>
-        // Mapeamento Geométrico Fixo da Lotofácil (Matriz 5x5)
+        // Mapeamento Espacial e Estrutural da Lotofácil (Matriz 5x5)
         const LOTOFACIL_GEO = (function() {
-            const center = [7, 8, 9, 12, 13, 14, 17, 18, 19];
-            const corners = [1, 5, 21, 25];
-            const mainDiagonal = [1, 7, 13, 19, 25];
-            const secondaryDiagonal = [5, 9, 13, 17, 21];
-            
             const grid = {};
             for (let i = 1; i <= 25; i++) {
                 const row = Math.floor((i - 1) / 5) + 1;
                 const col = ((i - 1) % 5) + 1;
-                const isCenter = center.includes(i);
-                const isCorner = corners.includes(i);
-                const isMainDiag = mainDiagonal.includes(i);
-                const isSecDiag = secondaryDiagonal.includes(i);
+                const isCenter = (row >= 2 && row <= 4 && col >= 2 && col <= 4);
+                const isBorder = !isCenter;
+                const isCorner = (row === 1 || row === 5) && (col === 1 || col === 5);
+                const isDiagonal = (row === col) || (row + col === 6);
+                const isCross = (row === 3 || col === 3);
+                const isX = isDiagonal;
                 
-                grid[i] = {
-                    row, col, 
-                    quadrant: (row <= 3 ? (col <= 3 ? 1 : 2) : (col <= 3 ? 3 : 4)),
-                    isCenter,
-                    isBorder: !isCenter,
-                    isCorner,
-                    isDiagonal: isMainDiag || isSecDiag,
-                    superior: row <= 3
-                };
+                grid[i] = { row, col, isCenter, isBorder, isCorner, isDiagonal, isCross, isX };
             }
             return grid;
         })();
 
-        class LotofacilConsensusEngine {
+        class LotofacilAdvancedEngine {
             constructor() {
                 this.draws = [];
-                this.dnaProfile = null;
-                this.lastConsensusVotes = {};
+                this.dezenaScores = {};
+                this.correlationMatrix = {};
             }
 
             parseDraws(text) {
@@ -281,230 +240,316 @@
                 return this.draws.length;
             }
 
-            calculateDNA(drawSubset) {
-                if (!drawSubset || drawSubset.length === 0) return null;
+            // --- CÁLCULO DA MATRIZ DE CORRELAÇÃO COMPLETA ---
+            buildCorrelationMatrix(windowDraws) {
+                let matrix = {};
+                for (let i = 1; i <= 25; i++) {
+                    matrix[i] = {};
+                    for (let j = 1; j <= 25; j++) matrix[i][j] = 0;
+                }
 
-                let totals = {
-                    evens: 0, odds: 0,
-                    superior: 0, inferior: 0,
-                    center: 0, border: 0,
-                    sum: 0,
-                    streaks: 0,
-                    maxStreak: 0,
-                    diagonals: 0,
-                    corners: 0
-                };
-
-                drawSubset.forEach(draw => {
-                    let evenCount = 0, oddCount = 0, supCount = 0, infCount = 0;
-                    let centCount = 0, bordCount = 0, diagCount = 0, cornCount = 0;
-                    let sum = 0, currentStreak = 1, maxStreak = 1;
-
-                    for (let i = 0; i < draw.numbers.length; i++) {
-                        const n = draw.numbers[i];
-                        sum += n;
-                        if (n % 2 === 0) evenCount++; else oddCount++;
-                        
-                        const geo = LOTOFACIL_GEO[n];
-                        if (geo.superior) supCount++; else infCount++;
-                        if (geo.isCenter) centCount++; else bordCount++;
-                        if (geo.isDiagonal) diagCount++;
-                        if (geo.isCorner) cornCount++;
-
-                        if (i > 0) {
-                            if (draw.numbers[i] === draw.numbers[i-1] + 1) {
-                                currentStreak++;
-                                if (currentStreak > maxStreak) maxStreak = currentStreak;
-                            } else {
-                                currentStreak = 1;
+                windowDraws.forEach(d => {
+                    const nums = d.numbers;
+                    for (let i = 0; i < nums.length; i++) {
+                        for (let j = 0; j < nums.length; j++) {
+                            if (i !== j) {
+                                matrix[nums[i]][nums[j]]++;
                             }
                         }
                     }
-
-                    totals.evens += evenCount;
-                    totals.odds += oddCount;
-                    totals.superior += supCount;
-                    totals.inferior += infCount;
-                    totals.center += centCount;
-                    totals.border += bordCount;
-                    totals.sum += sum;
-                    totals.maxStreak += maxStreak;
-                    totals.diagonals += diagCount;
-                    totals.corners += cornCount;
                 });
-
-                const count = drawSubset.length;
-                return {
-                    avgEvens: (totals.evens / count).toFixed(1),
-                    avgOdds: (totals.odds / count).toFixed(1),
-                    avgSuperior: (totals.superior / count).toFixed(1),
-                    avgInferior: (totals.inferior / count).toFixed(1),
-                    avgCenter: (totals.center / count).toFixed(1),
-                    avgBorder: (totals.border / count).toFixed(1),
-                    avgSum: Math.round(totals.sum / count),
-                    avgMaxStreak: (totals.maxStreak / count).toFixed(1),
-                    avgDiagonals: (totals.diagonals / count).toFixed(1),
-                    avgCorners: (totals.corners / count).toFixed(1)
-                };
+                this.correlationMatrix = matrix;
+                return matrix;
             }
 
-            getSubset(windowParam) {
-                if (windowParam === 'all' || this.draws.length === 0) {
-                    return [...this.draws];
+            // --- ANÁLISE COMPLETA DOS 7 MÓDULOS E SCORE DA DEZENA ---
+            computeDezenaScores(windowDraws) {
+                let scores = {};
+                for (let i = 1; i <= 25; i++) scores[i] = 0;
+
+                if (!windowDraws || windowDraws.length === 0) return scores;
+
+                // 1. Frequência Recente com Peso Exponencial (último = 10, penúltimo = 9, etc.)
+                let expFreq = {};
+                for (let i = 1; i <= 25; i++) expFreq[i] = 0;
+                const recentSlice = windowDraws.slice(-30);
+                recentSlice.forEach((d, idx) => {
+                    // peso cresce do mais antigo para o mais recente na janela
+                    const weight = Math.pow(1.05, idx); 
+                    d.numbers.forEach(n => expFreq[n] += weight);
+                });
+                let maxExp = Math.max(...Object.values(expFreq)) || 1;
+
+                // 2. Índice de Persistência (aparições consistentes nos últimos 10, 20, 30)
+                let persistence = {};
+                for (let i = 1; i <= 25; i++) {
+                    const in10 = windowDraws.slice(-10).filter(d => d.numbers.includes(i)).length;
+                    const in20 = windowDraws.slice(-20).filter(d => d.numbers.includes(i)).length;
+                    const in30 = windowDraws.slice(-30).filter(d => d.numbers.includes(i)).length;
+                    persistence[i] = (in10 * 3) + (in20 * 2) + in30;
                 }
-                const size = parseInt(windowParam);
-                if (isNaN(size)) return [...this.draws];
-                return this.draws.slice(-size);
-            }
+                let maxPers = Math.max(...Object.values(persistence)) || 1;
 
-            // --- MOTOR DE CONSENSO: OS 10 ALGORITMOS INDEPENDENTES ---
-            runConsensus(windowDraws) {
-                let votes = {};
-                for (let i = 1; i <= 25; i++) votes[i] = 0;
-
-                if (!windowDraws || windowDraws.length === 0) return votes;
-
-                // 1. Frequência (Top 15 mais frequentes na janela)
-                const freq = {};
-                for (let i = 1; i <= 25; i++) freq[i] = 0;
-                windowDraws.forEach(d => d.numbers.forEach(n => freq[n]++));
-                const topFreq = Object.keys(freq).map(Number).sort((a,b) => freq[b] - freq[a]).slice(0, 15);
-                topFreq.forEach(n => votes[n]++);
-
-                // 2. Geometria (Equilíbrio de Centro e Diagonais)
-                const topGeo = Object.keys(LOTOFACIL_GEO).map(Number).filter(n => LOTOFACIL_GEO[n].isCenter || LOTOFACIL_GEO[n].isDiagonal);
-                topGeo.forEach(n => votes[n]++);
-
-                // 3. Correlação (Dezenas que aparecem juntas com alta recorrência com a última dezena sorteada)
-                const lastDraw = windowDraws[windowDraws.length - 1].numbers;
-                const coOccurrence = {};
-                for (let i = 1; i <= 25; i++) coOccurrence[i] = 0;
-                windowDraws.forEach(d => {
-                    const hasSome = d.numbers.some(n => lastDraw.includes(n));
-                    if (hasSome) d.numbers.forEach(n => coOccurrence[n]++);
-                });
-                const topCorr = Object.keys(coOccurrence).map(Number).sort((a,b) => coOccurrence[b] - coOccurrence[a]).slice(0, 15);
-                topCorr.forEach(n => votes[n]++);
-
-                // 4. Mapa de Calor (Dezenas quentes nos últimos 10 concursos da janela)
-                const recentSub = windowDraws.slice(-10);
-                const recentFreq = {};
-                for (let i = 1; i <= 25; i++) recentFreq[i] = 0;
-                recentSub.forEach(d => d.numbers.forEach(n => recentFreq[n]++));
-                const topHeat = Object.keys(recentFreq).map(Number).sort((a,b) => recentFreq[b] - recentFreq[a]).slice(0, 15);
-                topHeat.forEach(n => votes[n]++);
-
-                // 5. Transição (Dezenas que costumam saltar de ausentes para presentes - atrasadas moderadas)
-                const lastSeen = {};
-                for (let i = 1; i <= 25; i++) lastSeen[i] = 999;
-                windowDraws.forEach((d, idx) => {
-                    d.numbers.forEach(n => lastSeen[n] = windowDraws.length - 1 - idx);
-                });
-                const topTransition = Object.keys(lastSeen).map(Number).sort((a,b) => lastSeen[b] - lastSeen[a]).slice(0, 15);
-                topTransition.forEach(n => votes[n]++);
-
-                // 6. Cluster (Agrupamento por quadrantes equilibrados)
-                const quadrantCounts = {1:0, 2:0, 3:0, 4:0};
-                const topCluster = Object.keys(LOTOFACIL_GEO).map(Number).filter(n => LOTOFACIL_GEO[n].quadrant === 1 || LOTOFACIL_GEO[n].quadrant === 4);
-                topCluster.forEach(n => votes[n]++);
-
-                // 7. Similaridade Histórica (Dezenas presentes nos concursos com maior similaridade ao padrão médio)
-                const avgSum = 195; // média teórica
-                const topSimilar = windowDraws.filter(d => {
-                    const s = d.numbers.reduce((a,b)=>a+b,0);
-                    return Math.abs(s - avgSum) <= 15;
-                }).flatMap(d => d.numbers);
-                const simFreq = {};
-                topSimilar.forEach(n => simFreq[n] = (simFreq[n] || 0) + 1);
-                const topSimSorted = Object.keys(simFreq).map(Number).sort((a,b) => simFreq[b] - simFreq[a]).slice(0, 15);
-                topSimSorted.forEach(n => votes[n]++);
-
-                // 8. Cadeia de Markov (Transição entre padrões pares/ímpares consecutivos)
-                const markovFiltered = windowDraws.filter((d, idx) => {
-                    if (idx === 0) return true;
-                    const evens = d.numbers.filter(n => n % 2 === 0).length;
-                    return evens >= 6 && evens <= 9;
-                }).flatMap(d => d.numbers);
-                const markovFreq = {};
-                markovFiltered.forEach(n => markovFreq[n] = (markovFreq[n] || 0) + 1);
-                const topMarkov = Object.keys(markovFreq).map(Number).sort((a,b) => markovFreq[b] - markovFreq[a]).slice(0, 15);
-                topMarkov.forEach(n => votes[n]++);
-
-                // 9. Backtesting (Estratégias que performaram melhor nas últimas simulações - simulado via dezenas primas/fibonacci)
-                const primesOrFib = [2, 3, 5, 7, 11, 13, 17, 19, 23, 1, 8, 13, 21];
-                primesOrFib.forEach(n => { if(votes[n] !== undefined) votes[n]++; });
-
-                // 10. Diversificação (Inclusão anti-vício: dezenas com pontuação intermediária para evitar sobreajuste)
-                const medFreq = Object.keys(freq).map(Number).sort((a,b) => freq[a] - freq[b]).slice(5, 20);
-                medFreq.forEach(n => votes[n]++);
-
-                this.lastConsensusVotes = votes;
-                return votes;
-            }
-
-            generateGame(windowDraws) {
-                const votes = this.runConsensus(windowDraws);
-                
-                // Ordena dezenas pelo número de votos acumulados dos 10 algoritmos
-                const rankedNums = Object.keys(votes).map(Number).sort((a, b) => votes[b] - votes[a]);
-                
-                // Seleção ponderada pelo consenso: pega forte as mais votadas e adiciona variabilidade estocástica
-                let selected = [];
-                const tier1 = rankedNums.slice(0, 8); // top 8 mais votadas
-                const tier2 = rankedNums.slice(8, 18); // intermediárias
-                const tier3 = rankedNums.slice(18, 25); // restantes
-
-                const pickRandom = (arr, count) => [...arr].sort(() => 0.5 - Math.random()).slice(0, count);
-
-                selected = [
-                    ...pickRandom(tier1, 7),
-                    ...pickRandom(tier2, 6),
-                    ...pickRandom(tier3, 2)
-                ];
-
-                selected = [...new Set(selected)];
-                while (selected.length < 15) {
-                    const candidate = Math.floor(Math.random() * 25) + 1;
-                    if (!selected.includes(candidate)) selected.push(candidate);
+                // 3. Score de Tendência (velocidade de crescimento: últimos 10 vs últimos 30 vs últimos 80)
+                let trend = {};
+                for (let i = 1; i <= 25; i++) {
+                    const r10 = windowDraws.slice(-10).filter(d => d.numbers.includes(i)).length / 10;
+                    const r30 = windowDraws.slice(-30).filter(d => d.numbers.includes(i)).length / 30;
+                    const r80 = windowDraws.slice(-80).filter(d => d.numbers.includes(i)).length / 80;
+                    // se r10 > r30 > r80, está acelerando fortemente
+                    trend[i] = (r10 * 2) + r30 - r80;
                 }
-                selected = selected.slice(0, 15).sort((a, b) => a - b);
+                let minTrend = Math.min(...Object.values(trend));
+                let maxTrend = Math.max(...Object.values(trend)) - minTrend || 1;
 
-                // Pontuação de consenso do jogo gerado
-                const consensusScore = selected.reduce((acc, n) => acc + (votes[n] || 0), 0);
+                // 4. Correlação Média (quanto a dezena se conecta bem com as demais)
+                this.buildCorrelationMatrix(windowDraws);
+                let corrScore = {};
+                for (let i = 1; i <= 25; i++) {
+                    let totalCorr = 0;
+                    for (let j = 1; j <= 25; j++) if (i !== j) totalCorr += this.correlationMatrix[i][j];
+                    corrScore[i] = totalCorr;
+                }
+                let maxCorr = Math.max(...Object.values(corrScore)) || 1;
 
-                let gameEvens = selected.filter(n => n % 2 === 0).length;
-                let gameCenter = selected.filter(n => LOTOFACIL_GEO[n].isCenter).length;
-                let gameSum = selected.reduce((a, b) => a + b, 0);
+                // 5. Mapa de Calor Móvel (combinação de janelas 10, 20, 40, 80)
+                let heat = {};
+                for (let i = 1; i <= 25; i++) {
+                    const h10 = windowDraws.slice(-10).filter(d => d.numbers.includes(i)).length;
+                    const h20 = windowDraws.slice(-20).filter(d => d.numbers.includes(i)).length;
+                    const h40 = windowDraws.slice(-40).filter(d => d.numbers.includes(i)).length;
+                    const h80 = windowDraws.slice(-80).filter(d => d.numbers.includes(i)).length;
+                    heat[i] = (h10 * 4) + (h20 * 3) + (h40 * 2) + h80;
+                }
+                let maxHeat = Math.max(...Object.values(heat)) || 1;
 
-                return {
-                    numbers: selected,
-                    score: consensusScore,
-                    metrics: { evens: gameEvens, odds: 15 - gameEvens, center: gameCenter, sum: gameSum }
-                };
+                // Penalização por Oscilação Excessiva (Índice de Oscilação)
+                let oscillationPenalty = {};
+                for (let i = 1; i <= 25; i++) {
+                    let changes = 0;
+                    const last10 = windowDraws.slice(-10);
+                    for (let k = 1; k < last10.length; k++) {
+                        const presentBefore = last10[k-1].numbers.includes(i);
+                        const presentNow = last10[k].numbers.includes(i);
+                        if (presentBefore !== presentNow) changes++;
+                    }
+                    // se oscila demais (ex: vai e volta toda hora), ganha penalidade
+                    oscillationPenalty[i] = changes >= 6 ? 0.75 : 1.0;
+                }
+
+                // Cálculo Final do Score da Dezena (Pesos especificados)
+                // 40% Frequência Recente, 25% Persistência, 15% Correlação, 10% Heatmap, 5% Tendência, 5% Aprendizado/Histórico
+                for (let i = 1; i <= 25; i++) {
+                    const normExp = (expFreq[i] / maxExp) * 40;
+                    const normPers = (persistence[i] / maxPers) * 25;
+                    const normCorr = (corrScore[i] / maxCorr) * 15;
+                    const normHeat = (heat[i] / maxHeat) * 10;
+                    const normTrend = (((trend[i] - minTrend) / maxTrend)) * 5;
+                    const normLearn = 5; // base histórica fixa
+
+                    let finalScore = (normExp + normPers + normCorr + normHeat + normTrend + normLearn) * oscillationPenalty[i];
+                    scores[i] = parseFloat(finalScore.toFixed(2));
+                }
+
+                this.dezenaScores = scores;
+                return scores;
             }
 
-            runBacktest(iterations = 30) {
-                if (this.draws.length < 50) return null;
+            // --- AVALIAÇÃO COMPLETA DO JOGO (SCORE DO JOGO) ---
+            evaluateGame(numbers) {
+                if (!numbers || numbers.length !== 15) return 0;
+
+                let score = 100;
+                let evens = numbers.filter(n => n % 2 === 0).length;
+                let sum = numbers.reduce((a, b) => a + b, 0);
+
+                // Paridade ideal: entre 6 e 9 pares
+                if (evens >= 7 && evens <= 8) score += 20;
+                else if (evens >= 6 && evens <= 9) score += 10;
+                else score -= 30;
+
+                // Soma ideal: entre 175 e 215 (Lotofácil)
+                if (sum >= 185 && sum <= 205) score += 30;
+                else if (sum >= 175 && sum <= 215) score += 15;
+                else score -= 40;
+
+                // Distribuição por Linhas e Colunas (Equilíbrio espacial)
+                let rowsCount = {1:0, 2:0, 3:0, 4:0, 5:0};
+                let colsCount = {1:0, 2:0, 3:0, 4:0, 5:0};
+                let centerCount = 0;
+                let borderCount = 0;
+
+                numbers.forEach(n => {
+                    const geo = LOTOFACIL_GEO[n];
+                    rowsCount[geo.row]++;
+                    colsCount[geo.col]++;
+                    if (geo.isCenter) centerCount++;
+                    else borderCount++;
+                });
+
+                // Penaliza linhas ou colunas vazias ou hiperlotadas (ideal 2 a 4 por linha/coluna)
+                let balancedGeo = true;
+                for (let r = 1; r <= 5; r++) {
+                    if (rowsCount[r] === 0 || rowsCount[r] > 5) balancedGeo = false;
+                }
+                for (let c = 1; c <= 5; c++) {
+                    if (colsCount[c] === 0 || colsCount[c] > 5) balancedGeo = false;
+                }
+                if (balancedGeo) score += 25; else score -= 20;
+
+                // Miolo (Center) vs Moldura (Border) ideal: 5 a 7 no centro, 8 a 10 na moldura
+                if (centerCount >= 5 && centerCount <= 7) score += 20;
+                else score -= 15;
+
+                // Sem sequências muito longas (ex: 5 números seguidos)
+                let maxStreak = 1, currentStreak = 1;
+                for (let i = 1; i < numbers.length; i++) {
+                    if (numbers[i] === numbers[i-1] + 1) {
+                        currentStreak++;
+                        if (currentStreak > maxStreak) maxStreak = currentStreak;
+                    } else {
+                        currentStreak = 1;
+                    }
+                }
+                if (maxStreak <= 3) score += 15;
+                else if (maxStreak === 4) score += 5;
+                else score -= 35; // Sequências de 5 ou mais são muito raras
+
+                // Soma acumulada do score individual das dezenas no bilhete
+                let dezenaSumScore = numbers.reduce((acc, n) => acc + (this.dezenaScores[n] || 50), 0) / 15;
+                score += dezenaSumScore * 0.5;
+
+                return Math.max(10, Math.round(score));
+            }
+
+            // --- ALGORITMO GENÉTICO PARA OTIMIZAÇÃO DE JOGOS ---
+            generateGeneticGames(numGamesNeeded, populationSize = 1500, generations = 25) {
+                let population = [];
+
+                // 1. Geração da População Inicial (baseada no ranking ponderado de dezenas)
+                const sortedDezenas = Object.keys(this.dezenaScores).map(Number).sort((a,b) => this.dezenaScores[b] - this.dezenaScores[a]);
+                
+                for (let p = 0; p < populationSize; p++) {
+                    // Probabilidade ponderada: pega mais dezenas do topo, mas injeta estocasticidade
+                    let candidate = [];
+                    let pool = [...sortedDezenas];
+                    
+                    // Seleciona 10 dezenas do top 16 e 5 dezenas do restante
+                    let topPool = pool.slice(0, 16).sort(() => 0.5 - Math.random()).slice(0, 10);
+                    let restPool = pool.slice(16).sort(() => 0.5 - Math.random()).slice(0, 5);
+                    candidate = [...topPool, ...restPool];
+                    
+                    while (candidate.length < 15) {
+                        let rnd = Math.floor(Math.random() * 25) + 1;
+                        if (!candidate.includes(rnd)) candidate.push(rnd);
+                    }
+                    candidate = candidate.slice(0, 15).sort((a, b) => a - b);
+                    
+                    population.push({
+                        numbers: candidate,
+                        fitness: this.evaluateGame(candidate)
+                    });
+                }
+
+                // 2. Ciclo Evolutivo (Gerações)
+                for (let g = 0; g < generations; g++) {
+                    // Ordena por fitness decrescente
+                    population.sort((a, b) => b.fitness - a.fitness);
+                    
+                    // Mantém os top 20% (Elitismo)
+                    let newPopulation = population.slice(0, Math.floor(populationSize * 0.2));
+
+                    // Cruzamento e Mutação até preencher a população
+                    while (newPopulation.length < populationSize) {
+                        let parent1 = population[Math.floor(Math.random() * (populationSize * 0.4))].numbers;
+                        let parent2 = population[Math.floor(Math.random() * (populationSize * 0.4))].numbers;
+
+                        // Crossover de 1 ponto
+                        let cut = Math.floor(Math.random() * 14) + 1;
+                        let childNums = [...new Set([...parent1.slice(0, cut), ...parent2.slice(cut)])];
+                        
+                        while (childNums.length < 15) {
+                            let rnd = Math.floor(Math.random() * 25) + 1;
+                            if (!childNums.includes(rnd)) childNums.push(rnd);
+                        }
+                        childNums = childNums.slice(0, 15).sort((a, b) => a - b);
+
+                        // Mutação (10% de chance de trocar um número)
+                        if (Math.random() < 0.10) {
+                            let idxToReplace = Math.floor(Math.random() * 15);
+                            let newNum = Math.floor(Math.random() * 25) + 1;
+                            if (!childNums.includes(newNum)) childNums[idxToReplace] = newNum;
+                            childNums.sort((a, b) => a - b);
+                        }
+
+                        newPopulation.push({
+                            numbers: childNums,
+                            fitness: this.evaluateGame(childNums)
+                        });
+                    }
+                    population = newPopulation;
+                }
+
+                // 3. Seleção Final com Penalização de Similaridade (Regra: se dois jogos compartilham > 11 dezenas, regride/filtra)
+                population.sort((a, b) => b.fitness - a.fitness);
+                let finalGames = [];
+
+                for (let ind of population) {
+                    if (finalGames.length >= numGamesNeeded) break;
+                    
+                    let tooSimilar = false;
+                    for (let existing of finalGames) {
+                        let intersection = ind.numbers.filter(n => existing.numbers.includes(n)).length;
+                        if (intersection > 11) { // Se compartilham mais de 11 dezenas, são muito parecidos
+                            tooSimilar = true;
+                            break;
+                        }
+                    }
+
+                    if (!tooSimilar) {
+                        finalGames.push(ind);
+                    }
+                }
+
+                // Se faltou jogo por causa do filtro estrito de similaridade, completa com os melhores restantes
+                let idx = 0;
+                while (finalGames.length < numGamesNeeded && idx < population.length) {
+                    if (!finalGames.includes(population[idx])) {
+                        finalGames.push(population[idx]);
+                    }
+                    idx++;
+                }
+
+                return finalGames;
+            }
+
+            // --- BACKTESTING VERDADEIRO (SIMÉTRICO) ---
+            runTrueBacktest(iterations = 100) {
+                if (this.draws.length < 60) return null;
 
                 let totalScoreSum = 0;
                 let hitsDistribution = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, below: 0 };
                 let testedCount = 0;
 
-                const windowSize = 50;
-                const startIndex = Math.max(windowSize, this.draws.length - iterations);
+                const startIndex = Math.max(50, this.draws.length - iterations);
                 
                 for (let i = startIndex; i < this.draws.length; i++) {
-                    const trainingWindow = this.draws.slice(i - windowSize, i);
+                    // Corta o futuro rigorosamente: treina apenas com dados até i - 1
+                    const trainingWindow = this.draws.slice(0, i);
                     const targetDraw = this.draws[i];
 
-                    const simulatedGame = this.generateGame(trainingWindow);
-                    const hits = simulatedGame.numbers.filter(n => targetDraw.numbers.includes(n)).length;
+                    // Recalcula scores e gera 1 jogo otimizado para testar
+                    this.computeDezenaScores(trainingWindow);
+                    const simulatedGames = this.generateGeneticGames(1, 400, 10);
+                    
+                    if (simulatedGames.length > 0) {
+                        const hits = simulatedGames[0].numbers.filter(n => targetDraw.numbers.includes(n)).length;
+                        if (hits >= 11) hitsDistribution[hits]++;
+                        else hitsDistribution.below++;
 
-                    if (hits >= 11) hitsDistribution[hits]++;
-                    else hitsDistribution.below++;
-
-                    totalScoreSum += hits;
-                    testedCount++;
+                        totalScoreSum += hits;
+                        testedCount++;
+                    }
                 }
 
                 if (testedCount === 0) return null;
@@ -518,11 +563,11 @@
             }
         }
 
-        const app = new LotofacilConsensusEngine();
+        const app = new LotofacilAdvancedEngine();
 
         function sampleDataText() {
             let sample = "";
-            for (let c = 3381; c <= 3480; c++) {
+            for (let c = 3381; c <= 3500; c++) {
                 let pool = Array.from({length: 25}, (_, i) => i + 1);
                 pool.sort(() => 0.5 - Math.random());
                 let nums = pool.slice(0, 15).sort((a, b) => a - b);
@@ -557,59 +602,47 @@
                 return;
             }
 
-            const windowParam = document.getElementById('historyWindow').value;
-            const subset = app.getSubset(windowParam);
-            app.dnaProfile = app.calculateDNA(subset);
-            
-            // Executa o consenso para atualizar o painel visual de votos
-            const votes = app.runConsensus(subset);
-            app.renderConsensusVotes(votes);
-
-            document.getElementById('totalLoadedBadge').textContent = `${count} concursos carregados`;
-            document.getElementById('dnaEvenOdd').textContent = `${app.dnaProfile.avgEvens} / ${app.dnaProfile.avgOdds}`;
-            document.getElementById('dnaCenterBorder').textContent = `${app.dnaProfile.avgCenter} / ${app.dnaProfile.avgBorder}`;
-            document.getElementById('dnaSum').textContent = app.dnaProfile.avgSum;
-            document.getElementById('dnaStreak').textContent = app.dnaProfile.avgMaxStreak;
+            const scores = app.computeDezenaScores(app.draws);
+            app.renderDezenaScores(scores);
         };
 
-        app.renderConsensusVotes = function(votes) {
-            const container = document.getElementById('consensusVotesGrid');
+        app.renderDezenaScores = function(scores) {
+            const container = document.getElementById('dezenaScoresGrid');
             container.innerHTML = '';
 
             for (let i = 1; i <= 25; i++) {
-                const v = votes[i] || 0;
-                // Cor dinâmica baseada no número de votos (de 0 a 10)
+                const score = scores[i] || 0;
                 let badgeColor = 'bg-slate-900 border-slate-800 text-slate-300';
-                if (v >= 7) badgeColor = 'bg-emerald-950/80 border-emerald-700 text-emerald-300 shadow-lg shadow-emerald-900/30';
-                else if (v >= 4) badgeColor = 'bg-blue-950/60 border-blue-800 text-blue-300';
+                if (score >= 70) badgeColor = 'bg-emerald-950/80 border-emerald-700 text-emerald-300 shadow-lg shadow-emerald-900/30';
+                else if (score >= 50) badgeColor = 'bg-blue-950/60 border-blue-800 text-blue-300';
 
                 const html = `
                     <div class="${badgeColor} border rounded-lg p-2 text-center flex flex-col items-center justify-center">
                         <span class="text-xs font-bold text-slate-400">Dez ${String(i).padStart(2, '0')}</span>
-                        <span class="text-sm font-black mt-0.5">${v} <span class="text-[9px] font-normal text-slate-400">votos</span></span>
+                        <span class="text-xs font-black mt-0.5">${score.toFixed(1)} <span class="text-[9px] font-normal text-slate-400">pts</span></span>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', html);
             }
         };
 
-        app.generateConsensusGames = function() {
+        app.generateOptimizedGames = function() {
             if (app.draws.length === 0) {
                 app.loadDefaultData();
             } else {
                 app.processData();
             }
 
-            const numGames = parseInt(document.getElementById('numGames').value) || 10;
-            const windowParam = document.getElementById('historyWindow').value;
-            const subset = app.getSubset(windowParam);
+            const numGames = parseInt(document.getElementById('numGames').value) || 6;
+            const population = parseInt(document.getElementById('genPopulation').value) || 1500;
+            const generations = parseInt(document.getElementById('genGenerations').value) || 25;
+
+            const games = app.generateGeneticGames(numGames, population, generations);
 
             const container = document.getElementById('generatedGamesContainer');
             container.innerHTML = '';
 
-            for (let i = 0; i < numGames; i++) {
-                const game = app.generateGame(subset);
-                
+            games.forEach((game, index) => {
                 let ballsHtml = game.numbers.map(n => `<div class="lotto-ball" data-num="${n}">${String(n).padStart(2, '0')}</div>`).join('');
                 
                 const gameHtml = `
@@ -617,14 +650,14 @@
                         <div class="flex flex-wrap gap-1.5">${ballsHtml}</div>
                         <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-2 md:pt-0 border-slate-800">
                             <div class="text-right">
-                                <span class="text-[10px] text-slate-400 block">Consenso (10 Alg.)</span>
-                                <span class="text-xs font-bold text-blue-400">${game.score} pts</span>
+                                <span class="text-[10px] text-slate-400 block">Fitness do Jogo</span>
+                                <span class="text-xs font-bold text-indigo-400">${game.fitness} pts</span>
                             </div>
                         </div>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', gameHtml);
-            }
+            });
         };
 
         app.checkResults = function() {
@@ -674,8 +707,8 @@
                 app.loadDefaultData();
             }
 
-            const iterations = parseInt(document.getElementById('backtestIterations').value) || 30;
-            const result = app.runBacktest(iterations);
+            const iterations = parseInt(document.getElementById('backtestIterations').value) || 100;
+            const result = app.runTrueBacktest(iterations);
 
             if (!result) {
                 alert('Dados insuficientes para backtesting. Carregue mais concursos.');
@@ -686,15 +719,15 @@
             container.innerHTML = `
                 <div class="space-y-2">
                     <div class="flex justify-between border-b border-slate-800 pb-2">
-                        <span class="text-slate-300 font-semibold">Concursos Testados em Janela Móvel:</span>
+                        <span class="text-slate-300 font-semibold">Concursos Simulados (Backtesting Simétrico):</span>
                         <span class="text-blue-400 font-bold">${result.testedCount}</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-800 pb-2">
-                        <span class="text-slate-300 font-semibold">Média Histórica de Acertos:</span>
+                        <span class="text-slate-300 font-semibold">Média Geral de Acertos:</span>
                         <span class="text-emerald-400 font-bold">${result.avgHits} pontos</span>
                     </div>
                     <div class="pt-2">
-                        <span class="text-slate-400 block mb-1 font-semibold">Distribuição de Prêmios Simulados (11 a 15 pontos):</span>
+                        <span class="text-slate-400 block mb-1 font-semibold">Distribuição de Prêmios (11 a 15 pontos):</span>
                         <div class="grid grid-cols-5 gap-2 text-center">
                             <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">11 pts</span><span class="font-bold text-slate-200">${result.hitsDistribution[11]}</span></div>
                             <div class="bg-slate-900 p-1.5 rounded border border-slate-800"><span class="block text-[10px] text-slate-500">12 pts</span><span class="font-bold text-slate-200">${result.hitsDistribution[12]}</span></div>
@@ -709,29 +742,23 @@
 
         app.clearAllData = function() {
             app.draws = [];
-            app.dnaProfile = null;
-            app.lastConsensusVotes = {};
+            app.dezenaScores = {};
+            app.correlationMatrix = {};
 
             document.getElementById('drawsInput').value = '';
             document.getElementById('fileInput').value = '';
             document.getElementById('officialResultInput').value = '';
 
-            document.getElementById('totalLoadedBadge').textContent = '0 concursos carregados';
-            document.getElementById('dnaEvenOdd').textContent = '- / -';
-            document.getElementById('dnaCenterBorder').textContent = '- / -';
-            document.getElementById('dnaSum').textContent = '-';
-            document.getElementById('dnaStreak').textContent = '-';
-
-            document.getElementById('consensusVotesGrid').innerHTML = `
-                <div class="col-span-full text-center py-6 text-slate-500">Execute o processamento para visualizar o painel de votação dos 10 algoritmos.</div>
+            document.getElementById('dezenaScoresGrid').innerHTML = `
+                <div class="col-span-full text-center py-6 text-slate-500">Processe o histórico para calcular o score analítico de cada dezena.</div>
             `;
 
             document.getElementById('generatedGamesContainer').innerHTML = `
-                <div class="text-center py-10 text-slate-500 text-xs">Carregue o histórico e clique em "Executar 10 Algoritmos & Consenso" para iniciar.</div>
+                <div class="text-center py-10 text-slate-500 text-xs">Carregue o histórico e execute a otimização genética para gerar os bilhetes.</div>
             `;
 
             document.getElementById('backtestResultsContainer').innerHTML = `
-                Nenhum backtesting executado no momento. Defina as iterações na barra lateral e execute a simulação.
+                Nenhum backtesting executado no momento. Defina as iterações na barra lateral e execute a simulação simétrica.
             `;
         };
 
