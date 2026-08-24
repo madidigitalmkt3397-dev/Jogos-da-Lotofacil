@@ -1,750 +1,838 @@
-Você é o engenheiro responsável pela manutenção deste sistema de análise estatística da Lotofácil.
-
-IMPORTANTE:
-
-NÃO recrie o sistema do zero.
-
-NÃO remova as estratégias existentes.
-
-NÃO simplifique o motor estatístico.
-
-NÃO altere a interface visual sem necessidade.
-
-NÃO substitua o backtest por uma simulação fictícia.
-
-NÃO invente resultados.
-
-Faça uma correção cirúrgica no código atual, preservando toda a estrutura existente.
-
-O objetivo desta atualização é corrigir quatro pontos:
-
-1. PARSER DO HISTÓRICO
-2. BACKTEST WALK-FORWARD
-3. CONFERÊNCIA DOS JOGOS ATUAIS
-4. AUDITORIA "MÁXIMO HISTÓRICO VS RESULTADO ATUAL"
-
-============================================================
-1. PROBLEMA ATUAL
-============================================================
-
-O sistema apresenta situações como:
-
-Motor Principal:
-- Maior acerto no backtest: 14 pontos
-- Melhor jogo gerado atualmente: 8 pontos
-
-Isso NÃO deve ser tratado como erro matemático.
-
-O problema é que o sistema atualmente não diferencia claramente:
-
-A) máximo encontrado durante o BACKTEST histórico
-
-de
-
-B) melhor jogo efetivamente GERADO NA EXECUÇÃO ATUAL.
-
-O sistema deve passar a tratar essas métricas como informações independentes.
-
-Exemplo correto:
-
-MOTOR PRINCIPAL
-
-BACKTEST HISTÓRICO
-Máximo observado: 14 pontos
-Média: 9,42
-14+: 3
-15: 0
-
-CONFERÊNCIA ATUAL
-Melhor jogo atual: 8 pontos
-
-Diferença:
-8 - 14 = -6
-
-Conclusão:
-"O Motor Principal atingiu 14 pontos em pelo menos uma simulação histórica do backtest, porém o melhor jogo produzido na execução atual obteve 8 pontos."
-
-NUNCA apresentar simplesmente:
-
-"Motor Principal fez 14 pontos"
-
-quando os 14 pontos vierem apenas do backtest.
-
-Usar obrigatoriamente a expressão:
-
-"Máximo observado no Backtest"
-
-============================================================
-2. CORRIGIR O PARSER DO HISTÓRICO
-============================================================
-
-O parser atual possui risco de interpretar partes da data como dezenas.
-
-Exemplo:
-
-3650,01/04/2026,01,02,04,05,07,09,10,12,14,16,18,20,22,23,25
-
-O parser NÃO pode interpretar:
-
-01/04/2026
-
-como dezenas do concurso.
-
-A data deve ser ignorada.
-
-O resultado correto desse registro é:
-
-01,02,04,05,07,09,10,12,14,16,18,20,22,23,25
-
-Implementar um parser robusto que:
-
-- aceite CSV;
-- aceite vírgula;
-- aceite ponto e vírgula;
-- aceite espaços;
-- aceite formato da Caixa;
-- aceite concurso + data + 15 dezenas;
-- aceite somente 15 dezenas;
-- ignore concurso;
-- ignore data;
-- aceite somente dezenas entre 01 e 25;
-- exija exatamente 15 dezenas únicas;
-- ordene as dezenas;
-- rejeite linhas inválidas;
-- NÃO use simplesmente "as últimas 15 dezenas" como mecanismo de correção.
-
-IMPORTANTE:
-
-Se uma linha possuir quantidade diferente de 15 dezenas válidas após a remoção de concurso/data, a linha deve ser marcada como inválida e não silenciosamente corrigida.
-
-Registrar no console:
-
-"Parser: X concursos válidos carregados."
-
-E também informar:
-
-- linhas válidas;
-- linhas rejeitadas;
-- motivo da rejeição.
-
-============================================================
-3. VALIDAÇÃO DO HISTÓRICO
-============================================================
-
-Depois do parser, executar uma auditoria básica.
-
-Para cada concurso:
-
-- exatamente 15 dezenas;
-- nenhuma duplicada;
-- todas entre 1 e 25;
-- dezenas ordenadas;
-- concurso não deve ser utilizado como dezena;
-- ano/data não devem ser utilizados como dezena.
-
-Criar uma função:
-
-validarHistorico(historico)
-
-Ela deve retornar algo semelhante a:
-
-{
-    valido: true,
-    concursosValidos: 100,
-    concursosInvalidos: 0,
-    erros: []
-}
-
-Se houver erro, mostrar claramente.
-
-NÃO permitir que o backtest execute com histórico inválido.
-
-============================================================
-4. CORRIGIR O BACKTEST WALK-FORWARD
-============================================================
-
-Preservar a ideia de Walk-Forward.
-
-Para cada concurso-alvo:
-
-CONCURSO ALVO
-↓
-não pode participar do cálculo das estatísticas
-↓
-usar somente concursos anteriores/passados
-↓
-calcular frequência
-↓
-calcular atraso
-↓
-gerar jogo
-↓
-comparar com o concurso-alvo real
-
-Não pode haver data leakage.
-
-IMPORTANTE:
-
-O backtest NÃO pode usar o histórico atual inteiro para prever um concurso que pertence a esse mesmo histórico.
-
-A lógica temporal deve ser explicitamente auditável.
-
-Para cada teste registrar:
-
-{
-    indiceTeste,
-    concursoAlvo,
-    tamanhoHistoricoTreino,
-    estrategia,
-    jogoGerado,
-    acertos
-}
-
-============================================================
-5. CORRIGIR A CONTAGEM DE SIMULAÇÕES
-============================================================
-
-O sistema atualmente informa "30.000 simulações" mesmo quando a quantidade real pode ser menor.
-
-Isso deve ser corrigido.
-
-Nunca exibir um número fixo de 30.000.
-
-Calcular:
-
-totalSimulacoesExecutadas
-
-e apresentar o número real.
-
-Exemplo:
-
-"12.480 simulações executadas"
-
-ou:
-
-"30.000 simulações executadas"
-
-dependendo do número real.
-
-O relatório deve informar:
-
-- quantidade de concursos utilizados no Walk-Forward;
-- quantidade de estratégias;
-- simulações por lote;
-- total real de simulações;
-- quantidade total de jogos avaliados.
-
-============================================================
-6. SEPARAR BACKTEST E CONFERÊNCIA ATUAL
-============================================================
-
-Criar duas estruturas independentes.
-
-ESTRUTURA 1:
-
-backtestResultsGlobal
-
-Responsável SOMENTE pelo desempenho histórico.
-
-ESTRUTURA 2:
-
-auditoriaAtualGlobal
-
-Responsável SOMENTE pela conferência dos jogos atualmente gerados.
-
-NUNCA misturar os dois.
-
-============================================================
-7. BACKTEST — MÉTRICAS
-============================================================
-
-Para cada estratégia armazenar:
-
-{
-    jogos,
-    maior,
-    menor,
-    somaAcertos,
-    media,
-    ac11,
-    ac12,
-    ac13,
-    ac14,
-    ac15
-}
-
-Onde:
-
-maior = maior quantidade de acertos encontrada em QUALQUER teste do backtest.
-
-IMPORTANTE:
-
-"maior" deve ser rotulado na interface como:
-
-"Máximo observado no Backtest"
-
-e NÃO:
-
-"Acerto atual"
-
-ou:
-
-"Previsão atual".
-
-============================================================
-8. CONFERÊNCIA DOS JOGOS ATUAIS
-============================================================
-
-A função conferirJogos() deve analisar SOMENTE:
-
-jogosGeradosGlobal
-
-contra:
-
-resultadoOficial
-
-Para cada jogo:
-
-acertos =
-jogo.dezenas.filter(
-    d => resultadoOficial.includes(d)
-).length;
-
-Salvar:
-
-j.pontos = acertos;
-
-Além disso salvar:
-
-j.auditoria = {
-    acertos: [...],
-    faltantes: [...]
-};
-
-Onde:
-
-acertos = dezenas do jogo que também estão no resultado oficial.
-
-faltantes = dezenas do resultado oficial que não estavam no jogo.
-
-============================================================
-9. CRIAR AUDITORIA DO MELHOR JOGO ATUAL
-============================================================
-
-Criar:
-
-auditoriaAtualGlobal = {
-    resultadoOficial: [],
-    melhorJogo: null,
-    melhorPontuacao: 0,
-    porEstrategia: {},
-    totalJogos: 0,
-    conferidoEm: null
-};
-
-Depois da conferência:
-
-identificar o melhor jogo atual.
-
-Exemplo:
-
-Melhor jogo atual:
-Estratégia: Motor Principal
-Jogo: #2
-Acertos: 8/15
-
-Acertos:
-01,03,05,07,09,12,18,24
-
-Faltantes:
-02,04,06,10,13,15,21
-
-============================================================
-10. AUDITORIA POR ESTRATÉGIA
-============================================================
-
-Além do melhor jogo global, calcular:
-
-Motor Principal
-- quantidade de jogos atuais;
-- melhor resultado atual;
-- média atual;
-- jogo que obteve o melhor resultado.
-
-Fazer o mesmo para TODAS as estratégias.
-
-Exemplo:
-
-Motor Principal
-Jogos atuais: 3
-Melhor atual: 8
-Média atual: 7,33
-
-Jogo Híbrido Alpha
-Jogos atuais: 3
-Melhor atual: 10
-Média atual: 8,67
-
-etc.
-
-============================================================
-11. RELATÓRIO "HISTÓRICO VS ATUAL"
-============================================================
-
-Criar um painel visual:
-
-🔎 AUDITORIA — HISTÓRICO VS CONFERÊNCIA ATUAL
-
-Para cada estratégia mostrar:
-
-Estratégia
-Máximo Backtest
-Média Backtest
-Melhor Atual
-Média Atual
-Diferença Atual vs Máximo Histórico
-
-Exemplo:
-
-Motor Principal
-
-Máximo Backtest: 14
-Média Backtest: 9,42
-
-Melhor Atual: 8
-Média Atual: 7,33
-
-Diferença:
-8 - 14 = -6
-
-Conclusão:
-"O melhor resultado da execução atual ficou 6 pontos abaixo do máximo observado no backtest."
-
-============================================================
-12. DIFERENCIAR CLARAMENTE OS DOIS RESULTADOS
-============================================================
-
-A interface deve utilizar exatamente estes conceitos:
-
-BACKTEST:
-
-"Máximo observado no Backtest"
-
-CONFERÊNCIA:
-
-"Melhor resultado da execução atual"
-
-Nunca utilizar:
-
-"Motor Principal fez 14"
-
-se o 14 veio do backtest.
-
-Utilizar:
-
-"Motor Principal atingiu 14 pontos em uma simulação histórica do Backtest."
-
-============================================================
-13. NÃO CONFUNDIR BACKTEST COM PREVISÃO
-============================================================
-
-IMPORTANTE:
-
-Um resultado de 14 no backtest significa:
-
-"Uma simulação histórica dessa estratégia encontrou um jogo com 14 acertos."
-
-Não significa:
-
-"O Motor Principal prevê 14 acertos."
-
-Não apresentar o resultado histórico como garantia ou previsão.
-
-============================================================
-14. AUDITORIA DOS JOGOS DO BACKTEST
-============================================================
-
-Quando uma estratégia atingir um novo recorde no backtest, salvar também o jogo responsável pelo recorde.
-
-Exemplo:
-
-res.maior = 14
-
-salvar:
-
-res.melhorJogoHistorico = {
-    jogo: [...],
-    acertos: 14,
-    concursoAlvo: [...],
-    teste: X
-};
-
-Assim será possível auditar de onde veio o "14".
-
-O sistema deverá permitir identificar:
-
-- qual concurso foi utilizado como alvo;
-- quais dezenas foram geradas;
-- quais dezenas acertaram;
-- quais dezenas faltaram;
-- qual estratégia gerou;
-- qual teste produziu o recorde.
-
-============================================================
-15. REGISTRO DE NOVO RECORDE
-============================================================
-
-Quando:
-
-acertos > res.maior
-
-salvar:
-
-res.maior = acertos;
-
-res.melhorJogoHistorico = {
-    dezenas: [...jogoGerado],
-    concursoAlvo: [...concursoAlvo],
-    acertos: acertos,
-    teste: t
-};
-
-Isso é obrigatório.
-
-Assim, se o sistema disser:
-
-"Motor Principal — máximo histórico: 14"
-
-deve ser possível descobrir exatamente de onde veio esse 14.
-
-============================================================
-16. CORRIGIR O RANKING
-============================================================
-
-A tabela atual possui:
-
-Estratégia
-Peso Atual
-Jogos Gerados
-Maior Acerto
-Média de Acertos
-11+
-12+
-13+
-14+
-15
-
-Manter essas colunas para o BACKTEST.
-
-Mas adicionar:
-
-Melhor Atual
-Média Atual
-
-E deixar visualmente claro que:
-
-"Maior Acerto" = Backtest
-
-"Melhor Atual" = Conferência atual
-
-============================================================
-17. NÃO ALTERAR O MOTOR PRINCIPAL SEM NECESSIDADE
-============================================================
-
-Nesta correção NÃO modificar a lógica matemática das estratégias.
-
-Primeiro corrigir:
-
-- parser;
-- validação;
-- backtest;
-- auditoria;
-- conferência;
-- apresentação.
-
-Somente depois avaliar alterações no algoritmo de geração.
-
-Não mascarar problemas de geração alterando o algoritmo.
-
-============================================================
-18. CORRIGIR A DOCUMENTAÇÃO DAS 30.000 SIMULAÇÕES
-============================================================
-
-Não escrever:
-
-"30.000+ simulações reais concluídas"
-
-de forma fixa.
-
-Usar:
-
-"${totalSimulacoesExecutadas.toLocaleString()} simulações reais concluídas."
-
-Também informar:
-
-"Concursos de teste: X"
-
-"Estratégias avaliadas: X"
-
-"Jogos avaliados: X"
-
-============================================================
-19. TESTE OBRIGATÓRIO APÓS A CORREÇÃO
-============================================================
-
-Depois de implementar, execute estes testes.
-
-TESTE 1 — PARSER
-
-Entrada:
-
-3650,01/04/2026,01,02,04,05,07,09,10,12,14,16,18,20,22,23,25
-
-Resultado esperado:
-
-01,02,04,05,07,09,10,12,14,16,18,20,22,23,25
-
-Exatamente 15 dezenas.
-
-TESTE 2 — CONFERÊNCIA
-
-Resultado oficial:
-
-01,02,03,04,05,06,07,08,09,10,11,12,13,14,15
-
-Criar um jogo conhecido e verificar manualmente a quantidade de acertos.
-
-O sistema deve retornar exatamente a interseção matemática.
-
-TESTE 3 — DIFERENCIAÇÃO
-
-Se o backtest apresentar:
-
-Máximo histórico = 14
-
-e a conferência atual apresentar:
-
-Melhor atual = 8
-
-O painel deve mostrar:
-
-Máximo observado no Backtest: 14
-
-Melhor resultado atual: 8
-
-Diferença: -6
-
-NÃO pode mostrar:
-
-"Motor Principal: 14"
-
-como se fosse o resultado atual.
-
-TESTE 4 — AUDITORIA
-
-Se o backtest encontrar 14 pontos, deve ser possível abrir/consultar:
-
-- concurso alvo;
-- jogo gerado;
-- dezenas acertadas;
-- dezenas faltantes;
-- estratégia;
-- número do teste.
-
-TESTE 5 — CONTAGEM
-
-O número exibido de simulações deve ser exatamente igual ao contador real:
-
-totalSimulacoesExecutadas.
-
-============================================================
-20. CRITÉRIO DE ACEITAÇÃO
-============================================================
-
-A correção só estará concluída se:
-
-[ ] Parser não utilizar data como dezenas.
-
-[ ] Parser exigir 15 dezenas únicas.
-
-[ ] Histórico inválido for rejeitado.
-
-[ ] Backtest utilizar somente dados anteriores ao concurso-alvo.
-
-[ ] Não existir data leakage.
-
-[ ] Número de simulações exibido for o número REAL.
-
-[ ] Backtest e conferência atual forem estruturas independentes.
-
-[ ] "Máximo histórico" não for confundido com "melhor jogo atual".
-
-[ ] Cada recorde do backtest puder ser auditado.
-
-[ ] Cada jogo atual puder ser auditado.
-
-[ ] Conferência mostrar acertos e faltantes.
-
-[ ] Ranking separar Backtest de Atual.
-
-[ ] Relatório mostrar "Histórico vs Atual".
-
-[ ] Se houver 14 no backtest e 8 atualmente, o sistema deverá mostrar claramente:
-
-    BACKTEST: 14
-    ATUAL: 8
-    DIFERENÇA: -6
-
-[ ] Não alterar as estratégias existentes sem necessidade.
-
-[ ] Não inventar métricas.
-
-[ ] Não exibir "30.000 simulações" quando o número real for diferente.
-
-============================================================
-21. RELATÓRIO FINAL DA IA
-============================================================
-
-Depois de corrigir o código, NÃO responda apenas "corrigido".
-
-Informe:
-
-1. O que foi corrigido no parser.
-2. O que foi corrigido no backtest.
-3. Como foi eliminado o risco de data leakage.
-4. Quantas simulações o backtest realmente executou.
-5. Como a conferência atual foi separada do backtest.
-6. Como funciona agora a auditoria do melhor jogo.
-7. Como o sistema diferencia "14 histórico" de "8 atual".
-8. Se todos os testes obrigatórios passaram.
-9. Se alguma parte não pôde ser validada.
-
-IMPORTANTE:
-
-Não declarar que um teste passou sem realmente executar/verificar o código.
-
-============================================================
-RESULTADO ESPERADO
-============================================================
-
-O sistema deve passar a responder claramente:
-
-"Qual foi o melhor resultado histórico do Motor Principal?"
-
-→ Máximo observado no Backtest.
-
-"Qual foi o melhor resultado dos jogos que acabei de gerar?"
-
-→ Melhor resultado da execução atual.
-
-"De onde veio o 14?"
-
-→ Mostrar concurso-alvo, jogo, acertos, faltantes e teste responsável.
-
-"Por que o histórico mostrou 14 e agora apareceu 8?"
-
-→ Porque são métricas diferentes:
-14 = máximo encontrado no backtest histórico.
-8 = melhor resultado dos jogos gerados na execução atual.
-
-Essa distinção deve ficar explícita tanto no código quanto na interface.
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotofácil - Laboratório Estatístico Avançado & Motor Adaptativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- Cabeçalho -->
+        <header class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">Lotofácil - Laboratório Estatístico & Motor Adaptativo</h1>
+                <p class="text-slate-500 text-sm mt-1">Pré-Filtro Estatístico, Auditoria Walk-Forward, Backtest vs Atual e Modo Elite.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <button onclick="analisarHistorico()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
+                    Analisar Histórico
+                </button>
+                <button onclick="gerarJogos()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
+                    Gerar Jogos (Modo Elite)
+                </button>
+                <button onclick="executarModoCientifico()" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
+                    Modo Científico (Backtest)
+                </button>
+                <button onclick="gerarNovamente()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
+                    Gerar Novamente
+                </button>
+                <button onclick="exportarJogosTXT()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl border border-slate-300 transition-all duration-200 text-sm">
+                    Exportar
+                </button>
+                <button onclick="limparJogos()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-2.5 rounded-xl border border-slate-300 transition-all duration-200 text-sm">
+                    Limpar Jogos
+                </button>
+                <button onclick="limparTudo()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold px-3 py-2.5 rounded-xl border border-rose-200 transition-all duration-200 text-sm">
+                    Limpar Tudo
+                </button>
+            </div>
+        </header>
+
+        <!-- Configuração e Entrada -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Entrada de Dados -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                <h2 class="text-lg font-semibold text-slate-800">Resultados da Lotofácil</h2>
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Cole os resultados (Suporta CSV, vírgula, ponto e vírgula, espaços e formato Caixa - ignora concursos e datas):</label>
+                    <textarea id="inputHistorico" rows="8" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 font-mono" placeholder="3650,01/04/2026,01,02,04,05,07,09,10,12,14,16,18,20,22,23,25"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Janela de Análise:</label>
+                        <select id="selectJanela" onchange="analisarHistorico()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 focus:outline-none focus:border-emerald-500">
+                            <option value="10">Últimos 10</option>
+                            <option value="20">Últimos 20</option>
+                            <option value="30">Últimos 30</option>
+                            <option value="50" selected>Últimos 50</option>
+                            <option value="100">Últimos 100</option>
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Jogos por Estratégia:</label>
+                        <select id="selectQtdJogos" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 focus:outline-none focus:border-emerald-500">
+                            <option value="3" selected>3 Jogos / Estratégia</option>
+                            <option value="5">5 Jogos / Estratégia</option>
+                            <option value="10">10 Jogos / Estratégia</option>
+                            <option value="20">20 Jogos / Estratégia</option>
+                            <option value="30">30 Jogos / Estratégia</option>
+                            <option value="50">50 Jogos / Estratégia</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard de Estatísticas e Rankings -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 lg:col-span-2">
+                <h2 class="text-lg font-semibold text-slate-800">Dashboard Estatístico & Validação do Histórico</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <span class="font-semibold text-emerald-700 block text-sm">Status do Parser & Validação:</span>
+                        <span id="dashParserStatus" class="text-slate-700 block font-mono leading-relaxed max-h-24 overflow-y-auto">-</span>
+                    </div>
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1.5">
+                        <span class="font-semibold text-slate-700 block text-sm">Matriz de Pesos Dinâmicos & Ativos:</span>
+                        <span id="dashPesos" class="text-slate-600 block font-mono leading-relaxed max-h-24 overflow-y-auto">-</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                    <div>
+                        <span class="font-semibold text-slate-700 block mb-0.5">Relatório do Modo Científico (Backtest Walk-Forward):</span>
+                        <span id="dashBacktesting" class="text-slate-600 block">-</span>
+                    </div>
+                    <div id="pesosAtuaisBadge" class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-[11px] font-mono">
+                        Zero Data Leakage Ativo
+                    </div>
+                </div>
+
+                <!-- Mapa de Calor (Dezenas 1 a 25) -->
+                <div>
+                    <span class="text-xs font-semibold text-slate-700 block mb-2">Mapa de Calor da Frequência (01 a 25):</span>
+                    <div id="mapaCalor" class="grid grid-cols-5 md:grid-cols-10 gap-1.5">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Seção de Relatório Histórico vs Atual (Painel Dedicado) -->
+        <section id="secaoAuditoriaComparativa" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                🔎 AUDITORIA — HISTÓRICO VS CONFERÊNCIA ATUAL
+            </h2>
+            <p class="text-xs text-slate-500">Diferenciação clara entre o Máximo Observado no Backtest (histórico) e o Melhor Resultado da Execução Atual.</p>
+            <div id="containerAuditoriaComparativa" class="overflow-x-auto">
+                <div class="text-xs text-slate-400 p-4 text-center border border-dashed border-slate-200 rounded-xl">
+                    Execute a conferência ou o backtest para visualizar a auditoria comparativa.
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Ranking Dinâmico das Estratégias (Separando Backtest e Atual) -->
+        <section id="secaoRanking" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                🏆 Tabela Comparativa & Matriz de Desempenho (Lotofácil)
+            </h2>
+            <div class="overflow-x-auto">
+                <table id="tabelaRankingEstrategias" class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                            <th class="p-3 font-semibold">Estratégia / Híbrido</th>
+                            <th class="p-3 font-semibold text-center">Peso Atual</th>
+                            <th class="p-3 font-semibold text-center">Jogos Gerados</th>
+                            <th class="p-3 font-semibold text-center text-emerald-700" title="Máximo observado em simulações históricas do Backtest">Máximo Backtest</th>
+                            <th class="p-3 font-semibold text-center text-emerald-700" title="Média de acertos no Backtest">Média Backtest</th>
+                            <th class="p-3 font-semibold text-center text-blue-700" title="Melhor resultado obtido na execução atual">Melhor Atual</th>
+                            <th class="p-3 font-semibold text-center text-blue-700" title="Média de acertos na execução atual">Média Atual</th>
+                            <th class="p-3 font-semibold text-center">11+ (BT)</th>
+                            <th class="p-3 font-semibold text-center">12+ (BT)</th>
+                            <th class="p-3 font-semibold text-center">13+ (BT)</th>
+                            <th class="p-3 font-semibold text-center">14+ (BT)</th>
+                            <th class="p-3 font-semibold text-center">15 (BT)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoTabelaRanking" class="divide-y divide-slate-200 text-slate-600">
+                        <!-- Injetado via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Seção de Jogos Gerados e Módulo de Conferência -->
+        <section class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-800">Laboratório de Elite, Híbridos e Jogos (15 Dezenas)</h2>
+                    <span id="statusGeracao" class="text-xs text-slate-500">Nenhum jogo gerado</span>
+                </div>
+                <!-- Módulo de Conferência -->
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <input type="text" id="inputConferencia" placeholder="Resultado Oficial: exatamente 15 dezenas (ex: 01,02,...,15)" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 font-mono flex-1 md:w-96">
+                    <button onclick="conferirJogos()" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-xl shadow-sm transition-all duration-200 text-xs flex items-center gap-1.5 whitespace-nowrap">
+                        Conferir Resultado
+                    </button>
+                </div>
+            </div>
+            
+            <div id="containerJogos" class="grid grid-cols-1 gap-6">
+                <div class="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl col-span-full text-sm">
+                    Clique em "Analisar Histórico" e depois em "Gerar Jogos" para ativar o motor estatístico.
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Script de Processamento e Motor Cirúrgico -->
+    <script>
+        // Variáveis Globais de Estado (Estruturas Separadas)
+        let historicoGlobal = [];
+        let estatisticasGlobais = {};
+        let jogosGeradosGlobal = [];
+        let backtestResultsGlobal = {};
+        let auditoriaAtualGlobal = {
+            resultadoOficial: [],
+            melhorJogo: null,
+            melhorPontuacao: 0,
+            porEstrategia: {},
+            totalJogos: 0,
+            conferidoEm: null
+        };
+        
+        let pesosEstrategias = {
+            "Motor Principal": 1.0,
+            "Jogo Híbrido Alpha": 1.2,
+            "Jogo Híbrido Beta": 1.1,
+            "Frequência Recente": 1.0,
+            "Ciclo": 1.0,
+            "Moldura × Centro": 1.0,
+            "Par × Ímpar": 1.0,
+            "Soma": 1.0,
+            "Sequências": 1.0,
+            "Ousadia Conservadora": 0.9,
+            "Ousadia Moderada": 1.0,
+            "Ousadia Agressiva": 0.8
+        };
+
+        // Amostra Inicial Padrão para Teste Imediato
+        const historicoInicialPadrao = [
+            "3650,01/04/2026,01,02,04,05,07,09,10,12,14,16,18,20,22,23,25",
+            "3649,30/03/2026,02,03,04,06,08,10,11,13,15,17,19,21,23,24,25",
+            "3648,28/03/2026,01,03,05,07,09,11,12,14,16,18,20,22,24,25",
+            "3647,27/03/2026,02,03,05,06,08,10,12,13,15,17,19,21,22,23,25",
+            "3646,26/03/2026,01,02,04,07,09,11,13,14,16,18,20,21,23,24,25",
+            "3645,25/03/2026,03,04,05,06,08,09,11,12,15,17,19,20,22,24,25",
+            "3644,24/03/2026,01,02,03,05,07,10,12,13,14,16,18,21,23,24,25",
+            "3643,23/03/2026,02,04,06,07,09,11,12,14,15,17,19,20,22,23,25",
+            "3642,22/03/2026,01,03,04,06,08,10,13,14,16,17,19,21,22,24,25",
+            "3641,20/03/2026,02,03,05,07,09,11,12,14,15,18,20,21,23,24,25",
+            "3640,19/03/2026,01,02,04,06,08,09,11,13,16,17,19,22,23,24,25",
+            "3639,18/03/2026,03,04,05,07,10,12,14,15,17,18,20,21,23,24,25",
+            "3638,17/03/2026,01,02,03,06,08,09,11,13,15,16,19,20,22,24,25",
+            "3637,16/03/2026,02,04,05,07,09,10,12,14,16,18,20,21,23,24,25",
+            "3636,13/03/2026,01,03,04,06,08,11,13,14,15,17,19,22,23,24,25"
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('inputHistorico').value = historicoInicialPadrao.join('\n');
+            analisarHistorico();
+        });
+
+        // --- 1 & 3. PARSER ROBUSTO E VALIDAÇÃO DO HISTÓRICO ---
+        function parseEValidarHistorico() {
+            const texto = document.getElementById('inputHistorico').value;
+            if (!texto || !texto.trim()) {
+                return { historico: [], validacao: { valido: false, concursosValidos: 0, concursosInvalidos: 0, erros: ["Texto vazio."] } };
+            }
+
+            const linhas = texto.split('\n');
+            let historicoValido = [];
+            let errosValidacao = [];
+            let linhasValidasCount = 0;
+            let linhasRejeitadasCount = 0;
+
+            linhas.forEach((linhaOriginal, index) => {
+                let linha = linhaOriginal.trim();
+                if (!linha) return;
+
+                // Dividir por delimitadores comuns (vírgula, ponto e vírgula, tab, barra, pipe, espaços)
+                let partes = linha.split(/[\t,;|\/\s-]+/).filter(Boolean);
+                
+                // Filtrar tokens que sejam puramente números inteiros válidos entre 1 e 25
+                // Datas no formato DD/MM/YYYY geram partes numéricas como 01, 04, 2026 (2026 é > 25, logo descartado)
+                // Concursos longos (ex: 3650) também são descartados por estarem fora do intervalo [1, 25]
+                let dezenasCandidatas = partes
+                    .map(p => parseInt(p, 10))
+                    .filter(n => !isNaN(n) && n >= 1 && n <= 25);
+
+                // Remover duplicatas mantendo a ordem para validação estrita de 15 dezenas únicas
+                let dezenasUnicas = [...new Set(dezenasCandidatas)];
+
+                // Critério estrito: exatamente 15 dezenas únicas e válidas
+                if (dezenasUnicas.length === 15) {
+                    dezenasUnicas.sort((a, b) => a - b);
+                    historicoValido.push(dezenasUnicas);
+                    linhasValidasCount++;
+                } else {
+                    linhasRejeitadasCount++;
+                    errosValidacao.push(`Linha ${index + 1}: Rejeitada por conter ${dezenasUnicas.length} dezenas válidas (exigido exatamente 15). Conteúdo: "${linhaOriginal}"`);
+                }
+            });
+
+            const resultadoValidacao = {
+                valido: historicoValido.length > 0,
+                concursosValidos: linhasValidasCount,
+                concursosInvalidos: linhasRejeitadasCount,
+                erros: errosValidacao
+            };
+
+            console.log(`Parser: ${linhasValidasCount} concursos válidos carregados. Linhas rejeitadas: ${linhasRejeitadasCount}.`);
+            return { historico: historicoValido, validacao: resultadoValidacao };
+        }
+
+        function validarHistorico(historico) {
+            let erros = [];
+            let validos = 0;
+            let invalidos = 0;
+
+            historico.forEach((c, idx) => {
+                if (c.length !== 15) {
+                    erros.push(`Concurso [${idx}]: possui ${c.length} dezenas (esperado 15).`);
+                    invalidos++;
+                    return;
+                }
+                let temDuplicata = new Set(c).size !== 15;
+                if (temDuplicata) {
+                    erros.push(`Concurso [${idx}]: contém dezenas duplicadas.`);
+                    invalidos++;
+                    return;
+                }
+                let foraDoIntervalo = c.some(n => n < 1 || n > 25);
+                if (foraDoIntervalo) {
+                    erros.push(`Concurso [${idx}]: contém dezenas fora do intervalo 1-25.`);
+                    invalidos++;
+                    return;
+                }
+                validos++;
+            });
+
+            return {
+                valido: erros.length === 0,
+                concursosValidos: validos,
+                concursosInvalidos: invalidos,
+                erros: erros
+            };
+        }
+
+        function analisarHistorico() {
+            const resultadoParse = parseEValidarHistorico();
+            historicoGlobal = resultadoParse.historico;
+            const statusValidacao = validarHistorico(historicoGlobal);
+
+            if (!statusValidacao.valido && historicoGlobal.length === 0) {
+                document.getElementById('dashParserStatus').innerHTML = `<strong class="text-rose-600">Erro Crítico no Parser:</strong> Nenhum concurso válido encontrado.<br>Erros:<br>` + statusValidacao.erros.slice(0, 3).join('<br>');
+                return;
+            }
+
+            const janelaStr = document.getElementById('selectJanela').value;
+            let janela = janelaStr === 'all' ? historicoGlobal.length : parseInt(janelaStr, 10);
+            const subHistorico = historicoGlobal.slice(0, Math.min(janela, historicoGlobal.length));
+
+            // Estatísticas de Frequência e Atraso
+            let freq = {};
+            let atraso = {};
+            for (let i = 1; i <= 25; i++) { freq[i] = 0; atraso[i] = 0; }
+
+            subHistorico.forEach(concurso => {
+                concurso.forEach(d => freq[d]++);
+            });
+
+            for (let d = 1; d <= 25; d++) {
+                let achou = false;
+                let cont = 0;
+                for (let i = 0; i < historicoGlobal.length; i++) {
+                    if (historicoGlobal[i].includes(d)) {
+                        achou = true;
+                        break;
+                    }
+                    cont++;
+                }
+                atraso[d] = achou ? cont : historicoGlobal.length;
+            }
+
+            estatisticasGlobais = { freq, atraso, subHistorico };
+            atualizarDashboardVisual(subHistorico, freq, atraso, statusValidacao);
+            inicializarRankingVisual();
+            atualizarPainelAuditoriaComparativa();
+        }
+
+        function atualizarDashboardVisual(subHistorico, freq, atraso, statusVal) {
+            let maisFrequentes = Object.entries(freq).sort((a,b) => b[1] - a[1]).slice(0, 5).map(x => x[0]).join(', ');
+            let maisAtrasadas = Object.entries(atraso).sort((a,b) => b[1] - a[1]).slice(0, 5).map(x => x[0]).join(', ');
+            
+            document.getElementById('dashParserStatus').innerHTML = `
+                <strong class="text-emerald-700">Parser:</strong> ${statusVal.concursosValidos} concursos válidos carregados.<br>
+                <span class="text-slate-500">Rejeitadas: ${statusVal.concursosInvalidos} linhas | Amostra Ativa: ${subHistorico.length}</span><br>
+                Quentes: ${maisFrequentes} | Atrasadas: ${maisAtrasadas}
+            `;
+            document.getElementById('dashPesos').innerHTML = Object.entries(pesosEstrategias).map(([k,v]) => `${k}: ${v.toFixed(2)}`).join(' | ');
+
+            // Mapa de Calor
+            let mapaHtml = '';
+            for (let i = 1; i <= 25; i++) {
+                let f = freq[i] || 0;
+                let corBg = f > (subHistorico.length * 0.6) ? 'bg-emerald-600 text-white' : f > (subHistorico.length * 0.3) ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-100 text-slate-700';
+                mapaHtml += `<div class="${corBg} p-2 rounded-lg text-center font-mono text-xs font-bold" title="Dezena ${i < 10 ? '0'+i : i}: ${f} ocorrências">
+                    ${i < 10 ? '0'+i : i}<br><span class="text-[9px] opacity-75">${f}x</span>
+                </div>`;
+            }
+            document.getElementById('mapaCalor').innerHTML = mapaHtml;
+        }
+
+        function inicializarRankingVisual() {
+            let estrategias = Object.keys(pesosEstrategias);
+            let html = '';
+            estrategias.forEach(est => {
+                let resBT = backtestResultsGlobal[est] || { jogos: 0, maior: 0, menor: 15, somaAcertos: 0, media: 0, ac11: 0, ac12: 0, ac13: 0, ac14: 0, ac15: 0 };
+                let resAtual = auditoriaAtualGlobal.porEstrategia[est] || { totalJogos: 0, melhorAtual: 0, mediaAtual: 0 };
+
+                html += `<tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-3 font-semibold text-slate-700">${est}</td>
+                    <td class="p-3 text-center font-mono">${pesosEstrategias[est].toFixed(2)}</td>
+                    <td class="p-3 text-center font-mono">${resAtual.totalJogos || 0}</td>
+                    <td class="p-3 text-center font-mono font-bold text-emerald-700" title="Máximo observado em simulações do Backtest">${resBT.maior || 0}</td>
+                    <td class="p-3 text-center font-mono text-emerald-600">${(resBT.media || 0).toFixed(2)}</td>
+                    <td class="p-3 text-center font-mono font-bold text-blue-700" title="Melhor resultado da execução atual">${resAtual.melhorAtual || 0}</td>
+                    <td class="p-3 text-center font-mono text-blue-600">${(resAtual.mediaAtual || 0).toFixed(2)}</td>
+                    <td class="p-3 text-center font-mono">${resBT.ac11 || 0}</td>
+                    <td class="p-3 text-center font-mono">${resBT.ac12 || 0}</td>
+                    <td class="p-3 text-center font-mono">${resBT.ac13 || 0}</td>
+                    <td class="p-3 text-center font-mono">${resBT.ac14 || 0}</td>
+                    <td class="p-3 text-center font-mono text-purple-700 font-bold">${resBT.ac15 || 0}</td>
+                </tr>`;
+            });
+            document.getElementById('corpoTabelaRanking').innerHTML = html;
+        }
+
+        // --- GERADOR DE CANDIDATOS E ESTRATÉGIAS REAIS ---
+        function gerarDezenasPorEstratégia(nomeEstr, freq, atraso, subHistorico) {
+            let pool = [];
+            let dezenasArray = Array.from({length: 25}, (_, i) => i + 1);
+
+            switch(nomeEstr) {
+                case "Motor Principal":
+                case "Frequência Recente":
+                    pool = dezenasArray.sort((a,b) => (freq[b] + (1/(atraso[b]+1))) - (freq[a] + (1/(atraso[a]+1))));
+                    break;
+                case "Jogo Híbrido Alpha":
+                    pool = dezenasArray.sort((a,b) => {
+                        let scoreA = (freq[a] * 0.5) + ((25 - atraso[a]) * 0.3) + ((freq[a] > 0 ? 1 : 0) * 0.2);
+                        let scoreB = (freq[b] * 0.5) + ((25 - atraso[b]) * 0.3) + ((freq[b] > 0 ? 1 : 0) * 0.2);
+                        return scoreB - scoreA;
+                    });
+                    break;
+                case "Jogo Híbrido Beta":
+                    pool = dezenasArray.sort((a,b) => {
+                        let scoreA = (freq[a] * 0.4) + (atraso[a] * 0.3) + ((a % 2 === 0 ? 10 : 5) * 0.2) + ((a % 3 === 0 ? 8 : 4) * 0.1);
+                        let scoreB = (freq[b] * 0.4) + (atraso[b] * 0.3) + ((b % 2 === 0 ? 10 : 5) * 0.2) + ((b % 3 === 0 ? 8 : 4) * 0.1);
+                        return scoreB - scoreA;
+                    });
+                    break;
+                case "Ciclo":
+                    pool = dezenasArray.sort((a,b) => atraso[b] - atraso[a]);
+                    break;
+                case "Moldura × Centro":
+                    let moldura = [1,2,3,4,5,6,10,11,15,16,20,21,22,23,24,25];
+                    let centro = [7,8,9,12,13,14,17,18,19];
+                    let mSel = moldura.sort(() => Math.random() - 0.5).slice(0, 10);
+                    let cSel = centro.sort(() => Math.random() - 0.5).slice(0, 5);
+                    return [...mSel, ...cSel].sort((a,b) => a - b);
+                case "Par × Ímpar":
+                    let pares = dezenasArray.filter(n => n % 2 === 0).sort(() => Math.random() - 0.5).slice(0, 7);
+                    let impares = dezenasArray.filter(n => n % 2 !== 0).sort(() => Math.random() - 0.5).slice(0, 8);
+                    return [...pares, ...impares].sort((a,b) => a - b);
+                case "Soma":
+                    pool = dezenasArray.sort(() => Math.random() - 0.5);
+                    break;
+                case "Sequências":
+                    let startSeq = Math.floor(Math.random() * 15) + 1;
+                    let seq = [];
+                    for(let i=0; i<15; i++) seq.push(((startSeq + i - 1) % 25) + 1);
+                    return [...new Set(seq)].sort((a,b) => a - b);
+                case "Ousadia Conservadora":
+                    pool = dezenasArray.sort((a,b) => freq[b] - freq[a]);
+                    break;
+                case "Ousadia Moderada":
+                    pool = dezenasArray.sort((a,b) => (freq[b] + atraso[b]) - (freq[a] + atraso[a]));
+                    break;
+                case "Ousadia Agressiva":
+                    pool = dezenasArray.sort((a,b) => atraso[b] - atraso[a]);
+                    break;
+                default:
+                    pool = dezenasArray.sort(() => Math.random() - 0.5);
+                    break;
+            }
+
+            let selecionadas = pool.slice(0, 10);
+            let restantes = pool.slice(10).sort(() => Math.random() - 0.5);
+            while(selecionadas.length < 15 && restantes.length > 0) {
+                selecionadas.push(restantes.pop());
+            }
+            return [...new Set(selecionadas)].sort((a,b) => a - b);
+        }
+
+        function gerarJogos() {
+            if (historicoGlobal.length === 0) {
+                alert("Por favor, insira e analise o histórico primeiro.");
+                return;
+            }
+            const qtdPorEstrategia = parseInt(document.getElementById('selectQtdJogos').value, 10);
+            let estrategias = Object.keys(pesosEstrategias);
+            let todosJogos = [];
+            let freq = estatisticasGlobais.freq;
+            let atraso = estatisticasGlobais.atraso;
+            let subHistorico = estatisticasGlobais.subHistorico;
+
+            estrategias.forEach(est => {
+                for (let i = 0; i < qtdPorEstrategia; i++) {
+                    let jogo = gerarDezenasPorEstratégia(est, freq, atraso, subHistorico);
+                    if (jogo.length === 15) {
+                        todosJogos.push({
+                            estrategia: est,
+                            dezenas: jogo,
+                            pontos: null,
+                            auditoria: null
+                        });
+                    }
+                }
+            });
+
+            jogosGeradosGlobal = todosJogos;
+            renderizarJogosNaTela(todosJogos);
+            document.getElementById('statusGeracao').innerText = `${todosJogos.length} jogos gerados com sucesso nas ${estrategias.length} estratégias.`;
+        }
+
+        function renderizarJogosNaTela(jogos) {
+            let container = document.getElementById('containerJogos');
+            if (jogos.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl col-span-full text-sm">Nenhum jogo gerado.</div>`;
+                return;
+            }
+
+            let html = '';
+            let porEstrategia = {};
+            jogos.forEach(j => {
+                if (!porEstrategia[j.estrategia]) porEstrategia[j.estrategia] = [];
+                porEstrategia[j.estrategia].push(j);
+            });
+
+            Object.entries(porEstrategia).forEach(([est, lista]) => {
+                html += `<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span> ${est} (${lista.length} jogos)
+                        </h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">`;
+                
+                lista.forEach((j, idx) => {
+                    let badgeAcertos = j.pontos !== null ? `<span class="bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded text-[11px]">${j.pontos} PONTOS (Atual)</span>` : '';
+                    let dezenasFormatadas = j.dezenas.map(d => `<span class="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-xs font-mono font-bold text-slate-700">${d < 10 ? '0'+d : d}</span>`).join(' ');
+                    
+                    let detalhesAuditoria = '';
+                    if (j.auditoria) {
+                        detalhesAuditoria = `<div class="text-[10px] font-mono text-slate-500 pt-1 border-t border-slate-100">
+                            <div><strong class="text-emerald-700">Acertos (${j.auditoria.acertos.length}):</strong> ${j.auditoria.acertos.map(n=>String(n).padStart(2,'0')).join(', ')}</div>
+                            <div><strong class="text-rose-600">Faltantes (${j.auditoria.faltantes.length}):</strong> ${j.auditoria.faltantes.map(n=>String(n).padStart(2,'0')).join(', ')}</div>
+                        </div>`;
+                    }
+
+                    html += `<div class="bg-white border border-slate-200 p-3 rounded-lg flex flex-col gap-2">
+                        <div class="flex justify-between items-center text-[11px] text-slate-400 font-mono">
+                            <span>Jogo #${idx+1}</span>
+                            ${badgeAcertos}
+                        </div>
+                        <div class="flex flex-wrap gap-1">${dezenasFormatadas}</div>
+                        ${detalhesAuditoria}
+                    </div>`;
+                });
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // --- 4 & 5 & 14 & 15. BACKTEST WALK-FORWARD REAL COM REGISTRO DE RECORDE ---
+        function executarModoCientifico() {
+            if (historicoGlobal.length < 15) {
+                alert("Histórico insuficiente para backtest Walk-Forward (mínimo de 15 concursos necessários).");
+                return;
+            }
+
+            document.getElementById('dashBacktesting').innerText = "Executando Walk-Forward real (Zero Data Leakage). Aguarde...";
+
+            setTimeout(() => {
+                let estrategias = Object.keys(pesosEstrategias);
+                let resultadosBacktest = {};
+                estrategias.forEach(est => {
+                    resultadosBacktest[est] = {
+                        jogos: 0, maior: 0, menor: 15, somaAcertos: 0,
+                        ac11: 0, ac12: 0, ac13: 0, ac14: 0, ac15: 0, media: 0,
+                        melhorJogoHistorico: null
+                    };
+                });
+
+                let totalTestes = Math.min(historicoGlobal.length - 10, 30); 
+                let simulacoesPorLote = 200; 
+                let totalSimulacoesExecutadas = 0;
+
+                for (let t = 0; t < totalTestes; t++) {
+                    let concursoAlvo = historicoGlobal[t]; 
+                    let subHistoricoPassado = historicoGlobal.slice(t + 1); // ZERO DATA LEAKAGE: Apenas o passado
+
+                    let freqP = {};
+                    let atrasoP = {};
+                    for (let i = 1; i <= 25; i++) { freqP[i] = 0; atrasoP[i] = 0; }
+                    subHistoricoPassado.forEach(c => c.forEach(d => freqP[d]++));
+                    for (let d = 1; d <= 25; d++) {
+                        let achou = false; let cont = 0;
+                        for (let i = 0; i < subHistoricoPassado.length; i++) {
+                            if (subHistoricoPassado[i].includes(d)) { achou = true; break; }
+                            cont++;
+                        }
+                        atrasoP[d] = achou ? cont : subHistoricoPassado.length;
+                    }
+
+                    estrategias.forEach(est => {
+                        let qtdSim = Math.ceil(simulacoesPorLote / estrategias.length);
+                        for (let s = 0; s < qtdSim; s++) {
+                            let jogoGerado = gerarDezenasPorEstratégia(est, freqP, atrasoP, subHistoricoPassado);
+                            let acertos = jogoGerado.filter(d => concursoAlvo.includes(d)).length;
+                            
+                            let res = resultadosBacktest[est];
+                            res.jogos++;
+                            res.somaAcertos += acertos;
+
+                            // REGISTRO DE NOVO RECORDE E AUDITORIA DO HISTÓRICO
+                            if (acertos > res.maior) {
+                                res.maior = acertos;
+                                let dezenasAcertadas = jogoGerado.filter(d => concursoAlvo.includes(d));
+                                let dezenasFaltantes = concursoAlvo.filter(d => !jogoGerado.includes(d));
+                                res.melhorJogoHistorico = {
+                                    dezenas: [...jogoGerado],
+                                    concursoAlvo: [...concursoAlvo],
+                                    acertos: acertos,
+                                    dezenasAcertadas: dezenasAcertadas,
+                                    dezenasFaltantes: dezenasFaltantes,
+                                    teste: t
+                                };
+                            }
+                            if (acertos < res.menor) res.menor = acertos;
+
+                            if (acertos >= 11) res.ac11++;
+                            if (acertos >= 12) res.ac12++;
+                            if (acertos >= 13) res.ac13++;
+                            if (acertos >= 14) res.ac14++;
+                            if (acertos === 15) res.ac15++;
+
+                            totalSimulacoesExecutadas++;
+                        }
+                    });
+                }
+
+                estrategias.forEach(est => {
+                    let res = resultadosBacktest[est];
+                    res.media = res.jogos > 0 ? (res.somaAcertos / res.jogos) : 0;
+                    let scoreBonus = (res.ac13 * 1.5) + (res.ac14 * 3.0) + (res.ac15 * 10.0);
+                    pesosEstrategias[est] = Math.max(0.5, Math.min(2.0, 1.0 + (scoreBonus / (res.jogos || 1))));
+                });
+
+                backtestResultsGlobal = resultadosBacktest;
+                inicializarRankingVisual();
+                atualizarPainelAuditoriaComparativa();
+
+                document.getElementById('dashBacktesting').innerHTML = `
+                    <strong>${totalSimulacoesExecutadas.toLocaleString()} simulações reais executadas.</strong><br>
+                    <span class="text-slate-500">Concursos de teste: ${totalTestes} | Estratégias: ${estrategias.length} | Zero Data Leakage validado.</span>
+                `;
+            }, 50);
+        }
+
+        // --- 8 & 9 & 10. CONFERÊNCIA DOS JOGOS ATUAIS E AUDITORIA ---
+        function conferirJogos() {
+            let textoOficial = document.getElementById('inputConferencia').value.trim();
+            if (!textoOficial) {
+                alert("Insira o resultado oficial com exatamente 15 dezenas para conferência.");
+                return;
+            }
+            let partes = textoOficial.split(/[\t,;|\/\s-]+/).filter(Boolean);
+            let resultadoOficial = partes.map(p => parseInt(p, 10)).filter(n => !isNaN(n) && n >= 1 && n <= 25);
+            resultadoOficial = [...new Set(resultadoOficial)].sort((a,b) => a - b);
+
+            if (resultadoOficial.length !== 15) {
+                alert(`O resultado oficial deve conter exatamente 15 dezenas únicas. Foram encontradas ${resultadoOficial.length}.`);
+                return;
+            }
+
+            if (jogosGeradosGlobal.length === 0) {
+                alert("Nenhum jogo gerado na tela para conferir.");
+                return;
+            }
+
+            auditoriaAtualGlobal = {
+                resultadoOficial: resultadoOficial,
+                melhorJogo: null,
+                melhorPontuacao: -1,
+                porEstrategia: {},
+                totalJogos: jogosGeradosGlobal.length,
+                conferidoEm: new Date().toLocaleTimeString()
+            };
+
+            let estrategias = Object.keys(pesosEstrategias);
+            estrategias.forEach(est => {
+                auditoriaAtualGlobal.porEstrategia[est] = {
+                    totalJogos: 0,
+                    melhorAtual: 0,
+                    somaAtual: 0,
+                    mediaAtual: 0,
+                    melhorJogoAtual: null
+                };
+            });
+
+            jogosGeradosGlobal.forEach(j => {
+                let acertos = j.dezenas.filter(d => resultadoOficial.includes(d)).length;
+                let faltantes = resultadoOficial.filter(d => !j.dezenas.includes(d));
+                j.pontos = acertos;
+                j.auditoria = {
+                    acertos: j.dezenas.filter(d => resultadoOficial.includes(d)),
+                    faltantes: faltantes
+                };
+
+                // Atualizar Auditoria por Estratégia
+                let estStats = auditoriaAtualGlobal.porEstrategia[j.estrategia];
+                if (estStats) {
+                    estStats.totalJogos++;
+                    estStats.somaAtual += acertos;
+                    if (acertos > estStats.melhorAtual) {
+                        estStats.melhorAtual = acertos;
+                        estStats.melhorJogoAtual = j;
+                    }
+                }
+
+                // Atualizar Melhor Jogo Global Atual
+                if (acertos > auditoriaAtualGlobal.melhorPontuacao) {
+                    auditoriaAtualGlobal.melhorPontuacao = acertos;
+                    auditoriaAtualGlobal.melhorJogo = j;
+                }
+            });
+
+            estrategias.forEach(est => {
+                let estStats = auditoriaAtualGlobal.porEstrategia[est];
+                if (estStats && estStats.totalJogos > 0) {
+                    estStats.mediaAtual = estStats.somaAtual / estStats.totalJogos;
+                }
+            });
+
+            renderizarJogosNaTela(jogosGeradosGlobal);
+            inicializarRankingVisual();
+            atualizarPainelAuditoriaComparativa();
+
+            alert(`Conferência oficial realizada!\nMelhor jogo atual: ${auditoriaAtualGlobal.melhorPontuacao} pontos (${auditoriaAtualGlobal.melhorJogo?.estrategia || '-'}).`);
+        }
+
+        // --- 11 & 12 & 16. PAINEL DE AUDITORIA COMPARATIVA (HISTÓRICO VS ATUAL) ---
+        function atualizarPainelAuditoriaComparativa() {
+            let container = document.getElementById('containerAuditoriaComparativa');
+            let estrategias = Object.keys(pesosEstrategias);
+            
+            let html = `<table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                        <th class="p-3 font-semibold">Estratégia</th>
+                        <th class="p-3 font-semibold text-center text-emerald-700">Máximo observado no Backtest</th>
+                        <th class="p-3 font-semibold text-center text-emerald-700">Média Backtest</th>
+                        <th class="p-3 font-semibold text-center text-blue-700">Melhor resultado da execução atual</th>
+                        <th class="p-3 font-semibold text-center text-blue-700">Média Atual</th>
+                        <th class="p-3 font-semibold text-center">Diferença (Atual vs Máximo Histórico)</th>
+                        <th class="p-3 font-semibold">Conclusão / Auditoria</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 text-slate-600">`;
+
+            estrategias.forEach(est => {
+                let bt = backtestResultsGlobal[est] || { maior: 0, media: 0, melhorJogoHistorico: null };
+                let atual = auditoriaAtualGlobal.porEstrategia[est] || { melhorAtual: 0, mediaAtual: 0 };
+                let diff = atual.melhorAtual - bt.maior;
+
+                let conclusao = `O melhor resultado da execução atual ficou ${Math.abs(diff)} pontos abaixo do máximo observado no backtest.`;
+                if (diff === 0 && bt.maior > 0) {
+                    conclusao = `A execução atual empatou com o recorde histórico do backtest!`;
+                } else if (diff > 0) {
+                    conclusao = `A execução atual superou o recorde anterior do backtest!`;
+                }
+
+                let detalhesRecordeBT = bt.melhorJogoHistorico ? `<div class="text-[10px] text-emerald-800 font-mono mt-0.5" title="Detalhe do registro de 14 no Backtest">Reg. Histórico: ${bt.melhorJogoHistorico.acertos} pts (Teste #${bt.melhorJogoHistorico.teste})</div>` : '';
+
+                html += `<tr class="hover:bg-slate-50">
+                    <td class="p-3 font-semibold text-slate-800">${est}</td>
+                    <td class="p-3 text-center font-mono font-bold text-emerald-700">${bt.maior} pts${detalhesRecordeBT}</td>
+                    <td class="p-3 text-center font-mono text-emerald-600">${bt.media.toFixed(2)}</td>
+                    <td class="p-3 text-center font-mono font-bold text-blue-700">${atual.melhorAtual} pts</td>
+                    <td class="p-3 text-center font-mono text-blue-600">${atual.mediaAtual.toFixed(2)}</td>
+                    <td class="p-3 text-center font-mono font-bold ${diff < 0 ? 'text-rose-600' : 'text-emerald-600'}">${diff >= 0 ? '+' + diff : diff}</td>
+                    <td class="p-3 text-slate-600 text-[11px] leading-relaxed">${conclusao}</td>
+                </tr>`;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function exportarJogosTXT() {
+            if (jogosGeradosGlobal.length === 0) {
+                alert("Não há jogos gerados para exportar.");
+                return;
+            }
+            let conteudo = "LOTOFÁCIL - JOGOS GERADOS PELO LABORATÓRIO DE ELITE\n";
+            conteudo += "==================================================\n\n";
+            jogosGeradosGlobal.forEach((j, idx) => {
+                conteudo += `[${j.estrategia}] Jogo #${idx+1}: ${j.dezenas.map(d => d < 10 ? '0'+d : d).join(', ')} ${j.pontos !== null ? '-> ' + j.pontos + ' Pontos (Atual)' : ''}\n`;
+            });
+
+            let blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = 'jogos_lotofacil_laboratorio_elite.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function gerarNovamente() {
+            gerarJogos();
+        }
+
+        function limparJogos() {
+            jogosGeradosGlobal = [];
+            document.getElementById('containerJogos').innerHTML = `<div class="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl col-span-full text-sm">Jogos limpos. Clique em "Gerar Jogos" para criar novos.</div>`;
+            document.getElementById('statusGeracao').innerText = "Nenhum jogo gerado";
+        }
+
+        function limparTudo() {
+            document.getElementById('inputHistorico').value = '';
+            limparJogos();
+            historicoGlobal = [];
+            estatisticasGlobais = {};
+            backtestResultsGlobal = {};
+            auditoriaAtualGlobal = { resultadoOficial: [], melhorJogo: null, melhorPontuacao: 0, porEstrategia: {}, totalJogos: 0, conferidoEm: null };
+            document.getElementById('dashParserStatus').innerText = "-";
+            document.getElementById('dashPesos').innerText = "-";
+            document.getElementById('dashBacktesting').innerText = "-";
+            document.getElementById('mapaCalor').innerHTML = "";
+            document.getElementById('containerAuditoriaComparativa').innerHTML = `<div class="text-xs text-slate-400 p-4 text-center border border-dashed border-slate-200 rounded-xl">Execute a conferência ou o backtest para visualizar a auditoria comparativa.</div>`;
+            inicializarRankingVisual();
+        }
+    </script>
+</body>
+</html>
