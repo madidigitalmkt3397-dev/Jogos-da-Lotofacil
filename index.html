@@ -16,7 +16,7 @@
         <header class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">Lotofácil - Laboratório Estatístico & Motor Adaptativo</h1>
-                <p class="text-slate-500 text-sm mt-1">Pré-Filtro Estatístico, Índice de Qualidade, Backtest Real, Eliminação, Diversidade e Modo Elite.</p>
+                <p class="text-slate-500 text-sm mt-1">Pré-Filtro Estatístico, Índice de Qualidade, Backtest Real Walk-Forward, Eliminação, Diversidade e Modo Elite.</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <button onclick="analisarHistorico()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 text-sm flex items-center gap-2">
@@ -184,7 +184,7 @@
                         <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
                             <th class="p-3 font-semibold">Estratégia / Híbrido</th>
                             <th class="p-3 font-semibold text-center">Peso Atual</th>
-                            <th class="p-3 font-semibold text-center">Jogos Gerados</th>
+                            <th class="p-3 font-semibold text-center">Jogos Testados</th>
                             <th class="p-3 font-semibold text-center">Maior Acerto</th>
                             <th class="p-3 font-semibold text-center">Média de Acertos</th>
                             <th class="p-3 font-semibold text-center">11+ Pontos</th>
@@ -230,7 +230,9 @@
             "3651,01/04/2026,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16",
             "3652,02/04/2026,01,03,05,07,09,11,13,15,17,19,21,22,23,24,25",
             "3653,03/04/2026,01,02,04,05,08,10,12,14,16,18,20,22,23,24,25",
-            "3654,04/04/2026,03,04,06,07,09,11,13,15,17,19,21,22,23,24,25"
+            "3654,04/04/2026,03,04,06,07,09,11,13,15,17,19,21,22,23,24,25",
+            "3655,05/04/2026,01,02,03,06,07,08,11,12,13,16,17,18,21,22,24",
+            "3656,06/04/2026,04,05,09,10,14,15,19,20,22,23,24,25,01,02,03"
         ].join("\n");
 
         document.getElementById('inputHistorico').value = dadosExemplo;
@@ -246,7 +248,7 @@
                 somaParidade: 0.10
             },
             cenario: {},
-            modoCientificoRelatorio: null
+            resultadosBacktest: null
         };
 
         function validateDraw(dezenas) {
@@ -356,8 +358,7 @@
             let scoreDezenas = {};
             for (let i = 1; i <= 25; i++) {
                 let fScore = (freqAbsoluta[i] / totalConcursos);
-                let aScore = Math.min(atrasoAtual[i] / 10, 1.0); // Normalizado
-                // Score ponderado real utilizando os pesos da IA
+                let aScore = Math.min(atrasoAtual[i] / 10, 1.0);
                 scoreDezenas[i] = (fScore * motorIA.pesos.freqRecente) + (aScore * motorIA.pesos.atraso);
             }
 
@@ -427,7 +428,7 @@
 
             document.getElementById('dashCenario').innerText = `${motorIA.cenario.predominio} | ${motorIA.cenario.repeticao}`;
             document.getElementById('dashPesos').innerText = JSON.stringify(motorIA.pesos, null, 2);
-            document.getElementById('dashBacktesting').innerText = `Backtest executado em ${subJanela.length} concursos. Média de acertos estimada: 9.1 / 15.`;
+            document.getElementById('dashBacktesting').innerText = `Análise concluída em ${subJanela.length} concursos. Clique em "Modo Científico (Backtest)" para rodar a simulação Walk-Forward.`;
             document.getElementById('iaMelhor1').innerText = "Estratégia: Motor Adaptativo de IA (Score Ponderado)";
             document.getElementById('iaPrec1').innerText = `Métrica de Cobertura Ativa`;
             document.getElementById('iaMelhor2').innerText = "Estratégia: Frequência Pura & Ciclo";
@@ -442,41 +443,133 @@
                 mapaHTML += `<div class="bg-emerald-100 p-2 rounded text-center text-xs font-mono font-bold text-emerald-800">${i < 10 ? '0'+i : i}<br><span class="text-[9px] font-normal">${f}x</span></div>`;
             }
             document.getElementById('mapaCalor').innerHTML = mapaHTML;
-
-            // Preencher Tabela de Ranking com dados reais do backtest da janela
-            atualizarTabelaRanking();
-            document.getElementById('secaoRanking').classList.remove('hidden');
+            document.getElementById('secaoRanking').classList.add('hidden');
         }
 
-        function atualizarTabelaRanking() {
-            let corpo = document.getElementById('corpoTabelaRanking');
-            let estrats = [
-                { nome: "Motor Adaptativo de IA", peso: "1.00", maior: 13, media: 9.4, p11: "18%", p12: "4.2%", p13: "0.8%", p14: "0.1%" },
-                { nome: "Fechamento Matemático", peso: "0.95", maior: 12, media: 9.1, p11: "15%", p12: "3.5%", p13: "0.5%", p14: "0.0%" },
-                { nome: "Híbrido Alpha", peso: "1.10", maior: 13, media: 9.5, p11: "20%", p12: "4.8%", p13: "1.0%", p14: "0.2%" },
-                { nome: "Estratégia de Ciclo", peso: "0.90", maior: 12, media: 9.0, p11: "14%", p12: "3.0%", p13: "0.4%", p14: "0.0%" }
+        // Função geradora auxiliar usada tanto na geração visual quanto no Backtest Real
+        let gerarCandidatoPorEstrat = (estatisticas, tipo) => {
+            let dezenasOrdenadas = Object.entries(estatisticas.scoreDezenas)
+                .sort((a, b) => b[1] - a[1])
+                .map(item => parseInt(item[0], 10));
+
+            let nums = [];
+            let poolBase = [...dezenasOrdenadas];
+
+            if (tipo === 'frequenciaPura') {
+                let topo = poolBase.slice(0, 18);
+                topo.sort(() => Math.random() - 0.5);
+                nums = topo.slice(0, 15);
+            } else if (tipo === 'atrasoFoco') {
+                let atrasadas = [...dezenasOrdenadas].reverse().slice(0, 18);
+                atrasadas.sort(() => Math.random() - 0.5);
+                nums = atrasadas.slice(0, 15);
+            } else if (tipo === 'hibridoMix') {
+                let nucleo = poolBase.slice(0, 10);
+                let resto = poolBase.slice(10);
+                resto.sort(() => Math.random() - 0.5);
+                nums = [...nucleo, ...resto.slice(0, 5)];
+            } else {
+                poolBase.sort(() => (Math.random() * 0.4) - 0.2);
+                nums = poolBase.slice(0, 15);
+            }
+            nums.sort((a, b) => a - b);
+            return nums;
+        };
+
+        // MOTOR DE BACKTEST WALK-FORWARD REAL
+        function executarModoCientifico() {
+            if (historicoGlobal.length < 5) {
+                alert("Você precisa de pelo menos 5 concursos no histórico para rodar o Backtest Walk-Forward.");
+                return;
+            }
+
+            let estrategiasTestadas = [
+                { id: 'scorePonderado', nome: "Motor Adaptativo de IA" },
+                { id: 'frequenciaPura', nome: "Fechamento Matemático" },
+                { id: 'hibridoMix', nome: "Híbrido Alpha" },
+                { id: 'atrasoFoco', nome: "Estratégia de Ciclo" }
             ];
 
+            let resultados = {};
+            estrategiasTestadas.forEach(e => {
+                resultados[e.id] = {
+                    nome: e.nome,
+                    totalTestes: 0,
+                    somaAcertos: 0,
+                    maiorAcerto: 0,
+                    p11: 0,
+                    p12: 0,
+                    p13: 0,
+                    p14: 0
+                };
+            });
+
+            // Janela deslizante de treino e teste (Walk-Forward)
+            // Começa a testar a partir do 4º concurso para garantir dados de treino suficientes
+            let inicioTeste = Math.min(3, historicoGlobal.length - 1);
+            let totalIteracoes = 0;
+
+            for (let i = inicioTeste; i < historicoGlobal.length; i++) {
+                // Treino: todos os concursos anteriores ao índice i
+                let subsetTreino = historicoGlobal.slice(0, i);
+                let resultadoReal = historicoGlobal[i]; // Concurso alvo a ser previsto
+                let estTreino = processarEstatisticas(subsetTreino);
+
+                if (!estTreino) continue;
+                totalIteracoes++;
+
+                estrategiasTestadas.forEach(estrat => {
+                    // Gera 1 jogo de teste para esta estratégia usando apenas o conhecimento passado
+                    let jogoGerado = gerarCandidatoPorEstrat(estTreino, estrat.id);
+                    
+                    // Confere acertos contra o resultado real
+                    let acertos = jogoGerado.filter(n => resultadoReal.includes(n)).length;
+                    let res = resultados[estrat.id];
+
+                    res.totalTestes++;
+                    res.somaAcertos += acertos;
+                    if (acertos > res.maiorAcerto) res.maiorAcerto = acertos;
+                    if (acertos >= 11) res.p11++;
+                    if (acertos >= 12) res.p12++;
+                    if (acertos >= 13) res.p13++;
+                    if (acertos >= 14) res.p14++;
+                });
+            }
+
+            motorIA.resultadosBacktest = resultados;
+
+            // Preenche a Tabela de Ranking com os dados reais calculados
+            let corpo = document.getElementById('corpoTabelaRanking');
             let html = "";
-            estrats.forEach(e => {
+
+            Object.values(resultados).forEach(r => {
+                let mediaAcertos = r.totalTestes > 0 ? (r.somaAcertos / r.totalTestes).toFixed(2) : "0.00";
+                let pct11 = r.totalTestes > 0 ? ((r.p11 / r.totalTestes) * 100).toFixed(1) + "%" : "0%";
+                let pct12 = r.totalTestes > 0 ? ((r.p12 / r.totalTestes) * 100).toFixed(1) + "%" : "0%";
+                let pct13 = r.totalTestes > 0 ? ((r.p13 / r.totalTestes) * 100).toFixed(1) + "%" : "0%";
+                let pct14 = r.totalTestes > 0 ? ((r.p14 / r.totalTestes) * 100).toFixed(1) + "%" : "0%";
+
                 html += `
                     <tr class="border-b border-slate-100 hover:bg-slate-50">
-                        <td class="p-3 font-semibold text-slate-700">${e.nome}</td>
-                        <td class="p-3 text-center font-mono">${e.peso}</td>
-                        <td class="p-3 text-center font-mono">10</td>
-                        <td class="p-3 text-center font-mono font-bold text-emerald-700">${e.maior} pts</td>
-                        <td class="p-3 text-center font-mono">${e.media}</td>
-                        <td class="p-3 text-center font-mono text-slate-600">${e.p11}</td>
-                        <td class="p-3 text-center font-mono text-slate-600">${e.p12}</td>
-                        <td class="p-3 text-center font-mono text-slate-600">${e.p13}</td>
-                        <td class="p-3 text-center font-mono text-slate-600">${e.p14}</td>
+                        <td class="p-3 font-semibold text-slate-700">${r.nome}</td>
+                        <td class="p-3 text-center font-mono">1.00</td>
+                        <td class="p-3 text-center font-mono">${r.totalTestes}</td>
+                        <td class="p-3 text-center font-mono font-bold text-emerald-700">${r.maiorAcerto} pts</td>
+                        <td class="p-3 text-center font-mono">${mediaAcertos}</td>
+                        <td class="p-3 text-center font-mono text-slate-600">${pct11}</td>
+                        <td class="p-3 text-center font-mono text-slate-600">${pct12}</td>
+                        <td class="p-3 text-center font-mono text-slate-600">${pct13}</td>
+                        <td class="p-3 text-center font-mono text-slate-600">${pct14}</td>
                     </tr>
                 `;
             });
+
             corpo.innerHTML = html;
+            document.getElementById('secaoRanking').classList.remove('hidden');
+            document.getElementById('dashBacktesting').innerText = `Backtest Real Walk-Forward executado em ${totalIteracoes} rodadas históricas. Métricas computadas com sucesso!`;
+            alert(`Backtest Walk-Forward concluído com sucesso sobre ${totalIteracoes} concursos do histórico! Confira o desempenho real na tabela abaixo.`);
         }
 
-        // Gerador com seleção baseada em Score real (Frequência + Atraso) ao invés de sorteio cego
         function gerarJogos() {
             if (historicoGlobal.length === 0 || !estatisticasGlobais.scoreDezenas) {
                 analisarHistorico();
@@ -492,43 +585,13 @@
                 { nome: "Estratégia de Ciclo", tipo: "atrasoFoco" }
             ];
 
-            let dezenasOrdenadas = Object.entries(estatisticasGlobais.scoreDezenas)
-                .sort((a, b) => b[1] - a[1])
-                .map(item => parseInt(item[0], 10));
-
             estrategiasMap.forEach(strat => {
                 html += `<div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">`;
                 html += `<h3 class="font-bold text-emerald-700 text-sm">Estratégia: ${strat.nome}</h3>`;
                 html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-2">`;
                 
                 for (let i = 0; i < qtd; i++) {
-                    let nums = [];
-                    // Seleção baseada em peso estatístico com variação controlada por estratégia
-                    let poolBase = [...dezenasOrdenadas];
-                    
-                    if (strat.tipo === 'frequenciaPura') {
-                        // Pega mais as dezenas de topo e algumas aleatórias
-                        let topo = poolBase.slice(0, 18);
-                        topo.sort(() => Math.random() - 0.5);
-                        nums = topo.slice(0, 15);
-                    } else if (strat.tipo === 'atrasoFoco') {
-                        // Dá preferência a dezenas com maior atraso
-                        let atrasadas = [...dezenasOrdenadas].reverse().slice(0, 18);
-                        atrasadas.sort(() => Math.random() - 0.5);
-                        nums = atrasadas.slice(0, 15);
-                    } else if (strat.tipo === 'hibridoMix') {
-                        // Mistura o núcleo forte com variação aleatória controlada
-                        let nucleo = poolBase.slice(0, 10);
-                        let resto = poolBase.slice(10);
-                        resto.sort(() => Math.random() - 0.5);
-                        nums = [...nucleo, ...resto.slice(0, 5)];
-                    } else {
-                        // Motor Adaptativo de IA padrão ponderado
-                        poolBase.sort(() => (Math.random() * 0.4) - 0.2 + (b = 0));
-                        nums = poolBase.slice(0, 15);
-                    }
-
-                    nums.sort((a, b) => a - b);
+                    let nums = gerarCandidatoPorEstrat(estatisticasGlobais, strat.tipo);
                     let formatted = nums.map(n => n < 10 ? '0'+n : n).join(', ');
                     
                     html += `<div class="bg-white border border-slate-200 p-2.5 rounded-lg flex justify-between items-center font-mono text-xs">`;
@@ -541,13 +604,6 @@
 
             container.innerHTML = html;
             document.getElementById('statusGeracao').innerText = `${estrategiasMap.length * qtd} jogos gerados com sucesso utilizando o Motor Estatístico Ponderado.`;
-        }
-
-        function executarModoCientifico() {
-            if (historicoGlobal.length < 10) {
-                analisarHistorico();
-            }
-            alert("Modo Científico (Backtest Walk-Forward) executado com sucesso sobre o histórico! Os pesos e scores das dezenas foram recalculados com base na aderência real.");
         }
 
         function gerarNovamente() {
@@ -595,7 +651,6 @@
             }
 
             let dezenasOficiais = resultadoParse.dezenas;
-            resultadoConferidoAtual = dezenasOficiais;
 
             let cardsJogos = document.querySelectorAll('#containerJogos .font-mono');
             if (cardsJogos.length === 0) {
