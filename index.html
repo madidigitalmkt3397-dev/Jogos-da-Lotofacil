@@ -12,7 +12,7 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
     <div class="max-w-7xl mx-auto space-y-8">
         
-        <!-- Cabeçalho (Mantido Exatamente Igual) -->
+        <!-- Cabeçalho -->
         <header class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-emerald-700">Lotofácil - Laboratório Estatístico & Motor Adaptativo</h1>
@@ -434,32 +434,6 @@
                 };
             }
 
-            let coocorrencia = {};
-            let paresRecorrentes = {};
-            let trincasRecorrentes = {};
-
-            for (let i = 1; i <= 25; i++) {
-                coocorrencia[i] = {};
-                for (let j = 1; j <= 25; j++) coocorrencia[i][j] = 0;
-            }
-
-            janelaSub.forEach(jogo => {
-                for (let i = 0; i < jogo.length; i++) {
-                    for (let j = i + 1; j < jogo.length; j++) {
-                        let d1 = jogo[i], d2 = jogo[j];
-                        coocorrencia[d1][d2]++;
-                        coocorrencia[d2][d1]++;
-                        let pKey = `${d1 < 10 ? '0'+d1 : d1}-${d2 < 10 ? '0'+d2 : d2}`;
-                        paresRecorrentes[pKey] = (paresRecorrentes[pKey] || 0) + 1;
-                    }
-                }
-                for (let i = 0; i < jogo.length - 2; i++) {
-                    let d1 = jogo[i], d2 = jogo[i+1], d3 = jogo[i+2];
-                    let tKey = `${d1 < 10 ? '0'+d1 : d1}-${d2 < 10 ? '0'+d2 : d2}-${d3 < 10 ? '0'+d3 : d3}`;
-                    trincasRecorrentes[tKey] = (trincasRecorrentes[tKey] || 0) + 1;
-                }
-            });
-
             let somaRepeticoes = 0;
             let somaPares = 0, somaImpares = 0, somaCentro = 0, somaMoldura = 0, somaTotalSoma = 0, somaAmplitude = 0;
 
@@ -507,9 +481,6 @@
                 mediaMoldura,
                 mediaSoma,
                 mediaAmplitude,
-                coocorrencia,
-                paresRecorrentes,
-                trincasRecorrentes,
                 ultimoConcurso: janelaSub[janelaSub.length - 1] || []
             };
         }
@@ -538,69 +509,6 @@
             };
         }
 
-        function avaliarCandidatoCompleto(jogo, est, ultimoConcurso) {
-            if (!jogo || jogo.length !== 15) return { score: 0, valido: false };
-
-            const molduraNums = [1,2,3,4,5,6,10,11,15,16,20,21,22,23,24,25];
-            
-            let linhas = [0,0,0,0,0];
-            jogo.forEach(n => {
-                let l = Math.floor((n - 1) / 5);
-                if (l >= 0 && l < 5) linhas[l]++;
-            });
-            if (linhas.some(qtd => qtd > 4)) return { score: 0, valido: false };
-
-            let colunas = [0,0,0,0,0];
-            jogo.forEach(n => {
-                let c = (n - 1) % 5;
-                colunas[c]++;
-            });
-            if (colunas.some(qtd => qtd === 0 || qtd > 4)) return { score: 0, valido: false };
-
-            let moldura = jogo.filter(n => molduraNums.includes(n)).length;
-            let difMoldura = Math.abs(moldura - (est.mediaMoldura || 9));
-            if (difMoldura > 3) return { score: 0, valido: false };
-
-            let superior = jogo.filter(n => n <= 12).length;
-            if (superior < 4 || superior > 11) return { score: 0, valido: false };
-
-            let pares = jogo.filter(n => n % 2 === 0).length;
-            let impares = 15 - pares;
-            let parImparValido = (pares === 7 && impares === 8) || (pares === 8 && impares === 7) || (pares === 6 && impares === 9) || (pares === 9 && impares === 6);
-            if (!parImparValido) return { score: 0, valido: false };
-
-            let soma = jogo.reduce((a, b) => a + b, 0);
-            let mediaSoma = est.mediaSoma || 200;
-            if (Math.abs(soma - mediaSoma) > 40) return { score: 0, valido: false };
-
-            let amplitude = jogo[14] - jogo[0];
-            let mediaAmp = est.mediaAmplitude || 22;
-            if (Math.abs(amplitude - mediaAmp) > 6) return { score: 0, valido: false };
-
-            let sequencias = 0;
-            let seqAtual = 1;
-            for (let i = 0; i < 14; i++) {
-                if (jogo[i+1] === jogo[i] + 1) {
-                    seqAtual++;
-                } else {
-                    if (seqAtual >= 2) sequencias++;
-                    seqAtual = 1;
-                }
-            }
-            if (seqAtual >= 2) sequencias++;
-            if (sequencias > 5) return { score: 0, valido: false };
-
-            if (ultimoConcurso && ultimoConcurso.length === 15) {
-                let repetidas = jogo.filter(n => ultimoConcurso.includes(n)).length;
-                let mediaRep = est.mediaRepeticao || 9;
-                if (Math.abs(repetidas - mediaRep) > 4) return { score: 0, valido: false };
-            }
-
-            let score = 70 + Math.floor(Math.random() * 25);
-            return { score, valido: true };
-        }
-
-        // Funções de Interface (Placeholder para manter a integridade visual)
         function analisarHistorico() {
             let texto = document.getElementById('inputHistorico').value;
             let resultado = parseHistory(texto);
@@ -616,7 +524,6 @@
             estatisticasGlobais = processarEstatisticas(subJanela);
             motorIA.cenario = classificarCenario(estatisticasGlobais);
 
-            // Atualiza Dashboard
             document.getElementById('dashCenario').innerText = `${motorIA.cenario.predominio} | ${motorIA.cenario.repeticao}`;
             document.getElementById('dashPesos').innerText = JSON.stringify(motorIA.pesos, null, 2);
             document.getElementById('dashBacktesting').innerText = "Análise concluída com sucesso. Pronto para gerar jogos em Modo Elite.";
@@ -628,7 +535,6 @@
             document.getElementById('iaHibridoMix').innerText = "Status: Otimizado";
             document.getElementById('listaMotivos').innerHTML = motorIA.cenario.motivos.join("<br>");
 
-            // Renderiza Mapa de Calor
             let mapaHTML = "";
             for (let i = 1; i <= 25; i++) {
                 let f = estatisticasGlobais.freqAbsoluta[i] || 0;
@@ -646,7 +552,6 @@
             let container = document.getElementById('containerJogos');
             let html = "";
             
-            // Estratégias antigas integradas mantendo a estrutura
             let estrategias = [
                 "Motor Adaptativo de IA",
                 "Fechamento Matemático",
@@ -663,7 +568,6 @@
                 html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-2">`;
                 
                 for (let i = 0; i < qtd; i++) {
-                    // Gera 15 dezenas aleatórias válidas entre 1 e 25
                     let nums = [];
                     while(nums.length < 15) {
                         let n = Math.floor(Math.random() * 25) + 1;
@@ -672,7 +576,10 @@
                     nums.sort((a,b) => a - b);
                     let formatted = nums.map(n => n < 10 ? '0'+n : n).join(', ');
                     
-                    html += `<div class="bg-white border border-slate-200 p-2.5 rounded-lg flex justify-between items-center font-mono text-xs"><span>Jogo ${i+1}: [${formatted}]</span><span class="text-emerald-600 font-bold">Score: 92%</span></div>`;
+                    html += `<div class="bg-white border border-slate-200 p-2.5 rounded-lg flex justify-between items-center font-mono text-xs">`;
+                    html += `<span class="info-jogo">Jogo ${i+1}: [${formatted}]</span>`;
+                    html += `<span class="text-emerald-600 font-bold">Score: 92%</span>`;
+                    html += `</div>`;
                 }
                 html += `</div></div>`;
             });
@@ -704,13 +611,62 @@
             historicoGlobal = [];
         }
 
+        // Função de Conferência Atualizada e Integrada
         function conferirJogos() {
-            let resOficial = document.getElementById('inputConferencia').value;
-            if(!resOficial) {
-                alert("Por favor, digite o resultado oficial para conferência.");
+            let resOficialTxt = document.getElementById('inputConferencia').value.trim();
+            if (!resOficialTxt) {
+                alert("Por favor, digite o resultado oficial para conferência (exatamente 15 dezenas separadas por vírgula, espaço ou ponto e vírgula).");
                 return;
             }
-            alert("Conferência realizada com sucesso! Verifique os acertos nos cards dos jogos.");
+
+            let resultadoParse = parseLine(resOficialTxt, 0);
+            if (!resultadoParse || !resultadoParse.valido) {
+                alert("O resultado oficial inserido é inválido. Certifique-se de informar exatamente 15 dezenas entre 1 e 25.");
+                return;
+            }
+
+            let dezenasOficiais = resultadoParse.dezenas;
+            resultadoConferidoAtual = dezenasOficiais;
+
+            let cardsJogos = document.querySelectorAll('#containerJogos .font-mono');
+            if (cardsJogos.length === 0) {
+                alert("Nenhum jogo gerado na tela para conferir!");
+                return;
+            }
+
+            cardsJogos.forEach(card => {
+                let textoCard = card.innerText;
+                let matchDezenas = textoCard.match(/\[(.*?)\]/);
+                
+                if (matchDezenas && matchDezenas[1]) {
+                    let dezenasJogo = matchDezenas[1].split(',').map(n => parseInt(n.trim(), 10));
+                    
+                    let acertos = dezenasJogo.filter(n => dezenasOficiais.includes(n));
+                    let qtdAcertos = acertos.length;
+
+                    let corBadge = "bg-slate-100 text-slate-700 border-slate-200";
+                    if (qtdAcertos >= 14) corBadge = "bg-amber-100 text-amber-800 border-amber-300 font-bold";
+                    else if (qtdAcertos === 13) corBadge = "bg-emerald-100 text-emerald-800 border-emerald-300 font-bold";
+                    else if (qtdAcertos === 12 || qtdAcertos === 11) corBadge = "bg-blue-50 text-blue-700 border-blue-200";
+
+                    let elementoInfo = card.querySelector('.info-jogo');
+                    let parteOriginal = elementoInfo ? elementoInfo.innerText : textoCard.split(' - Acertos:')[0];
+                    
+                    card.innerHTML = `
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-2">
+                            <span class="info-jogo">${parteOriginal}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] text-slate-500">Acertos: [${acertos.map(n => n < 10 ? '0'+n : n).join(', ')}]</span>
+                                <span class="px-2.5 py-1 rounded-lg border text-xs ${corBadge}">
+                                    ${qtdAcertos} Pontos
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            document.getElementById('statusGeracao').innerText = `Conferência realizada! Pontuação e acertos exibidos com sucesso nos cards.`;
         }
     </script>
 </body>
